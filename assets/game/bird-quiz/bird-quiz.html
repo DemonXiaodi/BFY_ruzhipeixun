@@ -1,0 +1,266 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>小鸟送快递答题游戏</title>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}html,body{height:100%}
+    body{overflow-x:hidden;font-family:"Microsoft YaHei","PingFang SC",sans-serif;color:#264653;background:linear-gradient(180deg,#87CEEB 0%,#E0F6FF 72%)}
+    .page{position:relative;display:flex;height:100vh;flex-direction:column;align-items:center;padding:56px 18px 18px;overflow:hidden}
+    .page:before{content:"";position:fixed;z-index:0;left:-7%;right:-7%;bottom:54px;height:150px;border-radius:50% 50% 0 0/35% 35% 0 0;background:#6fcf65;box-shadow:inset 0 18px 0 #ffffff20}
+    .page:after{content:"";position:fixed;z-index:0;left:0;right:0;bottom:0;height:86px;background:#47a447}
+    .status{position:fixed;z-index:20;top:10px;left:22px;right:22px;display:flex;justify-content:flex-end;pointer-events:none}
+    .pill{padding:10px 16px;border:3px solid #fff;border-radius:17px;background:#ffffffc7;box-shadow:0 6px 0 #3e778f38;backdrop-filter:blur(10px);font-weight:900}.score{color:#f08c25}
+    .upload{position:relative;z-index:4;display:flex;justify-content:center;gap:12px;margin-bottom:12px}.upload input{position:absolute;width:1px;height:1px;opacity:0}.upload label,.start-button{display:inline-flex;align-items:center;gap:8px;padding:11px 21px;border:3px solid #fff;border-radius:16px;color:#fff;font:inherit;font-weight:900;cursor:pointer}.upload label{background:#ff9f43;box-shadow:0 6px 0 #d97720}.start-button{background:#43aa8b;box-shadow:0 6px 0 #287f68}.upload label:active,.start-button:active{transform:translateY(4px);box-shadow:0 2px 0 #287f68}.start-button:disabled{opacity:.55;cursor:wait}
+    .stage{position:relative;z-index:3;width:min(1100px,100%);flex:1;min-height:0;display:flex;flex-direction:column;justify-content:center}.canvas-frame{position:relative;flex:1;min-height:0;display:flex;align-items:center;justify-content:center;overflow:hidden;border:4px solid #ffffffc7;border-radius:28px;background:#ffffff1f;box-shadow:0 16px 35px #2e6d8733}
+    canvas{display:block;max-width:100%;max-height:100%;width:auto;height:auto}
+    .card{position:relative;width:min(760px,calc(100% - 28px));margin:-16px auto 0;padding:16px 20px;text-align:center;border:2px solid #ffffffd1;border-radius:24px;background:linear-gradient(135deg,#ffffffc0,#ffffff70);box-shadow:0 14px 35px #34687e38;backdrop-filter:blur(18px)}
+    .tag{display:inline-block;margin-bottom:8px;padding:5px 12px;border-radius:999px;background:#52b788;color:#fff;font-size:13px;font-weight:900}.question-head{display:flex;align-items:center;justify-content:center;gap:18px;margin-bottom:12px}.card h1{margin:0;font-size:clamp(19px,3vw,27px);line-height:1.45}.timer-ring{--progress:1;position:relative;display:grid;flex:0 0 82px;width:82px;height:82px;place-items:center;border-radius:50%;background:conic-gradient(#ff5c5c calc(var(--progress)*1turn),#ffffff80 0);box-shadow:0 6px 15px #c8434338}.timer-ring:before{content:"";position:absolute;inset:7px;border:3px solid #fff;border-radius:50%;background:#fff5e9}.timer-ring span{position:relative;z-index:1;font-size:25px;filter:drop-shadow(0 2px 1px #ffffff)}
+    .answers{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:11px}.answer-button{min-height:44px;padding:9px 14px;border:2px solid #fff;border-radius:15px;background:#ffffffc7;box-shadow:0 4px 0 #46859d2e;color:#31596b;font:inherit;font-weight:800;cursor:pointer;transition:.15s}.answer-button:hover:not(:disabled){transform:translateY(-2px);background:#fff}.answer-button:disabled{cursor:default}.answer-button.good{border-color:#4ade80;background:#bbf7d0;color:#166534}.answer-button.bad{border-color:#f87171;background:#fecaca;color:#991b1b;animation:shake .28s}
+    @keyframes shake{25%{transform:translateX(-7px)}75%{transform:translateX(7px)}}
+    .float{position:absolute;z-index:8;color:#22c55e;font-size:28px;font-weight:1000;text-shadow:0 2px #fff,0 0 8px #fff;pointer-events:none;animation:floatUp .9s ease-out forwards}@keyframes floatUp{0%{opacity:0;transform:translate(-50%,0) scale(.7)}25%{opacity:1;transform:translate(-50%,-18px) scale(1.2)}100%{opacity:0;transform:translate(-50%,-80px)}}
+    .modal{position:fixed;z-index:100;inset:0;display:none;align-items:center;justify-content:center;padding:20px;background:#1a3f4e8f;backdrop-filter:blur(9px)}.modal.show{display:flex}.result,.intro-card{width:min(470px,100%);padding:32px 27px;text-align:center;border:4px solid #fff;border-radius:28px;background:#fffffff2;box-shadow:0 24px 70px #194c6159;animation:pop .35s cubic-bezier(.2,1.5,.5,1)}@keyframes pop{from{opacity:0;transform:translateY(25px) scale(.82)}}.result .icon,.intro-icon{font-size:62px}.result h2,.intro-card h2{font-size:29px}.final-score{margin:13px 0 7px;color:#f59e0b;font-size:58px;font-weight:1000;line-height:1}.summary{margin-bottom:20px;line-height:1.7;color:#4b6875}.restart,.intro-start{padding:11px 27px;border:3px solid #fff;border-radius:15px;background:#ff9f43;box-shadow:0 5px 0 #d97720;color:#fff;font:inherit;font-weight:900;cursor:pointer}.intro-card{border-color:#ffe08a;background:#fffdf4}.intro-sub{margin:4px 0 14px;color:#345563;font-size:15px;font-weight:900}.intro-card h2{color:#d94841}.intro-warning{margin:12px 0 18px;padding:12px;border-radius:14px;background:#fff1d6;color:#a54b15;font-size:17px;font-weight:900}.intro-rules{margin:0 0 22px;padding-left:24px;text-align:left;color:#345563;line-height:1.9}.intro-rules strong{color:#e24b44}.intro-start{width:100%;background:#43aa8b;box-shadow:0 5px 0 #287f68;font-size:18px}.intro-start:disabled{opacity:.55;cursor:wait}
+    .toast{position:fixed;z-index:120;right:20px;bottom:20px;max-width:calc(100% - 40px);padding:12px 17px;border-radius:14px;background:#264653;color:#fff;box-shadow:0 10px 30px #14374647;font-weight:700}
+    @media(max-width:600px){.page{padding:50px 10px 12px;height:100vh}.status{top:14px;left:10px;right:10px}.pill{padding:8px 10px;font-size:14px}.answers{grid-template-columns:1fr}.card{padding:19px 14px}.question-head{align-items:center;gap:9px}.timer-ring{flex-basis:68px;width:68px;height:68px}.timer-ring span{font-size:16px}}
+  </style>
+</head>
+<body>
+  <main class="page">
+    <header class="status"><div class="pill score">⭐ 得分：<span id="scoreCount">0</span></div></header>
+    <section class="upload"><button class="start-button" id="startButton" type="button" disabled>↻ 重新开始</button></section>
+    <section class="stage">
+      <div class="canvas-frame"><canvas id="gameCanvas" width="900" height="480">当前浏览器不支持 Canvas。</canvas></div>
+      <article class="card"><span class="tag">快递任务</span><div class="question-head"><h1 id="questionText"></h1><div class="timer-ring" id="timerRing" role="progressbar" aria-label="距离警戒线的剩余时间" aria-valuemin="0" aria-valuemax="100" aria-valuenow="100"><span aria-hidden="true">⏳</span></div></div><div class="answers" id="answerOptions"></div></article>
+    </section>
+  </main>
+  <div class="modal" id="introModal"><section class="intro-card" role="dialog" aria-modal="true" aria-labelledby="introTitle"><h2 id="introTitle">沟通问答预热游戏</h2><div class="intro-sub">10 道选择题</div><ul class="intro-rules"><li>🐦 小鸟送快递，飞行时会不断力竭下坠！</li><li>✅ 答对题目 → 给小鸟助力</li><li>❌ 未作答或答错 → 小鸟继续下坠</li><li>💥 圆环归零时小鸟触线 → 快递摔毁，任务失败！</li></ul><button class="intro-start" id="introStartButton" type="button" disabled>素材加载中…</button></section></div>
+  <div class="modal" id="resultModal"><section class="result" role="dialog" aria-modal="true"><div class="icon" id="resultIcon"></div><h2 id="resultTitle"></h2><div class="final-score" id="resultScore"></div><div class="summary" id="summary"></div><button class="restart" id="restartButton">重新挑战</button></section></div>
+  <script src="builtin-questions.js"></script>
+  <script>
+    // JS逻辑在此开始
+    (()=>{
+      const canvas=document.querySelector('#gameCanvas'),ctx=canvas.getContext('2d'),W=canvas.width,H=canvas.height;
+      startButton=document.querySelector('#startButton'),introStartButton=document.querySelector('#introStartButton'),introModal=document.querySelector('#introModal'),questionEl=document.querySelector('#questionText'),answersEl=document.querySelector('#answerOptions'),timerRing=document.querySelector('#timerRing'),scoreEl=document.querySelector('#scoreCount'),modal=document.querySelector('#resultModal');
+      const gravity=.5,BIRD_CENTER_Y=H*.4,BIRD_RADIUS=28,lineY=H*.86,INITIAL_COUNTDOWN_SECONDS=10,TARGET_FALL_FRAMES=INITIAL_COUNTDOWN_SECONDS*60,initialFallDistance=lineY-(BIRD_CENTER_Y+BIRD_RADIUS),physicsStep=Math.sqrt((2*initialFallDistance)/(gravity*TARGET_FALL_FRAMES*(TARGET_FALL_FRAMES+1)))*1.000001;
+
+      const skyImage=new Image();let skyReady=false;
+      const birdNormalImage=new Image();
+      const birdFlySpriteImage=new Image();
+      const birdCrashImage=new Image();
+      const SPRITE_WIDTH=1760; // 精灵表当前实际总宽度；替换图片后请按实际像素修改此数值
+      const SPRITE_FRAME=SPRITE_WIDTH/3; // 单帧宽度；如果不是 3 帧横排，请同步修改计算方式
+      const BIRD_DRAW_WIDTH=80;
+
+      function preloadImage(image,src){
+        return new Promise((resolve,reject)=>{
+          image.onload=()=>resolve(image);
+          image.onerror=()=>reject(new Error(`图片加载失败：${src}`));
+          image.src=src;
+        });
+      }
+
+      function preloadBirdImages(){
+        return Promise.all([
+          preloadImage(birdNormalImage,'bird_normal.png'),
+          preloadImage(birdFlySpriteImage,'bird_fly_sprite.png'),
+          preloadImage(birdCrashImage,'bird_crash.png')
+        ]);
+      }
+      const defaults=(typeof builtinQuestions!=='undefined'&&builtinQuestions.length)?builtinQuestions:[
+        {q:'收到陌生人发来的公司内部文件链接时，应该怎么做？',o:['立即点击查看','转发给所有同事','核实发送者身份后再处理','下载到私人网盘'],a:2},
+        {q:'以下哪种密码最安全？',o:['12345678','company2026','Aa9!xQ2#Lm7@','自己的生日'],a:2},
+        {q:'离开办公电脑时，正确的做法是？',o:['保持屏幕开启','锁定电脑屏幕','关闭显示器即可','让同事帮忙看管'],a:1},
+        {q:'发现疑似钓鱼邮件后，应该怎么处理？',o:['回复邮件询问','点击附件检查','删除邮件后不做处理','停止操作并报告信息安全部门'],a:3},
+        {q:'公司敏感资料应该存放在哪里？',o:['个人社交账号','未经批准的网盘','公司授权的安全存储系统','公共共享链接'],a:2}
+      ];
+      let useDrawnBird=false;
+      let questions=[...defaults],index=0,score=0,state='LOADING',active=false,frame=0,nextTimer,resultTimer,animationFrameId,assetsReady=false,ringStartFrames=1;
+      const bird={x:W*.28,y:BIRD_CENTER_Y,py:BIRD_CENTER_Y,vy:0,r:BIRD_RADIUS,flash:0,rotation:0};
+      const clouds=[{x:W*.12,y:82,s:.85},{x:W*.55,y:135,s:1.15},{x:W*.88,y:65,s:.72}],debris=[],fireworks=[];
+      const status=()=>{scoreEl.textContent=score};
+      function drawSky(){
+        if(skyReady&&skyImage.complete&&skyImage.naturalWidth){
+          // cover 模式铺满画布，避免拉伸变形
+          const scale=Math.max(W/skyImage.naturalWidth,H/skyImage.naturalHeight);
+          const dw=skyImage.naturalWidth*scale,dh=skyImage.naturalHeight*scale;
+          ctx.drawImage(skyImage,(W-dw)/2,(H-dh)/2,dw,dh);
+        }else{
+          const g=ctx.createLinearGradient(0,0,0,H);
+          g.addColorStop(0,'#BDE8FF');g.addColorStop(1,'#E0F6FF');
+          ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
+        }
+      }
+      function cloud(c){ctx.save();ctx.translate(c.x,c.y);ctx.scale(c.s,c.s);ctx.fillStyle='#fffffff0';ctx.beginPath();ctx.arc(-35,8,24,0,7);ctx.arc(-8,-9,34,0,7);ctx.arc(28,4,28,0,7);ctx.arc(50,13,19,0,7);ctx.rect(-35,8,85,29);ctx.fill();ctx.restore()}
+      function warning(){ctx.save();ctx.strokeStyle='#ef4444';ctx.lineWidth=4;ctx.setLineDash([16,12]);ctx.beginPath();ctx.moveTo(0,lineY);ctx.lineTo(W,lineY);ctx.stroke();ctx.setLineDash([]);ctx.fillStyle='#dc2626';ctx.font='bold 15px Microsoft YaHei';ctx.textAlign='right';ctx.textBaseline='bottom';ctx.fillText('⚠ 警戒线',W-16,lineY-8);ctx.restore()}
+      function drawBirdCanvas(now){
+        const flap=state==='PLAYING'?Math.sin(now/110)*0.7:0.18;
+        ctx.save();
+        ctx.translate(bird.x,bird.y);
+        if(state==='CRASHED')ctx.rotate(bird.rotation);
+        if(now<bird.flash)ctx.filter='sepia(1) saturate(8) hue-rotate(315deg)';
+        // 尾羽
+        ctx.fillStyle='#E8892B';
+        ctx.beginPath();
+        ctx.moveTo(-bird.r*0.6,-4);
+        ctx.lineTo(-bird.r-18,-14);
+        ctx.lineTo(-bird.r-15,5);
+        ctx.closePath();ctx.fill();
+        // 身体
+        ctx.fillStyle='#FFB84C';
+        ctx.beginPath();ctx.arc(0,0,bird.r,0,7);ctx.fill();
+        // 肚皮
+        ctx.fillStyle='#FFE3B3';
+        ctx.beginPath();ctx.ellipse(3,bird.r*0.38,bird.r*0.62,bird.r*0.42,0,0,7);ctx.fill();
+        // 翅膀（扇动）
+        ctx.save();
+        ctx.translate(-4,-2);ctx.rotate(flap);
+        ctx.fillStyle='#F59E1B';
+        ctx.beginPath();ctx.ellipse(-9,4,18,10,-0.55,0,7);ctx.fill();
+        ctx.restore();
+        // 喙
+        ctx.fillStyle='#FF7043';
+        ctx.beginPath();
+        ctx.moveTo(bird.r-7,-6);ctx.lineTo(bird.r+14,0);ctx.lineTo(bird.r-7,6);
+        ctx.closePath();ctx.fill();
+        // 眼睛
+        if(state==='CRASHED'){
+          ctx.strokeStyle='#264653';ctx.lineWidth=3;ctx.lineCap='round';
+          ctx.beginPath();
+          ctx.moveTo(7,-14);ctx.lineTo(17,-4);ctx.moveTo(17,-14);ctx.lineTo(7,-4);
+          ctx.stroke();
+        }else{
+          ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(12,-8,7,0,7);ctx.fill();
+          ctx.fillStyle='#264653';ctx.beginPath();ctx.arc(14.5,-8,3.2,0,7);ctx.fill();
+        }
+        // 携带的快递包裹
+        const px=-14,py=bird.r-7,ps=28;
+        ctx.fillStyle='#C68B4E';ctx.fillRect(px,py,ps,22);
+        ctx.strokeStyle='#8A5A2B';ctx.lineWidth=2;ctx.strokeRect(px,py,ps,22);
+        ctx.beginPath();ctx.moveTo(px,py+11);ctx.lineTo(px+ps,py+11);ctx.moveTo(px+ps/2,py);ctx.lineTo(px+ps/2,py+22);ctx.stroke();
+        ctx.restore();
+      }
+      function drawBird(now){
+        if(useDrawnBird){drawBirdCanvas(now);return}
+        let image=birdNormalImage;
+        let sourceX=0;
+        let sourceWidth=image.naturalWidth;
+        let sourceHeight=image.naturalHeight;
+
+        if(state==='PLAYING'){
+          image=birdFlySpriteImage;
+          const spriteFrame=Math.floor(Date.now()/150)%3;
+          sourceX=spriteFrame*SPRITE_FRAME;
+          sourceWidth=SPRITE_FRAME;
+          sourceHeight=image.naturalHeight;
+        }else if(state==='CRASHED'){
+          image=birdCrashImage;
+          sourceWidth=image.naturalWidth;
+          sourceHeight=image.naturalHeight;
+        }
+
+        if(!image.complete||!image.naturalWidth)return;
+
+        const drawHeight=BIRD_DRAW_WIDTH*(sourceHeight/sourceWidth);
+        ctx.save();
+        ctx.translate(bird.x,bird.y);
+        if(state==='CRASHED')ctx.rotate(bird.rotation);
+        ctx.filter=now<bird.flash?'sepia(1) saturate(8) hue-rotate(315deg)':'none';
+        ctx.drawImage(
+          image,
+          sourceX,0,sourceWidth,sourceHeight,
+          -BIRD_DRAW_WIDTH/2,-drawHeight/2,BIRD_DRAW_WIDTH,drawHeight
+        );
+        ctx.restore();
+      }
+      function burstParcel(){for(let i=0;i<34;i++){const a=Math.random()*7,s=3+Math.random()*8;debris.push({x:bird.x-12,y:bird.y-39,vx:Math.cos(a)*s,vy:Math.sin(a)*s-3,z:4+Math.random()*9,r:Math.random()*7,vr:(Math.random()-.5)*.35,c:['#9a6238','#704225','#e8c07a'][i%3],life:1})}}
+      function drawDebris(){for(let i=debris.length-1;i>=0;i--){const p=debris[i];p.vy+=.32;p.x+=p.vx;p.y+=p.vy;p.r+=p.vr;p.life-=.018;if(p.life<=0){debris.splice(i,1);continue}ctx.save();ctx.globalAlpha=p.life;ctx.translate(p.x,p.y);ctx.rotate(p.r);ctx.fillStyle=p.c;ctx.fillRect(-p.z/2,-p.z/2,p.z,p.z*.72);ctx.restore()}}
+      function makeFirework(){const x=W*(.15+Math.random()*.7),y=H*(.12+Math.random()*.42),c=['#ff4d6d','#ffd166','#06d6a0','#4cc9f0','#b517ff'][Math.floor(Math.random()*5)];for(let i=0;i<38;i++){const a=7*i/38,s=2+Math.random()*5;fireworks.push({x,y,vx:Math.cos(a)*s,vy:Math.sin(a)*s,c,life:1,z:2+Math.random()*3})}}
+      function drawFireworks(){if(state==='WON'&&frame%24===0)makeFirework();for(let i=fireworks.length-1;i>=0;i--){const p=fireworks[i];p.vy+=.035;p.x+=p.vx;p.y+=p.vy;p.life-=.015;if(p.life<=0){fireworks.splice(i,1);continue}ctx.save();ctx.globalAlpha=p.life;ctx.fillStyle=p.c;ctx.shadowColor=p.c;ctx.shadowBlur=10;ctx.beginPath();ctx.arc(p.x,p.y,p.z,0,7);ctx.fill();ctx.restore()}}
+      function floatOne(){const e=document.createElement('b'),r=canvas.getBoundingClientRect();e.className='float';e.textContent='+1';e.style.left=`${r.left+bird.x/W*r.width}px`;e.style.top=`${r.top+bird.y/H*r.height-25}px`;e.style.position='fixed';document.body.append(e);e.addEventListener('animationend',()=>e.remove(),{once:true})}
+      function showResult(crashed=false){const percentage=Math.round(score/Math.max(questions.length,1)*100);state=crashed?'ENDED':'WON';active=false;timerRing.style.setProperty('--progress',0);timerRing.setAttribute('aria-valuenow','0');document.querySelector('#resultIcon').textContent=crashed?'📦💥':'📬🎉';document.querySelector('#resultTitle').textContent=crashed?'💥 快递摔毁，任务失败！':'📬 配送完成！';document.querySelector('#resultScore').textContent=`答对 ${score} 题`;document.querySelector('#summary').innerHTML=`答对占比：<strong>${percentage}%</strong>`;modal.classList.add('show');if(!crashed)for(let i=0;i<4;i++)setTimeout(makeFirework,i*170);try{if(window.parent&&window.parent!==window)window.parent.postMessage({type:'commWarmupEnd',crashed:crashed},'*')}catch(err){}}
+      function triggerCrash(){
+        cancelAnimationFrame(animationFrameId);
+        state='CRASHED';
+        active=false;
+        timerRing.style.setProperty('--progress',0);
+        timerRing.setAttribute('aria-valuenow','0');
+        bird.vy=2;
+        bird.rotation=0;
+        bird.flash=0;
+        bird.y=H-BIRD_DRAW_WIDTH*1.5;
+        burstParcel();
+        clearTimeout(nextTimer);
+        clearTimeout(resultTimer);
+        ctx.clearRect(0,0,W,H);drawSky();
+        clouds.forEach(cloud);
+        warning();
+        drawBird(performance.now());
+        animationFrameId=requestAnimationFrame(animateCrash);
+      }
+
+      function animateCrash(now){
+        ctx.clearRect(0,0,W,H);drawSky();
+        clouds.forEach(cloud);
+        warning();
+        bird.vy+=gravity*1.75;
+        bird.y+=bird.vy;
+        bird.rotation+=.14;
+
+        const groundY=H-BIRD_DRAW_WIDTH/2;
+        if(bird.y>=groundY){
+          bird.y=groundY;
+          drawBird(now);
+          drawDebris();
+          resultTimer=setTimeout(()=>showResult(true),1400);
+          return;
+        }
+
+        drawBird(now);
+        drawDebris();
+        animationFrameId=requestAnimationFrame(animateCrash);
+      }
+      function estimateFramesToWarning(){let simY=bird.y,simVelocity=bird.vy,framesLeft=0;while(simY+bird.r<lineY&&framesLeft<3600){simVelocity+=gravity*physicsStep;simY+=simVelocity*physicsStep;if(simY<bird.r+8){simY=bird.r+8;simVelocity=0}framesLeft++}return Math.max(framesLeft,1)}
+      function updateCountdownRing(){const remainingFrames=estimateFramesToWarning();const progress=Math.max(0,Math.min(1,remainingFrames/ringStartFrames));timerRing.style.setProperty('--progress',progress);timerRing.setAttribute('aria-valuenow',String(Math.round(progress*100)))}
+      function markIncorrect(){if(state==='PLAYING')bird.flash=performance.now()+520}
+      function renderQuestion(activate=true){if(index>=questions.length){showResult();return}const q=questions[index];questionEl.textContent=`${index+1}/${questions.length}　${q.q}`;answersEl.replaceChildren(...q.o.map((text,i)=>{const b=document.createElement('button');b.className='answer-button';b.dataset.index=i;b.textContent=`${String.fromCharCode(65+i)}. ${text}`;b.disabled=!activate;return b}));active=activate;ringStartFrames=estimateFramesToWarning();timerRing.style.setProperty('--progress',1);timerRing.setAttribute('aria-valuenow','100')}
+      function next(delay=650){clearTimeout(nextTimer);nextTimer=setTimeout(()=>{if(state==='PLAYING'){index++;renderQuestion()}},delay)}
+      function answer(e){const b=e.target.closest('.answer-button');if(!b||!active||state!=='PLAYING')return;active=false;answersEl.querySelectorAll('button').forEach(x=>x.disabled=true);const q=questions[index],selected=+b.dataset.index;if(selected===q.a){b.classList.add('good');bird.y=BIRD_CENTER_Y;bird.py=BIRD_CENTER_Y;bird.vy=0;ringStartFrames=estimateFramesToWarning();timerRing.style.setProperty('--progress',1);timerRing.setAttribute('aria-valuenow','100');score++;status();floatOne()}else{b.classList.add('bad');answersEl.querySelector(`[data-index="${q.a}"]`)?.classList.add('good');markIncorrect()}if(state==='PLAYING')next()}
+      function physics(){bird.py=bird.y;if(state==='PLAYING'&&active){bird.vy+=gravity*physicsStep;bird.y+=bird.vy*physicsStep;if(bird.y+bird.r>=lineY){triggerCrash();return}if(bird.y<bird.r+8){bird.y=bird.r+8;bird.vy=0}}}
+      function animate(now){frame++;ctx.clearRect(0,0,W,H);drawSky();clouds.forEach(c=>{c.x-=.5;if(c.x+130*c.s<0)c.x=W+130*c.s;cloud(c)});warning();physics();drawBird(now);drawDebris();drawFireworks();if(active&&state==='PLAYING')updateCountdownRing();if(state!=='CRASHED')animationFrameId=requestAnimationFrame(animate)}
+      function normalize(v){if(Number.isInteger(v)&&v>=0&&v<=3)return v;const s=String(v??'').trim().toUpperCase();if(/^[0-3]$/.test(s))return +s;const m=s.match(/^[A-D]/);return m?m[0].charCodeAt(0)-65:null}
+      function toast(text){document.querySelector('.toast')?.remove();const e=document.createElement('div');e.className='toast';e.textContent=text;document.body.append(e);setTimeout(()=>e.remove(),3000)}
+      function drawFrozenScene(){ctx.clearRect(0,0,W,H);drawSky();clouds.forEach(cloud);warning();drawBird(performance.now())}
+      function reset(startImmediately=true){cancelAnimationFrame(animationFrameId);clearTimeout(nextTimer);clearTimeout(resultTimer);index=score=frame=0;state=startImmediately?'PLAYING':'IDLE';active=false;debris.length=fireworks.length=0;Object.assign(bird,{x:W*.28,y:BIRD_CENTER_Y,py:BIRD_CENTER_Y,vy:0,flash:0,rotation:0});modal.classList.remove('show');status();renderQuestion(startImmediately);if(assetsReady){if(startImmediately)animationFrameId=requestAnimationFrame(animate);else drawFrozenScene()}}
+      function beginGame(){if(state==='LOADING')return;introModal.classList.remove('show');reset(true)}
+      function showInstructions(){if(!assetsReady)return;reset(false);introModal.classList.add('show')}
+      answersEl.addEventListener('click',answer);startButton.addEventListener('click',showInstructions);introStartButton.addEventListener('click',beginGame);document.querySelector('#restartButton').addEventListener('click',showInstructions);status();questionEl.textContent='正在加载小鸟素材…';
+
+      skyImage.onload=()=>{skyReady=true};
+      skyImage.onerror=()=>{console.warn('sky.jpg 加载失败，继续使用默认背景')};
+      skyImage.src='sky.jpg';
+      // 内置题库来自《职场沟通选择题.xlsx》，经 builtin-questions.js 直接加载，无网络依赖
+      preloadBirdImages().then(()=>{
+        if(birdFlySpriteImage.naturalWidth!==SPRITE_WIDTH){
+          console.warn(`精灵表实际宽度为 ${birdFlySpriteImage.naturalWidth}px，请检查 SPRITE_WIDTH。`);
+        }
+        assetsReady=true;
+        startButton.disabled=false;
+        introStartButton.disabled=false;
+        introStartButton.textContent='✈️ 开始送快递！';
+        reset(false);
+        introModal.classList.add('show');
+      }).catch(error=>{
+        console.warn('小鸟素材未找到，已切换为内置卡通小鸟。',error);
+        useDrawnBird=true;
+        assetsReady=true;
+        startButton.disabled=false;
+        introStartButton.disabled=false;
+        introStartButton.textContent='✈️ 开始送快递！';
+        reset(false);
+        introModal.classList.add('show');
+      });
+    })();
+  </script>
+</body>
+</html>

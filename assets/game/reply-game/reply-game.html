@@ -1,0 +1,1975 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📧 邮件谈判专家 · 海外仓投诉</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        html, body {
+            height: 100%;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: #f0f2f5;
+            color: #1e293b;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: stretch;
+            padding: 14px;
+            overflow-y: auto;
+        }
+        .app {
+            max-width: 1200px;
+            width: 100%;
+            height: 100%;
+            min-height: 560px;
+            background: #ffffff;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+        .topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 14px 28px;
+            border-bottom: 1px solid #e9edf2;
+            background: #fafbfc;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .topbar h1 {
+            font-size: 1.2rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .topbar .status {
+            display: flex;
+            align-items: center;
+            gap: 18px;
+            font-size: 0.9rem;
+            flex-wrap: wrap;
+        }
+        .mood-wrap {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .mood-hearts {
+            font-size: 1.4rem;
+            letter-spacing: 2px;
+            line-height: 1.4;
+            min-width: 120px;
+        }
+        .mood-hearts .heart-full {
+            color: #ef4444;
+        }
+        .mood-hearts .heart-empty {
+            color: #d1d5db;
+        }
+        .mood-label {
+            font-size: 0.8rem;
+            color: #64748b;
+            font-weight: 500;
+        }
+        .round-badge {
+            background: #dbeafe;
+            color: #1e4a7a;
+            padding: 2px 16px;
+            border-radius: 30px;
+            font-weight: 600;
+            font-size: 0.85rem;
+        }
+        .reset-btn {
+            background: none;
+            border: 1px solid #cbd5e1;
+            padding: 6px 18px;
+            border-radius: 30px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: 0.2s;
+            color: #475569;
+        }
+        .reset-btn:hover {
+            background: #f1f5f9;
+            border-color: #94a3b8;
+        }
+        .main {
+            display: flex;
+            flex: 1;
+            min-height: 0;
+        }
+        .sidebar {
+            width: 280px;
+            background: #f8fafc;
+            border-right: 1px solid #e9edf2;
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0;
+        }
+        .folder-tabs {
+            display: flex;
+            border-bottom: 1px solid #e9edf2;
+            background: #f1f5f9;
+        }
+        .folder-tab {
+            flex: 1;
+            padding: 12px 0;
+            text-align: center;
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: #64748b;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: 0.15s;
+            background: transparent;
+            border-top: none;
+            border-left: none;
+            border-right: none;
+            font-family: inherit;
+            position: relative;
+        }
+        .folder-tab:hover {
+            background: #e9edf2;
+        }
+        .folder-tab.active {
+            color: #0f172a;
+            border-bottom-color: #3b82f6;
+            background: #ffffff;
+        }
+        .folder-tab .badge {
+            display: inline-block;
+            background: #ef4444;
+            color: white;
+            font-size: 0.7rem;
+            padding: 1px 8px;
+            border-radius: 30px;
+            margin-left: 4px;
+            font-weight: 700;
+            transition: all 0.2s;
+        }
+        .folder-tab .badge.blink {
+            animation: blinkBadge 0.8s ease-in-out infinite;
+        }
+        @keyframes blinkBadge {
+            0%,
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+            50% {
+                opacity: 0.3;
+                transform: scale(0.85);
+            }
+        }
+        .mail-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 8px 0;
+        }
+        .mail-list .empty-msg {
+            padding: 30px 20px;
+            text-align: center;
+            color: #94a3b8;
+            font-size: 0.9rem;
+        }
+        .mail-item {
+            padding: 12px 18px;
+            cursor: pointer;
+            border-bottom: 1px solid #f1f5f9;
+            transition: 0.1s;
+            position: relative;
+        }
+        .mail-item:hover {
+            background: #f1f5f9;
+        }
+        .mail-item.active {
+            background: #eff6ff;
+            border-left: 3px solid #3b82f6;
+        }
+        .mail-item.new-mail {
+            animation: highlightNew 1s ease 2;
+            background: #fef9c3;
+        }
+        @keyframes highlightNew {
+            0%,
+            100% {
+                background: #fef9c3;
+            }
+            50% {
+                background: #fde047;
+            }
+        }
+        .mail-item .subject {
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: #0f172a;
+        }
+        .mail-item .from {
+            font-size: 0.8rem;
+            color: #64748b;
+            margin-top: 2px;
+        }
+        .mail-item .date {
+            font-size: 0.7rem;
+            color: #94a3b8;
+        }
+        .mail-item .unread-dot {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            background: #3b82f6;
+            border-radius: 50%;
+            margin-right: 8px;
+            flex-shrink: 0;
+        }
+        .mail-item .item-top {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .mail-item .item-bottom {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 2px;
+            flex-wrap: wrap;
+            gap: 4px;
+        }
+        .status-label {
+            font-size: 0.65rem;
+            font-weight: 700;
+            padding: 1px 10px;
+            border-radius: 30px;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+        .status-label.unread {
+            background: #ef4444;
+            color: white;
+            animation: blinkBadge 0.8s ease-in-out infinite;
+        }
+        .status-label.read {
+            background: #d1d5db;
+            color: #4b5563;
+        }
+        .mail-content {
+            flex: 1;
+            padding: 24px 32px 20px 32px;
+            display: flex;
+            flex-direction: column;
+            background: #ffffff;
+            min-width: 0;
+            overflow-y: auto;
+        }
+        .email-card {
+            background: #f9fafb;
+            border-radius: 12px;
+            padding: 20px 24px;
+            margin-bottom: 16px;
+            border: 1px solid #e9edf2;
+            flex-shrink: 0;
+        }
+        .email-card .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 6px;
+        }
+        .email-card .header .from {
+            font-weight: 600;
+            color: #0f172a;
+        }
+        .email-card .header .date {
+            font-size: 0.8rem;
+            color: #94a3b8;
+        }
+        .email-card .subject-line {
+            font-weight: 600;
+            font-size: 1.05rem;
+            margin-bottom: 12px;
+            color: #0f172a;
+        }
+        .email-card .body {
+            white-space: pre-wrap;
+            font-size: 0.95rem;
+            line-height: 1.7;
+            color: #1e293b;
+        }
+        #nextRoundContainer {
+            margin: 10px 0 4px 0;
+            text-align: center;
+        }
+        .btn-next {
+            background: #8b5cf6;
+            border: none;
+            padding: 10px 36px;
+            border-radius: 30px;
+            font-weight: 700;
+            color: white;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.15s;
+            box-shadow: 0 2px 8px rgba(139, 92, 246, 0.3);
+        }
+        .btn-next:hover {
+            background: #7c3aed;
+            transform: scale(1.02);
+        }
+        .draft-area {
+            background: #fefcf5;
+            border: 2px dashed #d1d9e6;
+            border-radius: 12px;
+            padding: 20px 24px;
+            margin-top: 12px;
+            position: relative;
+        }
+        .draft-area .draft-label {
+            position: absolute;
+            top: -10px;
+            left: 20px;
+            background: #fefcf5;
+            padding: 0 10px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: #94a3b8;
+        }
+        .draft-area .draft-hint {
+            text-align: center;
+            margin-top: -6px;
+            margin-bottom: 14px;
+            font-size: 0.95rem;
+            font-weight: 500;
+            color: #3b82f6;
+        }
+        .clickable-text {
+            cursor: pointer;
+            padding: 2px 4px;
+            border-radius: 4px;
+            transition: all 0.15s;
+            border: 1px solid transparent;
+            display: inline-block;
+        }
+        .clickable-text:hover {
+            background: #f1f5f9;
+            border-color: #d1d9e6;
+        }
+        .clickable-text.found {
+            background: #dcfce7;
+            border-color: #22c55e;
+            box-shadow: 0 0 0 2px rgba(34, 197, 94, 0.2);
+        }
+        .clickable-text.found::after {
+            content: " ✓";
+            color: #22c55e;
+            font-weight: 700;
+        }
+        .user-reply-preview {
+            background: #eff6ff;
+            border-radius: 12px;
+            padding: 16px 20px;
+            margin: 8px 0 14px 0;
+            border-left: 4px solid #3b82f6;
+            white-space: pre-wrap;
+            font-size: 0.95rem;
+            line-height: 1.6;
+            color: #1e293b;
+            flex-shrink: 0;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        .combo-area {
+            background: #f8fafc;
+            border-radius: 12px;
+            padding: 16px 20px;
+            border: 1px solid #e9edf2;
+            flex-shrink: 0;
+            margin-top: 12px;
+        }
+        .dimension {
+            margin-bottom: 12px;
+        }
+        .dimension:last-child {
+            margin-bottom: 0;
+        }
+        .dimension-label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #475569;
+            margin-bottom: 4px;
+        }
+        .tag-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .tag-btn {
+            background: #ffffff;
+            border: 1.5px solid #d1d9e6;
+            padding: 5px 16px;
+            border-radius: 30px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: #334155;
+            cursor: pointer;
+            transition: 0.15s;
+        }
+        .tag-btn:hover:not(:disabled) {
+            border-color: #94a3b8;
+            background: #f1f5f9;
+        }
+        .tag-btn.active {
+            border-color: #3b82f6;
+            background: #eff6ff;
+            color: #1e4a7a;
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.12);
+        }
+        .tag-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+        .reply-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            margin-top: 14px;
+            flex-shrink: 0;
+        }
+        .btn-primary {
+            background: #3b82f6;
+            border: none;
+            padding: 10px 32px;
+            border-radius: 30px;
+            font-weight: 600;
+            color: white;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: 0.15s;
+            box-shadow: 0 2px 6px rgba(59, 130, 246, 0.25);
+        }
+        .btn-primary:hover:not(:disabled) {
+            background: #2563eb;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.35);
+        }
+        .btn-primary:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        .coach-box {
+            margin-top: 12px;
+            padding: 10px 16px;
+            background: #f1f5f9;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            color: #475569;
+            min-height: 40px;
+            flex-shrink: 0;
+            border-left: 4px solid #94a3b8;
+        }
+        .game-over-overlay {
+            margin-top: 14px;
+            padding: 18px;
+            border-radius: 12px;
+            text-align: center;
+            font-weight: 600;
+            font-size: 1.05rem;
+            background: #f1f5f9;
+            border: 1px solid #e2e8f0;
+            flex-shrink: 0;
+        }
+        .game-over-overlay.success {
+            background: #dcfce7;
+            border-color: #86efac;
+            color: #166534;
+        }
+        .game-over-overlay.fail {
+            background: #fee2e2;
+            border-color: #fca5a5;
+            color: #991b1b;
+        }
+        .game-over-overlay.partial {
+            background: #fef9e7;
+            border-color: #fcd34d;
+            color: #92400e;
+        }
+        .hidden {
+            display: none !important;
+        }
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 999;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            pointer-events: none;
+            width: auto;
+            max-width: 90%;
+        }
+        .toast {
+            padding: 12px 24px;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+            border: 2px solid transparent;
+            pointer-events: auto;
+            animation: slideDown 0.3s ease;
+            width: 100%;
+            text-align: center;
+        }
+        .toast.success {
+            background: #dcfce7;
+            border-color: #86efac;
+            color: #166534;
+        }
+        .toast.warning {
+            background: #fef9e7;
+            border-color: #fcd34d;
+            color: #92400e;
+        }
+        .toast.error {
+            background: #fee2e2;
+            border-color: #fca5a5;
+            color: #991b1b;
+        }
+        .toast.info {
+            background: #eff6ff;
+            border-color: #93bffb;
+            color: #1e4a7a;
+        }
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px) scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+        .tooltip-bubble {
+            position: fixed;
+            background: #1e293b;
+            color: #f8fafc;
+            padding: 10px 16px;
+            border-radius: 10px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            max-width: 350px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+            z-index: 999;
+            pointer-events: none;
+            animation: fadeInTooltip 0.2s ease;
+            border-left: 4px solid #3b82f6;
+        }
+        .tooltip-bubble.error {
+            border-left-color: #ef4444;
+        }
+        .tooltip-bubble.success {
+            border-left-color: #22c55e;
+        }
+        @keyframes fadeInTooltip {
+            from {
+                opacity: 0;
+                transform: translateY(-6px) scale(0.96);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+        @media (max-width: 768px) {
+            .main {
+                flex-direction: column;
+            }
+            .sidebar {
+                width: 100%;
+                border-right: none;
+                border-bottom: 1px solid #e9edf2;
+                max-height: 200px;
+            }
+            .mail-list {
+                max-height: 140px;
+            }
+            .mail-content {
+                padding: 16px;
+                max-height: 600px;
+            }
+            .topbar {
+                padding: 12px 16px;
+            }
+            .topbar .status {
+                gap: 10px;
+            }
+            .mood-hearts {
+                font-size: 1.2rem;
+                min-width: 80px;
+            }
+            .toast {
+                font-size: 0.85rem;
+                padding: 10px 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="toast-container" id="toastContainer"></div>
+    <div class="app" id="app">
+        <div class="topbar">
+            <h1>📧 邮件谈判 · 海外仓投诉</h1>
+            <div class="status">
+                <div class="mood-wrap">
+                    <span class="mood-label">客户情绪</span>
+                    <span class="mood-hearts" id="moodHearts">❤️❤️❤️🤍🤍</span>
+                </div>
+                <span class="round-badge" id="roundBadge">第 1 / 3 轮</span>
+                <button class="reset-btn" id="resetBtn">↻ 重新开始</button>
+            </div>
+        </div>
+        <div class="main">
+            <div class="sidebar">
+                <div class="folder-tabs">
+                    <button class="folder-tab active" data-folder="inbox" id="inboxTab">📬 收件箱 <span class="badge" id="unreadBadge">1</span></button>
+                    <button class="folder-tab" data-folder="outbox" id="outboxTab">📤 发件箱</button>
+                </div>
+                <div class="mail-list" id="mailList"></div>
+            </div>
+            <div class="mail-content" id="mailContent">
+                <div class="email-card" id="emailCard">
+                    <div class="header">
+                        <span class="from" id="emailFrom">发件人：—</span>
+                        <span class="date" id="emailDate">—</span>
+                    </div>
+                    <div class="subject-line" id="emailSubject">请从左侧选择一封邮件</div>
+                    <div class="body" id="emailBody">点击收件箱中的邮件开始阅读…</div>
+                </div>
+                <div id="nextRoundContainer"></div>
+                <div id="draftArea" class="draft-area hidden">
+                    <span class="draft-label">📝 你的草稿</span>
+                    <div class="draft-hint">💡找出草稿中有邮件格式错误的区域</div>
+                    <div id="draftContent"></div>
+                </div>
+                <div id="userReplyPreview" class="user-reply-preview hidden">
+                    <strong>📤 你的回复邮件</strong><br>
+                    <span id="userReplyText"></span>
+                </div>
+                <div id="comboArea" class="combo-area hidden">
+                    <div class="dimension" id="dimAttitude">
+                        <div class="dimension-label">📝 态度</div>
+                        <div class="tag-group" id="tagGroupAttitude"></div>
+                    </div>
+                    <div class="dimension" id="dimSolution">
+                        <div class="dimension-label">🔧 方案</div>
+                        <div class="tag-group" id="tagGroupSolution"></div>
+                    </div>
+                    <div class="dimension" id="dimTime">
+                        <div class="dimension-label">⏱️ 时间</div>
+                        <div class="tag-group" id="tagGroupTime"></div>
+                    </div>
+                </div>
+                <div class="coach-box" id="coachBox">💡 从收件箱选择一封未读邮件开始阅读。</div>
+                <div class="reply-actions">
+                    <button class="btn-primary" id="sendBtn" disabled>📤 发送回复</button>
+                </div>
+                <div id="gameOverMessage" class="hidden game-over-overlay"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ================================================================
+        //  数据定义（与之前相同）
+        // ================================================================
+
+        const CLIENT_MAILS = [{
+            round: 0,
+            subject: '【紧急投诉】货物到仓数量严重不符 + 运费虚高',
+            from: '张女士（卖家）',
+            date: '今天 09:32',
+            body: `你们好！
+
+        这批货我等了三周终于到仓了，结果系统显示只入库了 477 件！我发了 500 件，少了 23 件！价值两万多！
+
+        更离谱的是，仓库量的体积重比我发货时自己量的多出 30%，运费凭空多了 8000 块！我做了六年跨境，从来没遇到过这么离谱的事！
+
+        今天必须给我一个说法：少的那 23 件怎么赔？多收的运费退不退？`
+        }, {
+            round: 1,
+            subject: '回复：关于您的回复（追问进度）',
+            from: '张女士（卖家）',
+            date: '今天 11:15',
+            body: `你们说的"核查"需要多久？我给了你们一天了，现在告诉我还要等 3 天？我客户等不了！
+
+        而且你们只提了数量核查，那运费的问题呢？多收的钱你们就假装没看见？
+
+        我不是来听你们走流程的，我是来要结果的。今天给我一个明确方案，否则我直接找你们老板。`
+        }, {
+            round: 2,
+            subject: '最后通牒 - 今天必须解决',
+            from: '张女士（卖家）',
+            date: '今天 14:20',
+            body: `我给了你们三天时间，你们给我的答复是"还在核实"？那我直接告诉你们：
+
+        1. 如果今天内不能确认赔偿方案，我会在亚马逊上留差评
+        2. 我会把所有物流订单转到你们竞品那边
+        3. 我会在同行群里曝光你们仓库的问题
+
+        我只等到今天下班。你们看着办。`
+        }];
+
+        const ERROR_POINTS = [{
+            id: 0,
+            label: '抄送范围不当',
+            description: '客服部全体不应抄送，应只抄送直接相关领导或处理该工单的同事。',
+            correct: '抄送：客服主管 <supervisor@company.com>'
+        }, {
+            id: 1,
+            label: '标题缺少【】标识',
+            description: '标题应使用【】标识，且内容应更明确，例如“【回复】关于货物数量差异及运费的投诉处理”。',
+            correct: '【回复】关于货物数量差异及运费的投诉处理'
+        }, {
+            id: 2,
+            label: '称呼不恰当',
+            description: '对外邮件应使用正式称呼，如“尊敬的张女士，您好！”，仅写名字显得不够尊重。',
+            correct: '尊敬的张女士，您好！'
+        }, {
+            id: 3,
+            label: '正文没有倒叙结构',
+            description: '应先说结论/当前进度，再补充过程说明，让客户第一时间知道结果。',
+            correct: '目前我们正在全面核查，预计今天内给出初步结果。'
+        }, {
+            id: 4,
+            label: '结论模糊无实质内容',
+            description: '应写明具体进度和时间承诺，例如“我们承诺今天内完成核查并反馈结果”。',
+            correct: '我们承诺今天内完成核查并反馈结果。'
+        }, {
+            id: 5,
+            label: '签名缺少联系方式',
+            description: '对外邮件必须包含电话和邮箱，方便客户直接联系。',
+            correct: '客服部 李明\nTel: 010-8888-1234\nEmail: liming@company.com'
+        }];
+
+        const ROUND2_TAGS = {
+            dimensions: [
+                { id: 'attitude', label: '📝 态度', tags: [{ id: 'a1', text: '理解客户急迫 + 加急处理', score: 2 },
+                    { id: 'a2', text: '坚持按流程走', score: 0 }, { id: 'a3', text: '质疑客户（"您也没及时反馈"）',
+                        score: -2 }
+                    ] },
+                { id: 'solution', label: '🔧 方案', tags: [{ id: 's1', text: '数量+运费同步处理，承诺赔偿',
+                        score: 3 }, { id: 's2', text: '先结清数量问题，运费另行处理', score: 1 },
+                    { id: 's3', text: '要求客户提供更多证据再谈', score: -1 }
+                    ] },
+                { id: 'time', label: '⏱️ 时间', tags: [{ id: 't1', text: '明天9:00前出结果', score: 2 },
+                    { id: 't2', text: '48小时内', score: 1 }, { id: 't3', text: '需要上级审批，不确定',
+                        score: -2 }
+                    ] }
+            ]
+        };
+
+        const ROUND3_TAGS = {
+            dimensions: [
+                { id: 'attitude', label: '📝 态度', tags: [{ id: 'a1', text: '立即升级 + 最高优先级处理',
+                        score: 2 }, { id: 'a2', text: '安抚情绪 + 请求更多时间', score: 0 },
+                    { id: 'a3', text: '冷静回应（"您有权这样做"）', score: -2 }
+                    ] },
+                { id: 'solution', label: '🔧 方案', tags: [{ id: 's1', text: '特批赔偿 + 即时退款', score: 3 },
+                    { id: 's2', text: '部分赔偿 + 争取客户接受', score: 1 }, { id: 's3',
+                        text: '坚持原方案，不妥协', score: -2 }
+                    ] },
+                { id: 'time', label: '⏱️ 时间', tags: [{ id: 't1', text: '今天内全流程走完', score: 2 },
+                    { id: 't2', text: '明天内完成', score: 1 }, { id: 't3', text: '按正常流程3-5天',
+                        score: -1 }
+                    ] }
+            ]
+        };
+
+        // 结局信息（用于显示）
+        const ENDINGS = {
+            success: { title: '🎉 谈判成功！', message: '客户完全满意，承诺继续合作，并感谢您的专业处理。',
+            cls: 'success' },
+            partial: { title: '😐 勉强接受', message: '客户接受了方案，但表示会重新考虑合作意向。', cls: 'partial' },
+            fail: { title: '💔 谈判破裂', message: '客户愤怒终止合作，公司需承担相应损失。', cls: 'fail' }
+        };
+
+        // 结局邮件内容（根据类型）
+        function getEndingMail(type) {
+            const map = {
+                success: {
+                    subject: '感谢信',
+                    body: `感谢您专业、耐心的处理。我对贵公司的服务重新有了信心，以后会继续合作。\n\n祝商祺！`
+                },
+                partial: {
+                    subject: '最终回复',
+                    body: `这次的问题算解决了，但过程让我很不愉快。以后我会慎重考虑是否继续合作。`
+                },
+                fail: {
+                    subject: '正式投诉及终止合作',
+                    body: `我已经无法忍受这种敷衍，我会将此事上报至贵公司总部并终止合作。\n\n请好自为之。`
+                }
+            };
+            return map[type] || map.fail;
+        }
+
+        // ================================================================
+        //  状态
+        // ================================================================
+        let state = {
+            currentRound: 0,
+            mood: 65,
+            foundErrors: [],
+            round1Done: false,
+            selected2: { attitude: null, solution: null, time: null },
+            round2Done: false,
+            selected3: { attitude: null, solution: null, time: null },
+            round3Done: false,
+            inbox: [],
+            outbox: [],
+            currentView: 'inbox',
+            currentMailId: null,
+            gameOver: false,
+            tagsEnabled: false,
+            waitingForNextRound: false,
+            isDoubtMail: false,
+            nextRoundPending: false,
+            pendingEndingType: null,
+        };
+
+        // ================================================================
+        //  DOM 引用
+        // ================================================================
+        const $ = id => document.getElementById(id);
+        const moodHearts = $('moodHearts');
+        const roundBadge = $('roundBadge');
+        const mailList = $('mailList');
+        const inboxTab = $('inboxTab');
+        const outboxTab = $('outboxTab');
+        const unreadBadge = $('unreadBadge');
+        const emailFrom = $('emailFrom');
+        const emailDate = $('emailDate');
+        const emailSubject = $('emailSubject');
+        const emailBody = $('emailBody');
+        const draftArea = $('draftArea');
+        const draftContent = $('draftContent');
+        const userReplyPreview = $('userReplyPreview');
+        const userReplyText = $('userReplyText');
+        const comboArea = $('comboArea');
+        const tagGroups = {
+            attitude: $('tagGroupAttitude'),
+            solution: $('tagGroupSolution'),
+            time: $('tagGroupTime')
+        };
+        const coachBox = $('coachBox');
+        const sendBtn = $('sendBtn');
+        const gameOverMsg = $('gameOverMessage');
+        const toastContainer = $('toastContainer');
+        const nextRoundContainer = $('nextRoundContainer');
+
+        // ================================================================
+        //  工具函数
+        // ================================================================
+        function generateId() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
+
+        function formatDate() {
+            const now = new Date();
+            return `今天 ${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+        }
+
+        function renderHearts(mood) {
+            const full = Math.round(mood / 20);
+            let html = '';
+            for (let i = 0; i < 5; i++) {
+                if (i < full) html += '<span class="heart-full">❤️</span>';
+                else html += '<span class="heart-empty">🤍</span>';
+            }
+            return html;
+        }
+
+        function updateMoodDisplay() {
+            moodHearts.innerHTML = renderHearts(state.mood);
+        }
+
+        function updateRoundBadge() {
+            const names = ['找茬题', '标签组合', '最终决策'];
+            const total = names.length;
+            const label = state.currentRound < total ? names[state.currentRound] : '完成';
+            roundBadge.textContent = `第 ${state.currentRound+1} / ${total} 轮 · ${label}`;
+        }
+
+        function updateUnreadBadge() {
+            const unread = state.inbox.filter(m => !m.read && !m.isEnding).length;
+            const badge = inboxTab.querySelector('.badge');
+            if (unread > 0) {
+                badge.textContent = unread;
+                badge.classList.remove('hidden');
+                badge.classList.add('blink');
+            } else {
+                badge.textContent = '0';
+                badge.classList.add('hidden');
+                badge.classList.remove('blink');
+            }
+        }
+
+        function findMail(mailId) {
+            let found = state.inbox.find(m => m.id === mailId);
+            if (found) return found;
+            return state.outbox.find(m => m.id === mailId);
+        }
+
+        function setCoach(text, type = 'info') {
+            coachBox.textContent = text;
+            const colors = { info: '#94a3b8', success: '#22c55e', error: '#ef4444', warning: '#f59e0b' };
+            coachBox.style.borderLeftColor = colors[type] || '#94a3b8';
+        }
+
+        function showToast(message, type = 'info') {
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.textContent = message;
+            toastContainer.appendChild(toast);
+            setTimeout(() => {
+                if (toast.parentNode) toast.remove();
+            }, 3500);
+        }
+
+        function showTooltip(element, message, type = 'info') {
+            const existing = document.querySelector('.tooltip-bubble');
+            if (existing) existing.remove();
+
+            const rect = element.getBoundingClientRect();
+            const bubble = document.createElement('div');
+            bubble.className = `tooltip-bubble ${type}`;
+            bubble.textContent = message;
+            document.body.appendChild(bubble);
+
+            const bubbleRect = bubble.getBoundingClientRect();
+            let left = rect.left + rect.width / 2 - bubbleRect.width / 2;
+            let top = rect.top - bubbleRect.height - 10;
+            if (left < 10) left = 10;
+            if (left + bubbleRect.width > window.innerWidth - 10) left = window.innerWidth - bubbleRect.width - 10;
+            if (top < 10) {
+                top = rect.bottom + 10;
+            }
+            bubble.style.left = left + 'px';
+            bubble.style.top = top + 'px';
+
+            setTimeout(() => {
+                if (bubble.parentNode) bubble.remove();
+            }, 3500);
+        }
+
+        // ================================================================
+        //  邮件生成（与之前相同）
+        // ================================================================
+        function generateRound1UserEmail(foundErrors) {
+            const foundIds = foundErrors.map(e => e.id);
+            const allFound = foundIds.length === ERROR_POINTS.length;
+            const corrected = allFound ? '（已修正所有错误）' : '（部分错误已修正）';
+
+            let body = `尊敬的张女士，您好！
+
+        感谢您的来信。关于您反馈的货物数量差异及运费问题，我们高度重视。
+
+        目前我们正在全面核查系统数据、仓库监控及头程记录，预计今天内给出初步结果。后续我们会第一时间同步您。
+
+        感谢您的耐心等待。`;
+
+            return `主题：【回复】关于货物数量差异及运费的投诉处理 ${corrected}
+
+        ${body}
+
+        顺颂商祺！
+        客服部 李明
+        Tel: 010-8888-1234
+        Email: liming@company.com`;
+        }
+
+        function generateRound2UserEmail(attId, solId, timeId) {
+            const dims = ROUND2_TAGS.dimensions;
+            const att = dims[0].tags.find(t => t.id === attId);
+            const sol = dims[1].tags.find(t => t.id === solId);
+            const tim = dims[2].tags.find(t => t.id === timeId);
+            const attText = att ? att.text : '';
+            const solText = sol ? sol.text : '';
+            const timeText = tim ? tim.text : '';
+
+            let body = `尊敬的张女士，您好！
+
+        关于您再次追问的处理进度，我们正在全力推进。`;
+
+            if (attId === 'a1') body += ` 我们非常理解您的急迫心情，已将您的工单标记为最高优先级。`;
+            else if (attId === 'a2') body += ` 我们正按照标准流程推进，请您放心。`;
+            else if (attId === 'a3') body += ` 我们注意到您的多次追问，但核查需要时间，请您保持耐心。`;
+
+            if (solId === 's1') body += ` 数量核查和运费差异我们将同步处理，并承诺给您一个合理的赔偿方案。`;
+            else if (solId === 's2') body += ` 我们将先确认数量问题，运费部分后续再核算。`;
+            else if (solId === 's3') body += ` 为了确保准确，请您提供更多发货凭证以便我们对比。`;
+
+            if (timeId === 't1') body += ` 我们承诺明天上午9:00前给您明确的处理结果。`;
+            else if (timeId === 't2') body += ` 我们将在48小时内完成全部核查。`;
+            else if (timeId === 't3') body += ` 具体时间需要上级审批后确认，我们会尽快同步您。`;
+
+            body += `\n\n再次感谢您的耐心等待，我们定当全力以赴。`;
+
+            return `主题：【进度同步】关于您投诉的处理进展（${attText}）
+
+        ${body}
+
+        顺颂商祺！
+        客服部 李明
+        Tel: 010-8888-1234
+        Email: liming@company.com`;
+        }
+
+        function generateRound3UserEmail(attId, solId, timeId) {
+            const dims = ROUND3_TAGS.dimensions;
+            const att = dims[0].tags.find(t => t.id === attId);
+            const sol = dims[1].tags.find(t => t.id === solId);
+            const tim = dims[2].tags.find(t => t.id === timeId);
+            const attText = att ? att.text : '';
+            const solText = sol ? sol.text : '';
+            const timeText = tim ? tim.text : '';
+
+            let body = `尊敬的张女士，您好！
+
+        关于您提出的最后通牒，我们经过内部紧急沟通，现正式回复如下：`;
+
+            if (attId === 'a1') body += ` 我们已将此事升级至最高管理层，并承诺以最大诚意解决您的问题。`;
+            else if (attId === 'a2') body += ` 我们恳请您再给一些时间，我们正在全力协调资源。`;
+            else if (attId === 'a3') body += ` 我们尊重您的决定，同时也希望您理解我们坚持原则的立场。`;
+
+            if (solId === 's1') body += ` 我们特批了全额赔偿方案，并即时启动退款流程。`;
+            else if (solId === 's2') body += ` 我们愿意给予部分赔偿作为补偿，希望您能接受。`;
+            else if (solId === 's3') body += ` 经评估，我们维持原有处理方案，无法做出让步。`;
+
+            if (timeId === 't1') body += ` 今天内即可完成全部流程，确保您明天收到反馈。`;
+            else if (timeId === 't2') body += ` 我们承诺明天内全部处理完毕。`;
+            else if (timeId === 't3') body += ` 按合同约定，相关流程需3-5个工作日。`;
+
+            body += `\n\n期待您的理解与最终确认。`;
+
+            return `主题：【最终回复】关于您投诉的处理决定（${attText}）
+
+        ${body}
+
+        顺颂商祺！
+        客服部 李明
+        Tel: 010-8888-1234
+        Email: liming@company.com`;
+        }
+
+        // ================================================================
+        //  草稿渲染 & 交互
+        // ================================================================
+        function renderDraft() {
+            const foundIds = state.foundErrors.map(e => e.id);
+
+            const bodyLines = [
+                '关于您反馈的问题，我们首先核查了系统数据，发现系统中确实有该批次的入库记录。',
+                '然后我们联系了海外仓同事，他们回复说入库时没有发现明显异常。',
+                '接着我们又对比了您提供的发货单和我们系统的入库数据，发现两边存在差异。',
+                '我们也调取了仓库的监控录像，但因为时间较久，需要一些时间来查看。',
+                '关于您提到的运费问题，我们也正在向头程部门申请复核，还没有拿到结果。'
+            ];
+
+            let bodyHtml = bodyLines.map(line =>
+                `<div style="margin-bottom:4px;">${line}</div>`
+            ).join('');
+
+            const draftHTML = `
+                <div style="font-family: 'Courier New', monospace; font-size: 0.9rem; line-height: 1.8;">
+
+                    <div style="color:#64748b; font-size:0.8rem; margin-bottom:4px;">
+                        <span class="clickable-text" data-error-id="-1" style="display:inline-block;">
+                            收件人：张女士 &lt;zhang@email.com&gt;
+                        </span>
+                    </div>
+
+                    <div style="color:#64748b; font-size:0.8rem; margin-bottom:12px;">
+                        <span class="clickable-text ${foundIds.includes(0) ? 'found' : ''}" data-error-id="0" style="display:inline-block;">
+                            抄送：客服部全体 &lt;service-all@company.com&gt;
+                        </span>
+                    </div>
+
+                    <div style="font-weight:600; margin-bottom:8px;">
+                        <span class="clickable-text ${foundIds.includes(1) ? 'found' : ''}" data-error-id="1" style="display:inline-block;">
+                            主题：回复投诉
+                        </span>
+                    </div>
+
+                    <div style="margin-bottom:8px;">
+                        <span class="clickable-text ${foundIds.includes(2) ? 'found' : ''}" data-error-id="2" style="font-weight:600; display:inline-block;">
+                            张女士：
+                        </span>
+                    </div>
+
+                    <div style="margin-bottom:8px; padding-left:4px; border-left: 2px solid #e2e8f0;">
+                        <span class="clickable-text ${foundIds.includes(3) ? 'found' : ''}" data-error-id="3" style="display:block;">
+                            ${bodyHtml}
+                        </span>
+                    </div>
+
+                    <div style="margin-bottom:8px;">
+                        <span class="clickable-text ${foundIds.includes(4) ? 'found' : ''}" data-error-id="4" style="font-weight:600; display:inline-block;">
+                            现在的情况就是，我们还在处理中，请您再等等。我们会尽快给您答复。
+                        </span>
+                    </div>
+
+                    <div style="margin-top:12px; border-top:1px solid #e2e8f0; padding-top:8px;">
+                        <span class="clickable-text ${foundIds.includes(5) ? 'found' : ''}" data-error-id="5" style="display:inline-block;">
+                            客服部 李明
+                        </span>
+                    </div>
+
+                </div>
+            `;
+            draftContent.innerHTML = draftHTML;
+
+            draftContent.querySelectorAll('.clickable-text').forEach(el => {
+                el.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    handleDraftClick(this);
+                });
+            });
+
+            updateSendBtn();
+        }
+
+        function handleDraftClick(element) {
+            if (state.round1Done || state.gameOver || state.currentRound !== 0) {
+                showTooltip(element, '⛔ 此轮已结束，无法再修改', 'error');
+                return;
+            }
+
+            const errorId = parseInt(element.dataset.errorId, 10);
+
+            if (errorId === -1) {
+                showTooltip(element, '✅ 此处格式正确', 'success');
+                return;
+            }
+
+            const error = ERROR_POINTS.find(e => e.id === errorId);
+            if (!error) return;
+
+            const idx = state.foundErrors.findIndex(e => e.id === errorId);
+            if (idx >= 0) {
+                state.foundErrors.splice(idx, 1);
+                element.classList.remove('found');
+                showTooltip(element, `↩️ 已取消标记：${error.label}`, 'info');
+            } else {
+                state.foundErrors.push(error);
+                element.classList.add('found');
+                showTooltip(element, `❌ 错误：${error.description}\n✅ 正确写法：${error.correct}`, 'error');
+            }
+
+            updateSendBtn();
+        }
+
+        // ================================================================
+        //  标签渲染
+        // ================================================================
+        function renderTags(round) {
+            const tagsData = round === 1 ? ROUND2_TAGS : ROUND3_TAGS;
+            const selected = round === 1 ? state.selected2 : state.selected3;
+            const dimMap = { attitude: 0, solution: 1, time: 2 };
+
+            const shouldDisable = state.gameOver ||
+                (round === 1 && state.round2Done) ||
+                (round === 2 && state.round3Done) ||
+                !state.tagsEnabled ||
+                state.currentRound !== round ||
+                state.waitingForNextRound ||
+                state.isDoubtMail;
+
+            Object.keys(tagGroups).forEach(key => {
+                const group = tagGroups[key];
+                const dim = tagsData.dimensions[dimMap[key]];
+                if (!dim) return;
+                let html = '';
+                dim.tags.forEach(tag => {
+                    const active = selected[key] === tag.id ? 'active' : '';
+                    const disabled = shouldDisable ? 'disabled' : '';
+                    html += `<button class="tag-btn ${active}" 
+                                     data-dim="${key}" 
+                                     data-tag="${tag.id}" 
+                                     onclick="selectTag(${round}, '${key}','${tag.id}')" 
+                                     ${disabled}>${tag.text}</button>`;
+                });
+                group.innerHTML = html;
+            });
+            updateSendBtn();
+        }
+
+        window.selectTag = function(round, dimId, tagId) {
+            if (state.gameOver || state.waitingForNextRound || state.isDoubtMail) return;
+            if (round === 1 && state.round2Done) return;
+            if (round === 2 && state.round3Done) return;
+            if (state.currentRound !== round) return;
+
+            const selected = round === 1 ? state.selected2 : state.selected3;
+            if (selected[dimId] === tagId) {
+                selected[dimId] = null;
+            } else {
+                selected[dimId] = tagId;
+            }
+            renderTags(round);
+            updateSendBtn();
+            setCoach(`💡 选择完三组标签后，点击「发送回复」。`);
+        };
+
+        // ================================================================
+        //  发送按钮控制
+        // ================================================================
+        function updateSendBtn() {
+            const round = state.currentRound;
+            if (round === 0) {
+                const hasMarked = state.foundErrors.length > 0;
+                sendBtn.disabled = state.round1Done || state.gameOver || state.waitingForNextRound || !hasMarked;
+                sendBtn.textContent = state.round1Done ? '✅ 已发送' : '📤 发送回复';
+                return;
+            }
+
+            const selected = round === 1 ? state.selected2 : state.selected3;
+            const allSelected = selected.attitude && selected.solution && selected.time;
+            const done = round === 1 ? state.round2Done : state.round3Done;
+            sendBtn.disabled = !allSelected || done || state.gameOver || state.waitingForNextRound || !state.tagsEnabled ||
+                state.isDoubtMail;
+            sendBtn.textContent = done ? '✅ 已发送' : '📤 发送回复';
+        }
+
+        // ================================================================
+        //  下一轮（从质疑邮件）
+        // ================================================================
+        function goToNextRoundFromDoubt() {
+            if (state.gameOver) return;
+            nextRoundContainer.innerHTML = '';
+
+            const existing = state.inbox.find(m => m.round === 1 && m.subject === CLIENT_MAILS[1].subject);
+            if (!existing) {
+                const round2Mail = {
+                    id: generateId(),
+                    round: 1,
+                    from: '张女士（卖家）',
+                    subject: CLIENT_MAILS[1].subject,
+                    body: CLIENT_MAILS[1].body,
+                    date: formatDate(),
+                    read: false,
+                    isEnding: false,
+                    isDoubt: false,
+                    _justArrived: true
+                };
+                state.inbox.push(round2Mail);
+                state.hasNewMail = true;
+                updateUnreadBadge();
+                inboxTab.querySelector('.badge').classList.add('blink');
+                renderMailList();
+                showToast('📬 新邮件到达收件箱，请点击查看进入第 2 轮。', 'info');
+            } else {
+                existing.read = false;
+                existing._justArrived = true;
+                updateUnreadBadge();
+                inboxTab.querySelector('.badge').classList.add('blink');
+                renderMailList();
+                showToast('📬 新邮件到达收件箱，请点击查看进入第 2 轮。', 'info');
+            }
+            setCoach('📬 已发送新邮件到收件箱，请点击查看。', 'info');
+        }
+
+        // ================================================================
+        //  显示结局（由点击结局邮件触发）
+        // ================================================================
+        function displayEnding(type) {
+            if (state.gameOver) return;
+            state.gameOver = true;
+            state.tagsEnabled = false;
+            const ending = ENDINGS[type];
+            if (!ending) return;
+
+            gameOverMsg.classList.remove('hidden', 'success', 'fail', 'partial');
+            gameOverMsg.classList.add(ending.cls);
+            gameOverMsg.innerHTML = `<strong>${ending.title}</strong><br>${ending.message}`;
+
+            sendBtn.disabled = true;
+            setCoach(`🏁 游戏结束：${ending.title}`);
+            // 隐藏所有交互区
+            draftArea.classList.add('hidden');
+            comboArea.classList.add('hidden');
+            userReplyPreview.classList.add('hidden');
+            nextRoundContainer.innerHTML = '';
+            state.isDoubtMail = false;
+            renderTags(1);
+            renderTags(2);
+            updateSendBtn();
+        }
+
+        // ================================================================
+        //  发送回复（核心）
+        // ================================================================
+        window.sendReply = function() {
+            if (state.gameOver) return;
+
+            const round = state.currentRound;
+
+            if (round === 0) {
+                if (state.round1Done || state.waitingForNextRound) return;
+                const foundCount = state.foundErrors.length;
+                const totalErrors = ERROR_POINTS.length;
+                if (foundCount === 0) {
+                    showTooltip(sendBtn, '⚠️ 请至少标记一处错误再发送', 'warning');
+                    return;
+                }
+
+                state.waitingForNextRound = true;
+                state.round1Done = true;
+                sendBtn.disabled = true;
+
+                const userEmail = generateRound1UserEmail(state.foundErrors);
+                const outMail = {
+                    id: generateId(),
+                    round: 0,
+                    from: '客服部 李明',
+                    subject: userEmail.split('\n')[0].replace('主题：', ''),
+                    body: userEmail,
+                    date: formatDate()
+                };
+                state.outbox.push(outMail);
+                showUserReply(userEmail);
+
+                if (foundCount === totalErrors) {
+                    const round2Mail = {
+                        id: generateId(),
+                        round: 1,
+                        from: '张女士（卖家）',
+                        subject: CLIENT_MAILS[1].subject,
+                        body: CLIENT_MAILS[1].body,
+                        date: formatDate(),
+                        read: false,
+                        isEnding: false,
+                        isDoubt: false,
+                        _justArrived: true
+                    };
+                    state.inbox.push(round2Mail);
+                    state.hasNewMail = true;
+                    updateUnreadBadge();
+                    inboxTab.querySelector('.badge').classList.add('blink');
+
+                    draftArea.classList.add('hidden');
+                    comboArea.classList.add('hidden');
+                    setCoach('✅ 全部找对！新邮件已到达收件箱，请点击查看进入第 2 轮。', 'success');
+                    renderMailList();
+                    showToast('📬 新邮件到达收件箱，请点击查看进入第 2 轮。', 'success');
+                    state.waitingForNextRound = false;
+                    return;
+                } else {
+                    const doubtReply = {
+                        subject: '回复：我对贵公司的专业性表示怀疑',
+                        body: `我对贵公司的专业性表示怀疑。你们连邮件格式都写不规范，我很难相信你们能处理好我的货。\n\n请派一个更专业的同事来对接。`,
+                        moodDelta: -30
+                    };
+                    state.mood = Math.min(100, Math.max(0, state.mood + doubtReply.moodDelta));
+                    updateMoodDisplay();
+
+                    const inMail = {
+                        id: generateId(),
+                        round: 1,
+                        from: '张女士（卖家）',
+                        subject: doubtReply.subject,
+                        body: doubtReply.body,
+                        date: formatDate(),
+                        read: false,
+                        isEnding: false,
+                        isDoubt: true,
+                        _justArrived: true
+                    };
+                    state.inbox.push(inMail);
+                    state.hasNewMail = true;
+                    updateUnreadBadge();
+                    inboxTab.querySelector('.badge').classList.add('blink');
+
+                    draftArea.classList.add('hidden');
+                    nextRoundContainer.innerHTML = '';
+
+                    state.currentMailId = inMail.id;
+                    displayMail(inMail);
+                    // 手动触发 selectMail 以显示按钮
+                    selectMail(inMail.id);
+
+                    setCoach('📨 客户质疑专业性，请点击查看。', 'error');
+                    showToast('⚠️ 漏了错误，客户质疑专业性。', 'error');
+                    state.waitingForNextRound = false;
+                    return;
+                }
+            }
+
+            // ----- 第 2 轮：标签组合 -----
+            if (round === 1) {
+                if (state.round2Done || state.waitingForNextRound || state.isDoubtMail) return;
+                const { attitude, solution, time } = state.selected2;
+                if (!attitude || !solution || !time) {
+                    showToast('请从三组中各选一个标签。', 'warning');
+                    return;
+                }
+
+                state.waitingForNextRound = true;
+                state.round2Done = true;
+                state.tagsEnabled = false;
+                sendBtn.disabled = true;
+
+                const dims = ROUND2_TAGS.dimensions;
+                const att = dims[0].tags.find(t => t.id === attitude);
+                const sol = dims[1].tags.find(t => t.id === solution);
+                const tim = dims[2].tags.find(t => t.id === time);
+                const score = (att ? att.score : 0) + (sol ? sol.score : 0) + (tim ? tim.score : 0);
+
+                const userEmail = generateRound2UserEmail(attitude, solution, time);
+                const outMail = {
+                    id: generateId(),
+                    round: 1,
+                    from: '客服部 李明',
+                    subject: userEmail.split('\n')[0].replace('主题：', ''),
+                    body: userEmail,
+                    date: formatDate()
+                };
+                state.outbox.push(outMail);
+                showUserReply(userEmail);
+
+                let reply, moodDelta;
+                if (score >= 6) {
+                    reply = { subject: '回复：期待你们的承诺',
+                    body: `看到您承诺同步处理数量和运费，并且明天前给结果，我稍微安心了一些。\n\n希望您说到做到。如果真能妥善解决，我会继续和你们合作。` };
+                    moodDelta = 20;
+                } else if (score >= 3) {
+                    reply = { subject: '回复：仍然不够快',
+                    body: `您提出的方案还是太慢了，而且运费的问题依然没有明确。我已经等了太久。\n\n明天9点前如果还没有实质性进展，我会采取进一步行动。` };
+                    moodDelta = 5;
+                } else {
+                    reply = { subject: '回复：你们在故意拖延',
+                    body: `我已经彻底失去耐心了！你们不仅不解决问题，还反过来质疑我？\n\n我决定不再等你们了。我会马上联系其他服务商，你们等着收投诉信吧。` };
+                    moodDelta = -15;
+                }
+
+                state.mood = Math.min(100, Math.max(0, state.mood + moodDelta));
+                updateMoodDisplay();
+
+                const inMail = {
+                    id: generateId(),
+                    round: 2,
+                    from: '张女士（卖家）',
+                    subject: reply.subject,
+                    body: reply.body,
+                    date: formatDate(),
+                    read: false,
+                    isEnding: false,
+                    isDoubt: false,
+                    _justArrived: true
+                };
+                state.inbox.push(inMail);
+                state.hasNewMail = true;
+                updateUnreadBadge();
+                inboxTab.querySelector('.badge').classList.add('blink');
+
+                comboArea.classList.add('hidden');
+                setCoach(`📨 已发送！新邮件已到达收件箱，请点击查看进入第 3 轮。`, 'info');
+                showToast('✅ 回复已发送！新邮件已到收件箱。', 'success');
+                renderMailList();
+                state.waitingForNextRound = false;
+
+                if (state.mood <= 0) {
+                    const endType = 'fail';
+                    const endMailContent = getEndingMail(endType);
+                    const endMail = {
+                        id: generateId(),
+                        round: 99,
+                        from: '张女士（卖家）',
+                        subject: endMailContent.subject,
+                        body: endMailContent.body,
+                        date: formatDate(),
+                        read: false,
+                        isEnding: true,
+                        _justArrived: true,
+                        endingType: endType
+                    };
+                    state.inbox.push(endMail);
+                    state.hasNewMail = true;
+                    updateUnreadBadge();
+                    inboxTab.querySelector('.badge').classList.add('blink');
+                    renderMailList();
+                    showToast('📬 客户最终邮件已到达，请点击查看结局。', 'info');
+                    return;
+                }
+                if (state.mood >= 100) {
+                    const endType = 'success';
+                    const endMailContent = getEndingMail(endType);
+                    const endMail = {
+                        id: generateId(),
+                        round: 99,
+                        from: '张女士（卖家）',
+                        subject: endMailContent.subject,
+                        body: endMailContent.body,
+                        date: formatDate(),
+                        read: false,
+                        isEnding: true,
+                        _justArrived: true,
+                        endingType: endType
+                    };
+                    state.inbox.push(endMail);
+                    state.hasNewMail = true;
+                    updateUnreadBadge();
+                    inboxTab.querySelector('.badge').classList.add('blink');
+                    renderMailList();
+                    showToast('📬 客户最终邮件已到达，请点击查看结局。', 'info');
+                    return;
+                }
+                return;
+            }
+
+            // ----- 第 3 轮：最终决策 -----
+            if (round === 2) {
+                if (state.round3Done || state.waitingForNextRound || state.isDoubtMail) return;
+                const { attitude, solution, time } = state.selected3;
+                if (!attitude || !solution || !time) {
+                    showToast('请从三组中各选一个标签。', 'warning');
+                    return;
+                }
+
+                state.waitingForNextRound = true;
+                state.round3Done = true;
+                state.tagsEnabled = false;
+                sendBtn.disabled = true;
+
+                const dims = ROUND3_TAGS.dimensions;
+                const att = dims[0].tags.find(t => t.id === attitude);
+                const sol = dims[1].tags.find(t => t.id === solution);
+                const tim = dims[2].tags.find(t => t.id === time);
+                const score = (att ? att.score : 0) + (sol ? sol.score : 0) + (tim ? tim.score : 0);
+
+                const userEmail = generateRound3UserEmail(attitude, solution, time);
+                const outMail = {
+                    id: generateId(),
+                    round: 2,
+                    from: '客服部 李明',
+                    subject: userEmail.split('\n')[0].replace('主题：', ''),
+                    body: userEmail,
+                    date: formatDate()
+                };
+                state.outbox.push(outMail);
+                showUserReply(userEmail);
+
+                let type;
+                if (score >= 6) type = 'success';
+                else if (score >= 3) type = 'partial';
+                else type = 'fail';
+
+                const moodMap = { success: 100, partial: 60, fail: 20 };
+                state.mood = moodMap[type];
+                updateMoodDisplay();
+
+                // 推送结局邮件
+                const endMailContent = getEndingMail(type);
+                const endMail = {
+                    id: generateId(),
+                    round: 99,
+                    from: '张女士（卖家）',
+                    subject: endMailContent.subject,
+                    body: endMailContent.body,
+                    date: formatDate(),
+                    read: false,
+                    isEnding: true,
+                    _justArrived: true,
+                    endingType: type
+                };
+                state.inbox.push(endMail);
+                state.hasNewMail = true;
+                updateUnreadBadge();
+                inboxTab.querySelector('.badge').classList.add('blink');
+
+                // 隐藏交互区
+                comboArea.classList.add('hidden');
+                userReplyPreview.classList.add('hidden');
+                setCoach(`📨 已发送最终回复，等待客户最终反馈…`, 'info');
+                showToast('📬 客户最终邮件已到达，请点击查看结局。', 'info');
+                renderMailList();
+                state.waitingForNextRound = false;
+                return;
+            }
+        };
+
+        // ================================================================
+        //  邮件列表 & 显示（关键修复：保留 _justArrived 直到点击）
+        // ================================================================
+        function renderMailList() {
+            const isInbox = state.currentView === 'inbox';
+            const mails = isInbox ? state.inbox : state.outbox;
+            if (mails.length === 0) {
+                mailList.innerHTML = `<div class="empty-msg">📭 ${isInbox ? '收件箱为空' : '暂无已发送邮件'}</div>`;
+                return;
+            }
+            let html = '';
+            const sorted = [...mails].reverse();
+            sorted.forEach(mail => {
+                const active = state.currentMailId === mail.id ? 'active' : '';
+                const isUnread = isInbox && !mail.read && !mail.isEnding;
+                const dot = isUnread ? '<span class="unread-dot"></span>' : '';
+                const fromDisplay = mail.from || '张女士';
+
+                let statusLabel = '';
+                if (isInbox && !mail.isEnding) {
+                    if (isUnread) {
+                        statusLabel = '<span class="status-label unread">未读</span>';
+                    } else {
+                        statusLabel = '<span class="status-label read">已读</span>';
+                    }
+                }
+
+                const unreadBadgeHtml = isUnread ? '<span class="badge-new blink">● 未读</span>' : '';
+                const newClass = (mail._justArrived && isUnread) ? 'new-mail' : '';
+
+                html += `
+                    <div class="mail-item ${active} ${newClass}" data-id="${mail.id}" onclick="selectMail('${mail.id}')">
+                        <div class="item-top">${dot}<span class="subject">${mail.subject}</span></div>
+                        <div class="item-bottom">
+                            <span class="from">${fromDisplay}</span>
+                            <span style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+                                <span class="date">${mail.date || ''}</span>
+                                ${unreadBadgeHtml}
+                                ${statusLabel}
+                            </span>
+                        </div>
+                    </div>
+                `;
+                // ★ 关键修复：不再在这里清除 _justArrived，保留到点击时清除
+            });
+            mailList.innerHTML = html;
+        }
+
+        window.selectMail = function(mailId) {
+            const mail = findMail(mailId);
+            if (!mail) return;
+
+            if (state.currentView === 'outbox') {
+                displayMail(mail);
+                return;
+            }
+
+            displayMail(mail);
+
+            if (!mail.read) {
+                mail.read = true;
+                mail._justArrived = false; // 点击后清除闪烁标记
+                updateUnreadBadge();
+                renderMailList();
+            }
+
+            // === 处理结局邮件 ===
+            if (mail.isEnding && mail.endingType) {
+                // 显示结局
+                draftArea.classList.add('hidden');
+                comboArea.classList.add('hidden');
+                userReplyPreview.classList.add('hidden');
+                nextRoundContainer.innerHTML = '';
+                state.tagsEnabled = false;
+                state.isDoubtMail = false;
+                displayEnding(mail.endingType);
+                return;
+            }
+
+            // 如果是质疑邮件
+            if (mail.isDoubt) {
+                draftArea.classList.add('hidden');
+                comboArea.classList.add('hidden');
+                userReplyPreview.classList.add('hidden');
+                state.tagsEnabled = false;
+                state.isDoubtMail = true;
+                if (state.round1Done && state.currentRound === 0 && !nextRoundContainer.querySelector('.btn-next')) {
+                    nextRoundContainer.innerHTML =
+                        `<button class="btn-next" onclick="goToNextRoundFromDoubt()">➡️ 下一轮</button>`;
+                }
+                updateSendBtn();
+                setCoach(`📖 客户质疑专业性，请点击“下一轮”继续。`, 'error');
+                return;
+            }
+
+            // 非质疑、非结局邮件
+            nextRoundContainer.innerHTML = '';
+            state.isDoubtMail = false;
+
+            const isClientMail = mail.from && mail.from.includes('张女士');
+
+            if (isClientMail && !state.gameOver) {
+                if (mail.round === state.currentRound) {
+                    if (state.currentRound === 0 && !state.round1Done) {
+                        draftArea.classList.remove('hidden');
+                        comboArea.classList.add('hidden');
+                        userReplyPreview.classList.add('hidden');
+                        renderDraft();
+                        state.tagsEnabled = true;
+                        setCoach(`📝 第 1 轮：点击草稿中的文字标记错误或检查格式。`);
+                        updateSendBtn();
+                    } else if (state.currentRound === 1 && !state.round2Done) {
+                        draftArea.classList.add('hidden');
+                        comboArea.classList.remove('hidden');
+                        userReplyPreview.classList.add('hidden');
+                        state.tagsEnabled = true;
+                        setCoach(`📝 第 2 轮：从三组中各选一个标签，组合成回复邮件。`);
+                        renderTags(1);
+                        updateSendBtn();
+                    } else if (state.currentRound === 2 && !state.round3Done) {
+                        draftArea.classList.add('hidden');
+                        comboArea.classList.remove('hidden');
+                        userReplyPreview.classList.add('hidden');
+                        state.tagsEnabled = true;
+                        setCoach(`📝 第 3 轮：从三组中各选一个标签，组合成回复邮件。`);
+                        renderTags(2);
+                        updateSendBtn();
+                    } else {
+                        draftArea.classList.add('hidden');
+                        comboArea.classList.add('hidden');
+                        state.tagsEnabled = false;
+                        updateSendBtn();
+                        setCoach(`📖 查看已完成的邮件。`);
+                    }
+                } else if (mail.round > state.currentRound) {
+                    let canAdvance = false;
+                    if (mail.round === 1 && state.round1Done === true) {
+                        canAdvance = true;
+                    } else if (mail.round === 2 && state.round2Done === true) {
+                        canAdvance = true;
+                    }
+
+                    if (canAdvance) {
+                        state.currentRound = mail.round;
+                        updateRoundBadge();
+                        if (state.currentRound === 1 && !state.round2Done) {
+                            draftArea.classList.add('hidden');
+                            comboArea.classList.remove('hidden');
+                            userReplyPreview.classList.add('hidden');
+                            state.tagsEnabled = true;
+                            setCoach(`📝 第 2 轮：从三组中各选一个标签，组合成回复邮件。`);
+                            renderTags(1);
+                            updateSendBtn();
+                            showToast('📬 进入第 2 轮！', 'info');
+                        } else if (state.currentRound === 2 && !state.round3Done) {
+                            draftArea.classList.add('hidden');
+                            comboArea.classList.remove('hidden');
+                            userReplyPreview.classList.add('hidden');
+                            state.tagsEnabled = true;
+                            setCoach(`📝 第 3 轮：从三组中各选一个标签，组合成回复邮件。`);
+                            renderTags(2);
+                            updateSendBtn();
+                            showToast('📬 进入第 3 轮！', 'info');
+                        } else {
+                            draftArea.classList.add('hidden');
+                            comboArea.classList.add('hidden');
+                            state.tagsEnabled = false;
+                            updateSendBtn();
+                            setCoach(`📖 查看已完成的邮件。`);
+                        }
+                    } else {
+                        draftArea.classList.add('hidden');
+                        comboArea.classList.add('hidden');
+                        state.tagsEnabled = false;
+                        updateSendBtn();
+                        setCoach(`📖 请先完成当前轮次。`, 'warning');
+                    }
+                } else {
+                    draftArea.classList.add('hidden');
+                    comboArea.classList.add('hidden');
+                    state.tagsEnabled = false;
+                    updateSendBtn();
+                    setCoach(`📖 查看历史邮件。`);
+                }
+            } else {
+                draftArea.classList.add('hidden');
+                comboArea.classList.add('hidden');
+                state.tagsEnabled = false;
+                updateSendBtn();
+                if (!state.gameOver) {
+                    setCoach(`📖 查看已发送的邮件。`);
+                }
+            }
+        };
+
+        function displayMail(mail) {
+            if (!mail) return;
+            state.currentMailId = mail.id;
+            emailFrom.textContent = `发件人：${mail.from || '未知'}`;
+            emailDate.textContent = mail.date || '';
+            emailSubject.textContent = `主题：${mail.subject}`;
+            emailBody.textContent = mail.body || '（无内容）';
+            renderMailList();
+        }
+
+        function showUserReply(text) {
+            userReplyPreview.classList.remove('hidden');
+            userReplyText.textContent = text;
+        }
+
+        function hideUserReply() {
+            userReplyPreview.classList.add('hidden');
+            userReplyText.textContent = '';
+        }
+
+        // ================================================================
+        //  文件夹切换
+        // ================================================================
+        inboxTab.addEventListener('click', function() {
+            state.currentView = 'inbox';
+            this.classList.add('active');
+            outboxTab.classList.remove('active');
+
+            const unread = state.inbox.filter(m => !m.read && !m.isEnding);
+            if (unread.length > 0) {
+                const latest = unread[unread.length - 1];
+                state.currentMailId = latest.id;
+                displayMail(latest);
+                selectMail(latest.id);
+            } else if (state.inbox.length > 0) {
+                const latest = state.inbox[state.inbox.length - 1];
+                state.currentMailId = latest.id;
+                displayMail(latest);
+                if (latest.round === state.currentRound && !state.gameOver) {
+                    selectMail(latest.id);
+                }
+            } else {
+                emailFrom.textContent = '发件人：—';
+                emailDate.textContent = '—';
+                emailSubject.textContent = '收件箱为空';
+                emailBody.textContent = '暂无邮件。';
+            }
+
+            draftArea.classList.add('hidden');
+            comboArea.classList.add('hidden');
+            hideUserReply();
+            renderMailList();
+            updateUnreadBadge();
+            const unreadCount = state.inbox.filter(m => !m.read && !m.isEnding).length;
+            if (unreadCount === 0) {
+                inboxTab.querySelector('.badge').classList.remove('blink');
+            }
+        });
+
+        outboxTab.addEventListener('click', function() {
+            state.currentView = 'outbox';
+            this.classList.add('active');
+            inboxTab.classList.remove('active');
+            if (state.outbox.length > 0) {
+                const latest = state.outbox[state.outbox.length - 1];
+                state.currentMailId = latest.id;
+                displayMail(latest);
+            } else {
+                emailFrom.textContent = '发件人：—';
+                emailDate.textContent = '—';
+                emailSubject.textContent = '发件箱为空';
+                emailBody.textContent = '暂无已发送的邮件。';
+            }
+            draftArea.classList.add('hidden');
+            comboArea.classList.add('hidden');
+            hideUserReply();
+            state.tagsEnabled = false;
+            state.isDoubtMail = false;
+            nextRoundContainer.innerHTML = '';
+            updateSendBtn();
+            renderMailList();
+        });
+
+        // ================================================================
+        //  重置
+        // ================================================================
+        function resetGame() {
+            state = {
+                currentRound: 0,
+                mood: 65,
+                foundErrors: [],
+                round1Done: false,
+                selected2: { attitude: null, solution: null, time: null },
+                round2Done: false,
+                selected3: { attitude: null, solution: null, time: null },
+                round3Done: false,
+                inbox: [],
+                outbox: [],
+                currentView: 'inbox',
+                currentMailId: null,
+                gameOver: false,
+                tagsEnabled: false,
+                waitingForNextRound: false,
+                isDoubtMail: false,
+                nextRoundPending: false,
+                pendingEndingType: null,
+            };
+
+            const firstMail = {
+                id: generateId(),
+                round: 0,
+                from: '张女士（卖家）',
+                subject: CLIENT_MAILS[0].subject,
+                body: CLIENT_MAILS[0].body,
+                date: '今天 09:32',
+                read: false,
+                isEnding: false,
+                isDoubt: false,
+                _justArrived: false
+            };
+            state.inbox.push(firstMail);
+
+            updateMoodDisplay();
+            updateRoundBadge();
+            hideUserReply();
+            gameOverMsg.classList.add('hidden');
+            gameOverMsg.innerHTML = '';
+            nextRoundContainer.innerHTML = '';
+
+            inboxTab.classList.add('active');
+            outboxTab.classList.remove('active');
+            state.currentView = 'inbox';
+
+            firstMail.read = true;
+            state.currentMailId = firstMail.id;
+            displayMail(firstMail);
+            updateUnreadBadge();
+
+            draftArea.classList.remove('hidden');
+            comboArea.classList.add('hidden');
+            state.tagsEnabled = true;
+            renderDraft();
+            renderMailList();
+            setCoach(`📝 第 1 轮：点击草稿中的文字标记错误或检查格式。`);
+            sendBtn.disabled = true;
+            sendBtn.textContent = '📤 发送回复';
+            sendBtn.onclick = sendReply;
+
+            renderTags(1);
+            renderTags(2);
+
+            showToast('🔄 已重置，开始新一局！', 'info');
+        }
+
+        // ================================================================
+        //  初始化
+        // ================================================================
+        sendBtn.addEventListener('click', sendReply);
+        document.getElementById('resetBtn').addEventListener('click', resetGame);
+        resetGame();
+
+        console.log('📧 邮件谈判专家已启动！最终修复：结局邮件显示未读标签和闪烁。');
+    </script>
+</body>
+</html>

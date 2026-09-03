@@ -1,0 +1,3514 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="canvas:width" content="1440">
+<meta name="canvas:height" content="900">
+<title>出口易新人培训平台 · 财务报销与合同审批 · 基础知识</title>
+<style>
+  :root{
+    /* 种子 token —— 外观与质感都从这里派生 */
+    --seed-bg:#F5F3F7;
+    --seed-fg:#1F2126;
+    --seed-primary:#2E6BE6;
+    --seed-accent:#DE3E44;
+    --seed-surface:#FFFFFF;
+    --seed-radius:14px;
+    --seed-spacing:1;
+
+    --bg:var(--seed-bg);
+    --fg:var(--seed-fg);
+    --surface:var(--seed-surface);
+    --primary:var(--seed-primary);
+    --accent:var(--seed-accent);
+    --muted:color-mix(in srgb, var(--fg) 58%, transparent);
+    --faint:color-mix(in srgb, var(--fg) 38%, transparent);
+    --border:color-mix(in srgb, var(--fg) 10%, transparent);
+    --hover:color-mix(in srgb, var(--fg) 5%, transparent);
+    --panel:color-mix(in srgb, var(--fg) 4%, transparent);
+    --shadow:0 1px 2px color-mix(in srgb, var(--fg) 5%, transparent),
+             0 10px 30px color-mix(in srgb, var(--fg) 6%, transparent);
+    --radius:var(--seed-radius);
+    --space:calc(1rem * var(--seed-spacing));
+    --on-color:#FFFFFF;    /* 深色底上的前景色 */
+    --ink-black:#22262E;   /* 手机边框深色 */
+
+    --font-body:"PingFang SC","Microsoft YaHei","Source Han Sans SC","Noto Sans SC","Segoe UI",system-ui,sans-serif;
+
+    /* 品牌标识色 */
+    --brand-green:#A8D934;
+    --brand-olive:#5F7F1D;
+    /* 思维导图节点色（内容色） */
+    --m-root:#2E4FC0;
+    --m-branch:#2FA5BC;
+    /* 财务部小组色（内容色） */
+    --g1:#3B5FCC;
+    --g2:#5B8BD4;
+    --g3:#6BAED6;
+    --g4:#4FB3C4;
+    /* 头像配色（内容色：底色/主体色） */
+    --av-a-bg:#E3ECFB; --av-a-fg:#3B5FCC;
+    --av-b-bg:#FBEBE0; --av-b-fg:#C96F4A;
+    --av-c-bg:#E7F1F3; --av-c-fg:#2FA5BC;
+    --av-d-bg:#EDF3E4; --av-d-fg:#5F8F3E;
+    /* 地区图标色（内容色，不随主题变化） */
+    --c-gz:#8F5BEB;
+    --c-sh:#3E8BFF;
+    --c-sz:#1FA9C9;
+    --c-hk:#EF9553;
+    --c-ow:#8A8F98;
+  }
+
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html{-webkit-font-smoothing:antialiased;}
+  body{
+    font-family:var(--font-body);
+    background:var(--bg);
+    color:var(--fg);
+    font-size:15.5px;
+    line-height:1.6;
+    font-feature-settings:"kern";
+    min-height:100vh;
+    display:flex;
+    flex-direction:column;
+  }
+
+  /* ============ 顶部导航 ============ */
+  .topbar{
+    background:var(--surface);
+    border-bottom:1px solid var(--border);
+    position:sticky;
+    top:0;
+    z-index:20;
+  }
+  .topbar-inner{
+    max-width:1280px;
+    margin:0 auto;
+    padding:0 calc(var(--space)*1.5);
+    height:64px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:calc(var(--space)*2);
+  }
+  .brand{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    text-decoration:none;
+    color:var(--fg);
+    flex-shrink:0;
+  }
+  .brand-mark{
+    width:36px;height:36px;
+    border-radius:10px;
+    display:block;
+  }
+  .brand-text{display:flex;flex-direction:column;line-height:1.25;}
+  .brand-text strong{font-size:15px;font-weight:600;letter-spacing:0.01em;}
+  .brand-text small{
+    font-size:11px;
+    color:var(--faint);
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+  }
+  .menu{
+    display:flex;
+    align-items:center;
+    gap:calc(var(--space)*0.5);
+    overflow-x:auto;
+    scrollbar-width:none;
+  }
+  .menu::-webkit-scrollbar{display:none;}
+  .menu-item{
+    position:relative;
+    white-space:nowrap;
+    padding:8px 14px;
+    border-radius:9px;
+    font-size:14px;
+    letter-spacing:0.02em;
+    text-decoration:none;
+    transition:background .15s ease, color .15s ease;
+  }
+  .menu-item.is-active{
+    color:var(--primary);
+    font-weight:600;
+  }
+  .menu-item.is-active::after{
+    content:"";
+    position:absolute;
+    left:14px;right:14px;bottom:-1px;
+    height:2.5px;
+    border-radius:2px;
+    background:var(--primary);
+  }
+  .menu-item.is-disabled{
+    color:var(--faint);
+    cursor:not-allowed;
+    user-select:none;
+  }
+  .menu-item.is-disabled:hover{
+    background:var(--hover);
+  }
+  .menu-item.is-disabled::before{
+    content:attr(data-tip);
+    position:absolute;
+    top:calc(100% + 8px);
+    left:50%;
+    transform:translateX(-50%) translateY(-2px);
+    background:var(--fg);
+    color:var(--surface);
+    font-size:12px;
+    letter-spacing:0.05em;
+    padding:4px 10px;
+    border-radius:6px;
+    opacity:0;
+    pointer-events:none;
+    transition:opacity .15s ease, transform .15s ease;
+    z-index:30;
+  }
+  .menu-item.is-disabled:hover::before{
+    opacity:1;
+    transform:translateX(-50%) translateY(0);
+  }
+
+  /* ============ 页面主体 ============ */
+  .page{
+    flex:1;
+    width:100%;
+    max-width:1280px;
+    margin:0 auto;
+    padding:calc(var(--space)*2.25) calc(var(--space)*1.5) calc(var(--space)*3);
+  }
+  .crumbs{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    font-size:13px;
+    color:var(--faint);
+    letter-spacing:0.01em;
+    margin-bottom:calc(var(--space)*1.5);
+  }
+  .crumbs .cur{color:var(--muted);font-weight:500;}
+
+  .grid{
+    display:grid;
+    grid-template-columns:minmax(0,5fr) minmax(0,6fr);
+    gap:calc(var(--space)*2.5);
+    align-items:start;
+  }
+
+  /* ---- 左栏：导语 ---- */
+  .intro{padding-top:calc(var(--space)*0.5);}
+  .module-mark{
+    width:52px;height:52px;
+    border-radius:14px;
+    display:block;
+    margin-bottom:calc(var(--space)*1.25);
+    box-shadow:var(--shadow);
+  }
+  .eyebrow{
+    font-size:13px;
+    color:var(--primary);
+    letter-spacing:0.08em;
+    font-weight:500;
+    margin-bottom:14px;
+  }
+  .intro h1{
+    font-size:34px;
+    line-height:1.25;
+    font-weight:600;
+    letter-spacing:-0.01em;
+    margin-bottom:16px;
+    max-width:22ch;
+  }
+  .lead{
+    color:var(--muted);
+    max-width:60ch;
+    margin-bottom:calc(var(--space)*1.25);
+  }
+  .module-note{
+    font-size:14px;
+    color:var(--muted);
+    background:color-mix(in srgb, var(--surface) 65%, transparent);
+    border:1px solid var(--border);
+    border-radius:10px;
+    padding:12px 16px;
+    max-width:56ch;
+    margin-bottom:calc(var(--space)*1.25);
+  }
+  .module-note b{color:var(--fg);font-weight:600;}
+
+  .callout{
+    position:relative;
+    background:var(--surface);
+    border-radius:var(--radius);
+    box-shadow:var(--shadow);
+    padding:18px 22px 18px 26px;
+    max-width:56ch;
+  }
+  .callout::before{
+    content:"";
+    position:absolute;
+    left:10px;top:14px;bottom:14px;
+    width:3.5px;
+    border-radius:2px;
+    background:var(--accent);
+  }
+  .callout-tag{
+    display:inline-block;
+    color:var(--accent);
+    font-size:13px;
+    font-weight:600;
+    letter-spacing:0.1em;
+    margin-bottom:4px;
+  }
+  .callout p{font-size:15px;line-height:1.7;}
+  .callout u{
+    text-decoration-color:var(--accent);
+    text-decoration-thickness:2px;
+    text-underline-offset:3px;
+    font-weight:500;
+  }
+
+  /* ---- 右栏：实体卡片 ---- */
+  .card{
+    background:var(--surface);
+    border-radius:var(--radius);
+    box-shadow:var(--shadow);
+    padding:calc(var(--space)*1.5);
+  }
+  .card-head{
+    display:flex;
+    align-items:flex-start;
+    justify-content:space-between;
+    gap:16px;
+    margin-bottom:calc(var(--space)*1.25);
+  }
+  .card-head h2{
+    font-size:19px;
+    font-weight:600;
+    letter-spacing:-0.01em;
+    margin-bottom:4px;
+  }
+  .card-head .sub{
+    font-size:13px;
+    color:var(--faint);
+    letter-spacing:0.01em;
+  }
+  .badge{
+    flex-shrink:0;
+    font-size:12.5px;
+    font-weight:500;
+    letter-spacing:0.02em;
+    color:var(--primary);
+    background:color-mix(in srgb, var(--primary) 10%, transparent);
+    padding:5px 14px;
+    border-radius:999px;
+  }
+
+  .acc-item + .acc-item{margin-top:10px;}
+  .acc-trigger{
+    width:100%;
+    display:flex;
+    align-items:center;
+    gap:14px;
+    padding:12px 14px;
+    background:var(--panel);
+    border:none;
+    border-radius:12px;
+    cursor:pointer;
+    font-family:inherit;
+    color:inherit;
+    text-align:left;
+    transition:background .15s ease;
+  }
+  .acc-trigger:hover{background:var(--hover);}
+  .acc-icon{
+    width:42px;height:42px;
+    border-radius:11px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:18px;
+    font-weight:600;
+    flex-shrink:0;
+  }
+  .acc-icon.gz{background:color-mix(in srgb, var(--c-gz) 14%, transparent);color:var(--c-gz);}
+  .acc-icon.sh{background:color-mix(in srgb, var(--c-sh) 14%, transparent);color:var(--c-sh);}
+  .acc-icon.sz{background:color-mix(in srgb, var(--c-sz) 14%, transparent);color:var(--c-sz);}
+  .acc-icon.hk{background:color-mix(in srgb, var(--c-hk) 16%, transparent);color:var(--c-hk);}
+  .acc-icon.ow{background:color-mix(in srgb, var(--c-ow) 16%, transparent);color:var(--c-ow);}
+  .acc-name{
+    font-size:15.5px;
+    font-weight:600;
+    letter-spacing:0.01em;
+    margin-bottom:2px;
+  }
+  .acc-meta{font-size:13px;color:var(--faint);letter-spacing:0.01em;}
+  .chevron{
+    margin-left:auto;
+    flex-shrink:0;
+    color:var(--faint);
+    transition:transform .2s ease;
+  }
+  .acc-item.open .chevron{transform:rotate(180deg);}
+
+  .acc-panel{
+    display:none;
+    padding:6px 14px 4px;
+  }
+  .acc-item.open .acc-panel{display:block;}
+  .acc-panel-inner{
+    background:var(--panel);
+    border-radius:12px;
+    padding:14px 16px;
+    margin-top:8px;
+  }
+  .region-codes{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+    margin-bottom:10px;
+  }
+  .code-chip{
+    font-size:12.5px;
+    font-weight:600;
+    letter-spacing:0.06em;
+    font-family:"SF Mono",Consolas,"Courier New",monospace;
+    padding:3px 10px;
+    border-radius:7px;
+    background:var(--surface);
+    border:1px solid var(--border);
+    color:var(--muted);
+  }
+  .code-chip.more{border-style:dashed;font-weight:400;color:var(--faint);}
+  .acc-note{
+    font-size:13px;
+    color:var(--faint);
+    line-height:1.6;
+    letter-spacing:0.01em;
+  }
+  .acc-note b{color:var(--muted);font-weight:500;}
+  .entity-count{
+    font-size:13px;
+    color:var(--muted);
+    line-height:1.6;
+    margin-bottom:8px;
+  }
+  .entity-count strong{color:var(--fg);font-weight:600;}
+
+  /* ============ 分页视图与翻页 ============ */
+  .view{display:none;}
+  .view.active{display:block;}
+
+  .lesson-head{margin-bottom:calc(var(--space)*2);}
+  .lesson-head h1{
+    font-size:32px;
+    line-height:1.3;
+    font-weight:600;
+    letter-spacing:-0.01em;
+    margin-bottom:14px;
+    max-width:30ch;
+  }
+
+  .page-actions{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    margin-top:calc(var(--space)*2.5);
+    padding-top:calc(var(--space)*1.5);
+    border-top:1px solid var(--border);
+  }
+  .page-indicator{
+    font-size:13px;
+    color:var(--faint);
+    letter-spacing:0.04em;
+  }
+  .page-actions-btns{display:flex;align-items:center;gap:12px;}
+  .btn{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    font-family:inherit;
+    font-size:14.5px;
+    font-weight:500;
+    letter-spacing:0.02em;
+    padding:10px 22px;
+    border-radius:10px;
+    border:1px solid transparent;
+    cursor:pointer;
+    transition:background .15s ease, transform .1s ease;
+  }
+  .btn:active{transform:translateY(1px);}
+  .btn-primary{background:var(--primary);color:var(--on-color);}
+  .btn-primary:hover{background:color-mix(in srgb, var(--primary) 86%, var(--fg));}
+  .btn-ghost{
+    background:transparent;
+    color:var(--muted);
+    border-color:var(--border);
+  }
+  .btn-ghost:hover{background:var(--hover);}
+  .btn.is-disabled{
+    background:var(--panel);
+    color:var(--faint);
+    cursor:not-allowed;
+    position:relative;
+  }
+  .btn.is-disabled:hover{background:var(--panel);}
+  .btn.is-disabled::before{
+    content:attr(data-tip);
+    position:absolute;
+    top:calc(100% + 8px);
+    left:50%;
+    transform:translateX(-50%) translateY(-2px);
+    background:var(--fg);
+    color:var(--surface);
+    font-size:12px;
+    letter-spacing:0.05em;
+    padding:4px 10px;
+    border-radius:6px;
+    opacity:0;
+    pointer-events:none;
+    transition:opacity .15s ease, transform .15s ease;
+    white-space:nowrap;
+    z-index:30;
+  }
+  .btn.is-disabled:hover::before{
+    opacity:1;
+    transform:translateX(-50%) translateY(0);
+  }
+
+  /* ============ 第二页：职能思维导图 ============ */
+  .mindmap{
+    background:var(--surface);
+    border-radius:var(--radius);
+    box-shadow:var(--shadow);
+    padding:calc(var(--space)*2) calc(var(--space)*2.5);
+    display:flex;
+    align-items:stretch;
+    margin-bottom:calc(var(--space)*2.5);
+  }
+  .mm-root{
+    flex-shrink:0;
+    display:flex;
+    align-items:center;
+    padding-right:40px;
+    position:relative;
+  }
+  .mm-root::after{
+    content:"";
+    position:absolute;
+    right:0;
+    top:50%;
+    transform:translateY(-50%);
+    width:40px;
+    height:2px;
+    background:color-mix(in srgb, var(--fg) 15%, transparent);
+  }
+  .mm-root span{
+    background:var(--m-root);
+    color:var(--on-color);
+    font-size:17px;
+    font-weight:600;
+    letter-spacing:0.14em;
+    padding:14px 24px;
+    border-radius:12px;
+    box-shadow:0 6px 18px color-mix(in srgb, var(--m-root) 30%, transparent);
+  }
+  .mm-branches{
+    flex:1;
+    display:flex;
+    flex-direction:column;
+    gap:calc(var(--space)*1.75);
+    border-left:2px solid color-mix(in srgb, var(--fg) 15%, transparent);
+  }
+  .mm-branch{
+    position:relative;
+    padding-left:40px;
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+  }
+  .mm-branch::before{
+    content:"";
+    position:absolute;
+    left:0;
+    top:31px;
+    width:40px;
+    height:2px;
+    background:color-mix(in srgb, var(--fg) 15%, transparent);
+  }
+  .mm-node{
+    align-self:flex-start;
+    background:var(--m-branch);
+    color:var(--on-color);
+    font-size:15px;
+    font-weight:600;
+    letter-spacing:0.05em;
+    padding:8px 18px;
+    border-radius:10px;
+    box-shadow:0 4px 12px color-mix(in srgb, var(--m-branch) 28%, transparent);
+  }
+  .mm-leafs{display:flex;gap:12px;flex-wrap:wrap;}
+  .mm-leaf{
+    flex:1;
+    min-width:240px;
+    background:var(--bg);
+    border:1px solid var(--border);
+    border-radius:12px;
+    padding:14px 16px;
+  }
+  .leaf-tag{
+    display:inline-block;
+    font-size:11.5px;
+    font-weight:600;
+    letter-spacing:0.1em;
+    color:var(--m-branch);
+    background:color-mix(in srgb, var(--m-branch) 13%, transparent);
+    padding:2px 10px;
+    border-radius:6px;
+    margin-bottom:8px;
+  }
+  .mm-leaf p{
+    font-size:13.5px;
+    color:var(--muted);
+    line-height:1.7;
+  }
+  .mm-leaf p b{color:var(--fg);font-weight:600;}
+
+  /* ============ 第二页：财务部分工 ============ */
+  .section-title{
+    font-size:20px;
+    font-weight:600;
+    letter-spacing:-0.01em;
+    margin-bottom:4px;
+  }
+  .section-sub{
+    font-size:13.5px;
+    color:var(--faint);
+    margin-bottom:calc(var(--space)*1.5);
+  }
+  .groups{
+    display:flex;
+    flex-direction:column;
+    gap:14px;
+    margin-bottom:calc(var(--space)*0.5);
+  }
+  .group-row{
+    display:flex;
+    gap:14px;
+    align-items:stretch;
+  }
+  .group-chip{
+    flex-shrink:0;
+    width:136px;
+    border-radius:12px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:var(--on-color);
+    font-size:15px;
+    font-weight:600;
+    letter-spacing:0.08em;
+    padding:16px 0;
+  }
+  .group-body{
+    flex:1;
+    border-radius:12px;
+    padding:14px 18px;
+  }
+  .group-duty{
+    list-style:none;
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+    margin-bottom:10px;
+  }
+  .group-duty li{
+    position:relative;
+    padding-left:16px;
+    font-size:13.5px;
+    color:var(--muted);
+    line-height:1.65;
+  }
+  .group-duty li::before{
+    content:"";
+    position:absolute;
+    left:0;
+    top:9px;
+    width:5px;
+    height:5px;
+    border-radius:50%;
+  }
+  .group-links{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    flex-wrap:wrap;
+  }
+  .link-label{
+    font-size:12px;
+    color:var(--faint);
+    letter-spacing:0.08em;
+  }
+  .gchip{
+    font-size:12.5px;
+    padding:3px 12px;
+    border-radius:999px;
+    background:var(--surface);
+    border:1px solid var(--border);
+    color:var(--muted);
+  }
+  .group-row.g1 .group-chip,.group-row.g1 .group-duty li::before{background:var(--g1);}
+  .group-row.g2 .group-chip,.group-row.g2 .group-duty li::before{background:var(--g2);}
+  .group-row.g3 .group-chip,.group-row.g3 .group-duty li::before{background:var(--g3);}
+  .group-row.g4 .group-chip,.group-row.g4 .group-duty li::before{background:var(--g4);}
+  .group-row.g1 .group-body{background:color-mix(in srgb, var(--g1) 7%, transparent);}
+  .group-row.g2 .group-body{background:color-mix(in srgb, var(--g2) 8%, transparent);}
+  .group-row.g3 .group-body{background:color-mix(in srgb, var(--g3) 9%, transparent);}
+  .group-row.g4 .group-body{background:color-mix(in srgb, var(--g4) 8%, transparent);}
+
+  /* ============ 左侧竖导航 ============ */
+  .layout{
+    display:grid;
+    grid-template-columns:264px minmax(0,1fr);
+    gap:calc(var(--space)*2);
+    align-items:start;
+  }
+  .sidebar{
+    position:sticky;
+    top:88px;
+    background:var(--surface);
+    border-radius:var(--radius);
+    box-shadow:var(--shadow);
+    padding:calc(var(--space)*1.25) calc(var(--space)*1);
+    max-height:calc(100vh - 120px);
+    overflow-y:auto;
+    scrollbar-width:thin;
+  }
+  .sidebar-title{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    font-size:13px;
+    font-weight:600;
+    color:var(--muted);
+    letter-spacing:0.08em;
+    padding:4px 12px 12px;
+    border-bottom:1px solid var(--border);
+    margin-bottom:10px;
+  }
+  .sidebar-title svg{color:var(--primary);flex-shrink:0;}
+
+  .nav-group{margin-bottom:2px;}
+  .nav-group-head{
+    width:100%;
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:9px 12px;
+    border:none;
+    border-radius:9px;
+    background:transparent;
+    font-family:inherit;
+    color:var(--fg);
+    font-size:14px;
+    font-weight:600;
+    letter-spacing:0.01em;
+    cursor:pointer;
+    text-align:left;
+    transition:background .15s ease;
+  }
+  .nav-group-head:hover{background:var(--hover);}
+  .nav-num{
+    flex-shrink:0;
+    font-size:11.5px;
+    font-weight:600;
+    letter-spacing:0.04em;
+    font-family:"SF Mono",Consolas,"Courier New",monospace;
+    color:var(--primary);
+    background:color-mix(in srgb, var(--primary) 10%, transparent);
+    border-radius:6px;
+    padding:1px 7px;
+  }
+  .nav-group-head .glabel{flex:1;}
+  .nav-group-head .chevron{
+    color:var(--faint);
+    transition:transform .2s ease;
+  }
+  .nav-group.open > .nav-group-head .chevron{transform:rotate(180deg);}
+
+  .nav-children{
+    display:none;
+    padding:2px 0 6px 0;
+  }
+  .nav-group.open > .nav-children{display:block;}
+  .nav-leaf{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    width:100%;
+    padding:7px 12px 7px 44px;
+    border:none;
+    border-radius:9px;
+    background:transparent;
+    font-family:inherit;
+    color:var(--muted);
+    font-size:13.5px;
+    letter-spacing:0.01em;
+    cursor:pointer;
+    text-align:left;
+    position:relative;
+    transition:background .15s ease, color .15s ease;
+  }
+  .nav-leaf::before{
+    content:"";
+    position:absolute;
+    left:28px;
+    top:50%;
+    transform:translateY(-50%);
+    width:5px;
+    height:5px;
+    border-radius:50%;
+    background:color-mix(in srgb, var(--fg) 22%, transparent);
+  }
+  .nav-leaf:hover{background:var(--hover);color:var(--fg);}
+  .nav-leaf.is-active{
+    background:color-mix(in srgb, var(--primary) 9%, transparent);
+    color:var(--primary);
+    font-weight:600;
+  }
+  .nav-leaf.is-active::before{background:var(--primary);}
+  .nav-leaf.is-locked{
+    color:var(--faint);
+    cursor:not-allowed;
+  }
+  .nav-leaf.is-locked:hover{background:transparent;color:var(--faint);}
+  .nav-leaf .lock-tip{
+    margin-left:auto;
+    font-size:10.5px;
+    letter-spacing:0.06em;
+    color:var(--faint);
+    border:1px solid var(--border);
+    border-radius:5px;
+    padding:1px 6px;
+    flex-shrink:0;
+  }
+
+  .content-col{min-width:0;}
+
+  /* ============ 第三页：异常表现 ============ */
+  .cmp{
+    display:grid;
+    grid-template-columns:minmax(0,1fr) 52px minmax(0,1.25fr);
+    gap:calc(var(--space)*0.75);
+    align-items:stretch;
+    margin-bottom:calc(var(--space)*2.5);
+  }
+  .cmp-card{
+    background:var(--surface);
+    border-radius:var(--radius);
+    box-shadow:var(--shadow);
+    padding:calc(var(--space)*1.5);
+  }
+  .cmp-label{
+    font-size:13px;
+    color:var(--faint);
+    letter-spacing:0.08em;
+    margin-bottom:14px;
+  }
+  .cmp-good .cmp-words{
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+  }
+  .cmp-word{
+    font-size:25px;
+    font-weight:600;
+    letter-spacing:0.1em;
+    color:var(--primary);
+    line-height:1.2;
+  }
+  .cmp-word small{
+    display:block;
+    font-size:13px;
+    font-weight:400;
+    letter-spacing:0.01em;
+    color:var(--faint);
+    margin-top:6px;
+  }
+  .cmp-arrow{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:var(--m-branch);
+  }
+  .cmp-list{display:flex;flex-direction:column;gap:12px;}
+  .cmp-item{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    font-size:16.5px;
+    font-weight:600;
+    letter-spacing:0.04em;
+    color:var(--accent);
+    background:color-mix(in srgb, var(--accent) 7%, transparent);
+    border-radius:10px;
+    padding:9px 16px;
+  }
+  .cmp-item svg{flex-shrink:0;}
+  .cmp-item.is-head{
+    background:color-mix(in srgb, var(--accent) 12%, transparent);
+  }
+
+  .risk-tree{
+    background:var(--surface);
+    border-radius:var(--radius);
+    box-shadow:var(--shadow);
+    padding:calc(var(--space)*2) calc(var(--space)*2.5);
+  }
+  .risk-root{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    text-align:center;
+  }
+  .risk-chip{
+    background:var(--accent);
+    color:var(--on-color);
+    font-size:16px;
+    font-weight:600;
+    letter-spacing:0.1em;
+    padding:10px 26px;
+    border-radius:11px;
+    box-shadow:0 6px 18px color-mix(in srgb, var(--accent) 26%, transparent);
+  }
+  .risk-desc{
+    background:var(--panel);
+    border:1px solid var(--border);
+    border-radius:12px;
+    padding:12px 20px;
+    margin-top:14px;
+    max-width:58ch;
+    color:var(--muted);
+    font-size:13.5px;
+    line-height:1.7;
+  }
+  .risk-desc b{color:var(--fg);font-weight:600;}
+  .risk-split{
+    position:relative;
+    height:26px;
+    margin:0 12px;
+  }
+  .risk-split::before{
+    content:"";
+    position:absolute;
+    left:50%;top:0;
+    width:2px;height:13px;
+    transform:translateX(-50%);
+    background:color-mix(in srgb, var(--fg) 15%, transparent);
+  }
+  .risk-split::after{
+    content:"";
+    position:absolute;
+    left:16.5%;right:16.5%;top:13px;
+    height:2px;
+    background:color-mix(in srgb, var(--fg) 15%, transparent);
+  }
+  .risk-branches{
+    display:grid;
+    grid-template-columns:repeat(3,minmax(0,1fr));
+    gap:14px;
+  }
+  .risk-branch{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    text-align:center;
+  }
+  .risk-branch::before{
+    content:"";
+    width:2px;height:13px;
+    background:color-mix(in srgb, var(--fg) 15%, transparent);
+    margin-bottom:0;
+  }
+  .risk-head{
+    background:var(--fg);
+    color:var(--surface);
+    font-size:14.5px;
+    font-weight:600;
+    letter-spacing:0.12em;
+    padding:7px 22px;
+    border-radius:9px;
+    margin:0 0 12px;
+  }
+  .risk-body{
+    width:100%;
+    background:var(--bg);
+    border:1px solid var(--border);
+    border-radius:12px;
+    padding:14px 16px;
+  }
+  .risk-body p{
+    font-size:13.5px;
+    color:var(--muted);
+    line-height:1.7;
+    text-align:left;
+  }
+  .risk-body p b{color:var(--fg);font-weight:600;}
+
+  /* ============ 第四页：认识发票 ============ */
+  .inv-block{margin-bottom:calc(var(--space)*2.25);}
+  .inv-grid-2x2{
+    display:grid;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:calc(var(--space)*1.5);
+  }
+  .inv-grid-3{
+    display:grid;
+    grid-template-columns:repeat(3,minmax(0,1fr));
+    gap:calc(var(--space)*1.25);
+  }
+  .inv-grid-2{
+    display:grid;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:calc(var(--space)*1.5);
+  }
+  .inv-card{
+    background:var(--surface);
+    border-radius:var(--radius);
+    box-shadow:var(--shadow);
+    padding:calc(var(--space)*1.25) calc(var(--space)*1.25) calc(var(--space)*1.5);
+    display:flex;
+    flex-direction:column;
+  }
+  .inv-card-head{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+    margin-bottom:calc(var(--space)*1);
+  }
+  .inv-card-head h3{
+    font-size:16px;
+    font-weight:600;
+    letter-spacing:0.01em;
+  }
+  .inv-count{
+    flex-shrink:0;
+    font-size:11.5px;
+    font-weight:500;
+    letter-spacing:0.04em;
+    color:var(--primary);
+    background:color-mix(in srgb, var(--primary) 9%, transparent);
+    padding:2px 10px;
+    border-radius:999px;
+  }
+  .inv-figs{
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+  }
+  .inv-fig{
+    position:relative;
+    border:1px solid var(--border);
+    border-radius:10px;
+    background:var(--bg);
+    padding:8px;
+    cursor:zoom-in;
+    transition:border-color .15s ease, box-shadow .15s ease;
+  }
+  .inv-fig:hover{
+    border-color:color-mix(in srgb, var(--primary) 45%, transparent);
+    box-shadow:0 4px 16px color-mix(in srgb, var(--fg) 8%, transparent);
+  }
+  .inv-fig img{
+    display:block;
+    width:100%;
+    height:auto;
+    border-radius:6px;
+  }
+  .inv-fig .zoom-hint{
+    position:absolute;
+    right:12px;
+    bottom:12px;
+    display:flex;
+    align-items:center;
+    gap:5px;
+    font-size:11.5px;
+    letter-spacing:0.04em;
+    color:var(--surface);
+    background:color-mix(in srgb, var(--fg) 72%, transparent);
+    padding:4px 10px;
+    border-radius:999px;
+    opacity:0;
+    transition:opacity .15s ease;
+    pointer-events:none;
+  }
+  .inv-fig:hover .zoom-hint{opacity:1;}
+
+  /* 灯箱放大预览 */
+  .lightbox{
+    display:none;
+    position:fixed;
+    inset:0;
+    z-index:100;
+    background:color-mix(in srgb, var(--fg) 78%, transparent);
+    align-items:center;
+    justify-content:center;
+    flex-direction:column;
+    gap:14px;
+    padding:calc(var(--space)*2.5);
+    cursor:zoom-out;
+  }
+  .lightbox.open{display:flex;}
+  .lightbox img{
+    max-width:min(1100px,90vw);
+    max-height:78vh;
+    border-radius:10px;
+    box-shadow:0 24px 60px color-mix(in srgb, var(--fg) 45%, transparent);
+  }
+  .lightbox-cap{
+    font-size:13.5px;
+    color:rgba(255,255,255,.85);
+    letter-spacing:0.04em;
+  }
+  .lightbox-close{
+    position:absolute;
+    top:calc(var(--space)*1.25);
+    right:calc(var(--space)*1.5);
+    width:38px;height:38px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    border:none;
+    border-radius:50%;
+    background:rgba(255,255,255,.14);
+    color:var(--on-color);
+    cursor:pointer;
+    transition:background .15s ease;
+  }
+  .lightbox-close:hover{background:rgba(255,255,255,.26);}
+
+  /* ============ 第五页：企业微信申请差旅（交互引导） ============ */
+  .wx-tutorial{
+    display:grid;
+    grid-template-columns:minmax(0,1fr) 386px;
+    gap:calc(var(--space)*2.5);
+    align-items:start;
+  }
+  .wx-step-list{
+    list-style:none;
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+    margin-bottom:calc(var(--space)*1.25);
+  }
+  .wx-step-list li{
+    display:flex;
+    gap:12px;
+    align-items:flex-start;
+    padding:12px 14px;
+    border-radius:12px;
+    border:1px solid transparent;
+    opacity:.45;
+    transition:opacity .2s ease, background .2s ease;
+  }
+  .wx-step-list li.is-done{opacity:.85;}
+  .wx-step-list li.is-current{
+    background:var(--surface);
+    border-color:var(--border);
+    box-shadow:var(--shadow);
+    opacity:1;
+  }
+  .wx-step-num{
+    flex-shrink:0;
+    width:26px;height:26px;
+    border-radius:50%;
+    background:var(--panel);
+    color:var(--muted);
+    font-weight:600;
+    font-size:13px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    margin-top:1px;
+  }
+  .wx-step-list li.is-current .wx-step-num{background:var(--primary);color:var(--on-color);}
+  .wx-step-list li.is-done .wx-step-num{
+    background:color-mix(in srgb, var(--primary) 15%, transparent);
+    color:var(--primary);
+  }
+  .wx-step-list b{font-size:14.5px;font-weight:600;display:block;}
+  .wx-step-list small{
+    font-size:12.5px;
+    color:var(--faint);
+    line-height:1.5;
+    display:block;
+    margin-top:2px;
+  }
+  .wx-hint{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    background:var(--surface);
+    border-radius:12px;
+    box-shadow:var(--shadow);
+    padding:14px 18px;
+    margin-bottom:calc(var(--space)*1.25);
+  }
+  .wx-hint .dot{
+    flex-shrink:0;
+    width:9px;height:9px;
+    border-radius:50%;
+    background:var(--accent);
+    animation:wxDot 1.2s ease-in-out infinite;
+  }
+  .wx-hint strong{
+    font-size:17px;
+    font-weight:600;
+    color:var(--accent);
+    letter-spacing:0.02em;
+    white-space:nowrap;
+  }
+  .wx-hint span{font-size:13px;color:var(--muted);}
+  .wx-phone{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:14px;
+  }
+  .wx-screen{
+    position:relative;
+    width:340px;
+    border-radius:26px;
+    border:8px solid var(--ink-black);
+    box-shadow:var(--shadow), 0 18px 44px color-mix(in srgb, var(--fg) 14%, transparent);
+    overflow:hidden;
+    background:var(--on-color);
+  }
+  .wx-screen img{display:block;width:100%;height:auto;}
+  .wx-box{
+    position:absolute;
+    border:3px solid var(--accent);
+    border-radius:10px;
+    background:color-mix(in srgb, var(--accent) 8%, transparent);
+    cursor:pointer;
+  }
+  .wx-box.hidden{display:none;}
+  .wx-box.pulse{animation:wxPulse 1.4s ease-out infinite;}
+  .wx-box.blink{animation:wxBlink 1.6s steps(1) infinite;}
+  .wx-box.blink.b{animation-delay:0.8s;}
+  .wx-toggle{display:flex;gap:10px;}
+  .wx-toggle button{
+    font-family:inherit;
+    font-size:13.5px;
+    letter-spacing:0.02em;
+    padding:7px 20px;
+    border-radius:999px;
+    border:1px solid var(--border);
+    background:var(--surface);
+    color:var(--muted);
+    cursor:pointer;
+    transition:all .15s ease;
+  }
+  .wx-toggle button:hover{background:var(--hover);}
+  .wx-toggle button.is-active{
+    background:var(--primary);
+    color:var(--on-color);
+    border-color:transparent;
+  }
+  @keyframes wxPulse{
+    0%{box-shadow:0 0 0 0 color-mix(in srgb, var(--accent) 42%, transparent);}
+    100%{box-shadow:0 0 0 12px transparent;}
+  }
+  @keyframes wxBlink{
+    0%,49%{opacity:1;}
+    50%,100%{opacity:.1;}
+  }
+  @keyframes wxDot{
+    0%,100%{transform:scale(1);opacity:1;}
+    50%{transform:scale(1.45);opacity:.55;}
+  }
+
+  /* ============ 第六页：系统模拟（PC 浏览器窗口） ============ */
+  .pc-stage{
+    position:sticky;
+    top:88px;
+    display:flex;
+    justify-content:center;
+  }
+  .pc-window{
+    width:100%;
+    max-width:760px;
+    border-radius:12px;
+    overflow:hidden;
+    box-shadow:var(--shadow), 0 18px 44px color-mix(in srgb, var(--fg) 14%, transparent);
+    background:var(--on-color);
+  }
+  .pc-titlebar{
+    display:flex;
+    align-items:center;
+    gap:14px;
+    padding:9px 14px;
+    background:color-mix(in srgb, var(--fg) 6%, var(--on-color));
+    border-bottom:1px solid var(--border);
+  }
+  .pc-dots{display:flex;gap:6px;flex-shrink:0;}
+  .pc-dots i{
+    width:11px;height:11px;
+    border-radius:50%;
+    background:color-mix(in srgb, var(--fg) 18%, transparent);
+  }
+  .pc-url{
+    flex:1;
+    display:flex;
+    align-items:center;
+    gap:7px;
+    font-size:12.5px;
+    letter-spacing:0.02em;
+    color:var(--muted);
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:999px;
+    padding:5px 16px;
+    min-width:0;
+    overflow:hidden;
+    white-space:nowrap;
+  }
+  .pc-screen{
+    position:relative;
+    overflow:hidden;
+  }
+  .pc-screen img{display:block;width:100%;height:auto;}
+  .pc-screen .wx-box{border-width:2.5px;}
+  .wx-tutorial.pc-layout{grid-template-columns:minmax(0,5fr) minmax(0,7fr);}
+
+  /* 系统模拟页：上下布局变体（步骤横排 + 大图） */
+  .pc-flow{display:flex;flex-direction:column;gap:calc(var(--space)*1.5);}
+  .pc-steps-row{
+    display:grid;
+    grid-template-columns:repeat(4,minmax(0,1fr));
+    gap:12px;
+    list-style:none;
+  }
+  .pc-steps-row li{
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+    background:var(--surface);
+    border:1px solid transparent;
+    border-radius:12px;
+    padding:14px 16px;
+    opacity:.5;
+    transition:opacity .2s ease, border-color .2s ease, box-shadow .2s ease;
+  }
+  .pc-steps-row li.is-done{opacity:.8;}
+  .pc-steps-row li.is-current{
+    opacity:1;
+    border-color:var(--border);
+    box-shadow:var(--shadow);
+  }
+  .pc-steps-row li.is-current .wx-step-num{background:var(--primary);color:var(--on-color);}
+  .pc-steps-row li.is-done .wx-step-num{
+    background:color-mix(in srgb, var(--primary) 15%, transparent);
+    color:var(--primary);
+  }
+  .pc-steps-row .wx-step-num{
+    width:auto;
+    align-self:flex-start;
+    border-radius:999px;
+    padding:2px 11px;
+    font-size:12px;
+  }
+  .pc-steps-row b{font-size:14.5px;font-weight:600;}
+  .pc-steps-row small{
+    font-size:12.5px;
+    color:var(--faint);
+    line-height:1.5;
+    display:block;
+  }
+  .pc-hint-row{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    flex-wrap:wrap;
+  }
+  .pc-hint-row .wx-hint{flex:1;margin-bottom:0;min-width:min(420px,100%);}
+  .pc-big{
+    display:flex;
+    justify-content:center;
+  }
+  .pc-big .pc-window{max-width:1120px;}
+  @media (max-width:1100px){
+    .pc-steps-row{grid-template-columns:repeat(2,minmax(0,1fr));}
+  }
+
+  /* ============ 第七页：费用分类及归属 ============ */
+  .fee-grid{
+    display:grid;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:calc(var(--space)*1.5);
+    margin-bottom:calc(var(--space)*2.5);
+  }
+  .fee-card{
+    background:var(--surface);
+    border-radius:var(--radius);
+    box-shadow:var(--shadow);
+    padding:calc(var(--space)*1.75);
+    position:relative;
+    overflow:hidden;
+  }
+  .fee-card::after{
+    content:"";
+    position:absolute;
+    top:0;left:0;right:0;
+    height:4px;
+  }
+  .fee-card.personal::after{background:var(--primary);}
+  .fee-card.corp::after{background:var(--m-branch);}
+  .fee-head{
+    display:flex;
+    align-items:center;
+    gap:14px;
+    margin-bottom:calc(var(--space)*1);
+  }
+  .fee-ico{
+    width:46px;height:46px;
+    border-radius:12px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    flex-shrink:0;
+  }
+  .fee-card.personal .fee-ico{
+    background:color-mix(in srgb, var(--primary) 11%, transparent);
+    color:var(--primary);
+  }
+  .fee-card.corp .fee-ico{
+    background:color-mix(in srgb, var(--m-branch) 12%, transparent);
+    color:var(--m-branch);
+  }
+  .fee-head h3{font-size:18px;font-weight:600;letter-spacing:0.01em;}
+  .fee-head small{
+    display:block;
+    font-size:12.5px;
+    color:var(--faint);
+    font-weight:400;
+    margin-top:2px;
+    letter-spacing:0.02em;
+  }
+  .fee-desc{
+    font-size:13.5px;
+    color:var(--muted);
+    line-height:1.7;
+    margin-bottom:calc(var(--space)*1);
+  }
+  .fee-chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:calc(var(--space)*1.25);}
+  .fee-chip{
+    font-size:12.5px;
+    padding:4px 13px;
+    border-radius:999px;
+    background:var(--panel);
+    color:var(--muted);
+    border:1px solid var(--border);
+  }
+  .fee-mode{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    font-size:12.5px;
+    color:var(--primary);
+    background:color-mix(in srgb, var(--primary) 8%, transparent);
+    border:1px dashed color-mix(in srgb, var(--primary) 38%, transparent);
+    border-radius:9px;
+    padding:7px 14px;
+    letter-spacing:0.02em;
+  }
+
+  /* 归属公司 */
+  .attr-card{
+    background:var(--surface);
+    border-radius:var(--radius);
+    box-shadow:var(--shadow);
+    padding:calc(var(--space)*1.75);
+    margin-bottom:calc(var(--space)*1.5);
+  }
+  .attr-rule-grid{
+    display:grid;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:14px;
+    margin-bottom:calc(var(--space)*1.5);
+  }
+  .attr-rule{
+    display:flex;
+    gap:14px;
+    background:var(--bg);
+    border:1px solid var(--border);
+    border-radius:12px;
+    padding:16px 18px;
+  }
+  .attr-num{
+    flex-shrink:0;
+    width:34px;height:34px;
+    border-radius:10px;
+    background:color-mix(in srgb, var(--primary) 10%, transparent);
+    color:var(--primary);
+    font-size:15px;
+    font-weight:600;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+  .attr-rule b{
+    display:block;
+    font-size:14.5px;
+    font-weight:600;
+    margin-bottom:3px;
+  }
+  .attr-rule small{
+    font-size:13px;
+    color:var(--muted);
+    line-height:1.6;
+    display:block;
+  }
+  .attr-entities{
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px;
+    margin-bottom:calc(var(--space)*1.5);
+  }
+  .ent-chip{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    font-size:13px;
+    color:var(--fg);
+    background:var(--panel);
+    border:1px solid var(--border);
+    border-radius:10px;
+    padding:8px 15px;
+  }
+  .ent-chip .dot-mini{
+    width:7px;height:7px;
+    border-radius:50%;
+    background:var(--m-branch);
+    flex-shrink:0;
+  }
+
+  /* 三流一致 */
+  .flow-row{
+    display:flex;
+    align-items:stretch;
+    justify-content:center;
+    gap:12px;
+    flex-wrap:wrap;
+  }
+  .flow-node{
+    flex:1;
+    min-width:180px;
+    max-width:280px;
+    background:var(--bg);
+    border:1px solid var(--border);
+    border-radius:12px;
+    padding:16px;
+    text-align:center;
+    position:relative;
+  }
+  .flow-node svg{color:var(--primary);margin-bottom:8px;}
+  .flow-node b{
+    display:block;
+    font-size:15px;
+    font-weight:600;
+    letter-spacing:0.04em;
+    margin-bottom:4px;
+  }
+  .flow-node small{
+    font-size:12.5px;
+    color:var(--faint);
+    line-height:1.5;
+    display:block;
+  }
+  .flow-arrow{
+    align-self:center;
+    color:var(--faint);
+    flex-shrink:0;
+  }
+  .flow-eq{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    justify-content:center;
+    margin-top:14px;
+    font-size:13px;
+    color:var(--primary);
+    font-weight:600;
+    letter-spacing:0.06em;
+  }
+  @media (max-width:960px){
+    .fee-grid,.attr-rule-grid{grid-template-columns:1fr;}
+    .flow-arrow{transform:rotate(90deg);}
+  }
+
+  /* ============ 第八页：报销人员对接 ============ */
+  .contact-intro{
+    display:flex;
+    align-items:flex-start;
+    gap:14px;
+    background:var(--surface);
+    border-radius:var(--radius);
+    box-shadow:var(--shadow);
+    padding:16px 20px;
+    margin-bottom:calc(var(--space)*2);
+    max-width:80ch;
+  }
+  .contact-intro svg{
+    flex-shrink:0;
+    color:var(--primary);
+    margin-top:2px;
+  }
+  .contact-intro p{font-size:14.5px;color:var(--muted);line-height:1.7;}
+  .contact-intro b{color:var(--fg);font-weight:600;}
+
+  .biz-block{margin-bottom:calc(var(--space)*2.25);}
+  .biz-head{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    margin-bottom:calc(var(--space)*1.25);
+  }
+  .biz-badge{
+    flex-shrink:0;
+    font-size:14px;
+    font-weight:600;
+    letter-spacing:0.04em;
+    color:var(--primary);
+    background:color-mix(in srgb, var(--primary) 10%, transparent);
+    padding:6px 16px;
+    border-radius:999px;
+  }
+  .biz-badge.alt{
+    color:var(--m-branch);
+    background:color-mix(in srgb, var(--m-branch) 12%, transparent);
+  }
+  .biz-head .line{
+    flex:1;
+    height:1px;
+    background:var(--border);
+  }
+  .biz-count{
+    font-size:12.5px;
+    color:var(--faint);
+    letter-spacing:0.02em;
+  }
+
+  .contact-grid{
+    display:grid;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:14px;
+  }
+  .contact-card{
+    display:flex;
+    align-items:center;
+    gap:16px;
+    background:var(--surface);
+    border-radius:var(--radius);
+    box-shadow:var(--shadow);
+    padding:18px 20px;
+  }
+  .avatar{
+    flex-shrink:0;
+    width:56px;
+    height:56px;
+    border-radius:50%;
+    overflow:hidden;
+    display:flex;
+    align-items:flex-end;
+    justify-content:center;
+  }
+  .contact-body{flex:1;min-width:0;}
+  .contact-name{
+    font-size:16.5px;
+    font-weight:600;
+    letter-spacing:0.02em;
+    margin-bottom:6px;
+  }
+  .contact-role{
+    font-size:11.5px;
+    font-weight:500;
+    letter-spacing:0.05em;
+    color:var(--m-branch);
+    background:color-mix(in srgb, var(--m-branch) 12%, transparent);
+    padding:2px 9px;
+    border-radius:5px;
+    margin-left:8px;
+    vertical-align:1.5px;
+  }
+  .contact-orgs{
+    display:flex;
+    flex-wrap:wrap;
+    gap:6px;
+  }
+  .org-chip{
+    font-size:12px;
+    color:var(--muted);
+    background:var(--panel);
+    border:1px solid var(--border);
+    border-radius:6px;
+    padding:2.5px 9px;
+    letter-spacing:0.01em;
+  }
+  .contact-cta{
+    flex-shrink:0;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:4px;
+    font-size:11px;
+    color:var(--faint);
+    letter-spacing:0.04em;
+  }
+  .contact-cta svg{color:var(--primary);}
+  @media (max-width:960px){
+    .contact-grid{grid-template-columns:1fr;}
+  }
+
+  /* ============ 第九页：贴票要求 ============ */
+  .quiz-card{
+    background:var(--surface);
+    border-radius:var(--radius);
+    box-shadow:var(--shadow);
+    padding:calc(var(--space)*1.75);
+    margin-bottom:calc(var(--space)*2);
+  }
+  .quiz-q{
+    font-size:16.5px;
+    font-weight:600;
+    letter-spacing:0.01em;
+    margin-bottom:4px;
+  }
+  .quiz-sub{
+    font-size:13px;
+    color:var(--faint);
+    margin-bottom:calc(var(--space)*1.5);
+  }
+  .quiz-opts{
+    display:grid;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:calc(var(--space)*1.5);
+    margin-bottom:calc(var(--space)*1.25);
+  }
+  .quiz-opt{
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+    padding:10px;
+    border:2px solid var(--border);
+    border-radius:12px;
+    background:var(--bg);
+    cursor:pointer;
+    transition:border-color .15s ease, background .15s ease;
+    font-family:inherit;
+    text-align:center;
+  }
+  .quiz-opt:hover{border-color:color-mix(in srgb, var(--primary) 40%, transparent);}
+  .quiz-opt img{
+    width:100%;
+    height:230px;
+    object-fit:cover;
+    object-position:center;
+    border-radius:8px;
+    display:block;
+  }
+  .quiz-opt .pick{
+    display:inline-flex;
+    align-items:center;
+    gap:9px;
+    justify-content:center;
+    font-size:14px;
+    color:var(--muted);
+    letter-spacing:0.02em;
+  }
+  .quiz-opt .pick .ring{
+    width:18px;height:18px;
+    border-radius:50%;
+    border:2px solid var(--border);
+    flex-shrink:0;
+    transition:all .15s ease;
+  }
+  .quiz-opt:hover .pick{color:var(--fg);}
+  .quiz-opt.chosen{border-color:var(--primary);}
+  .quiz-opt.chosen .pick{color:var(--primary);font-weight:600;}
+  .quiz-opt.chosen .pick .ring{
+    border-color:var(--primary);
+    background:radial-gradient(circle at center, var(--primary) 0 5px, transparent 5.5px);
+  }
+  .quiz-opt.dim{opacity:.55;}
+
+  .quiz-result{
+    display:none;
+    align-items:center;
+    gap:20px;
+    border-radius:12px;
+    padding:18px 24px;
+    margin-bottom:calc(var(--space)*0.5);
+  }
+  .quiz-result.show{display:flex;}
+  .quiz-result.ok{
+    background:color-mix(in srgb, #17A34A 9%, transparent);
+    border:1px solid color-mix(in srgb, #17A34A 30%, transparent);
+  }
+  .quiz-result.bad{
+    background:color-mix(in srgb, var(--accent) 8%, transparent);
+    border:1px solid color-mix(in srgb, var(--accent) 30%, transparent);
+  }
+  .quiz-result .mark{flex-shrink:0;}
+  .quiz-result .verdict{
+    font-size:20px;
+    font-weight:600;
+    letter-spacing:0.04em;
+    margin-bottom:3px;
+  }
+  .quiz-result.ok .verdict{color:#17A34A;}
+  .quiz-result.bad .verdict{color:var(--accent);}
+  .quiz-result .explain{
+    font-size:13.5px;
+    color:var(--muted);
+    line-height:1.6;
+  }
+
+  /* 正确贴法画廊 */
+  .gallery{display:none;}
+  .gallery.show{display:block;}
+  .gal-group{margin-bottom:calc(var(--space)*2);}
+  .gal-grid-2{
+    display:grid;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:calc(var(--space)*1.5);
+  }
+  .gal-grid-3{
+    display:grid;
+    grid-template-columns:minmax(0,7fr) minmax(0,5fr);
+    gap:calc(var(--space)*1.5);
+    align-items:stretch;
+  }
+  .gal-item{
+    background:var(--surface);
+    border-radius:var(--radius);
+    box-shadow:var(--shadow);
+    padding:calc(var(--space)*1.25);
+  }
+  .gal-item h3{
+    font-size:15.5px;
+    font-weight:600;
+    margin-bottom:2px;
+  }
+  .gal-item .sub{
+    font-size:12.5px;
+    color:var(--faint);
+    display:block;
+    margin-bottom:calc(var(--space)*1);
+  }
+  .gal-note{
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    gap:12px;
+  }
+  .gal-note-item{
+    display:flex;
+    gap:12px;
+    align-items:flex-start;
+    background:var(--bg);
+    border:1px solid var(--border);
+    border-radius:12px;
+    padding:14px 16px;
+  }
+  .gal-note-item svg{flex-shrink:0;color:var(--primary);margin-top:2px;}
+  .gal-note-item p{font-size:13.5px;color:var(--muted);line-height:1.7;}
+  .gal-note-item b{color:var(--fg);font-weight:600;}
+  @media (max-width:960px){
+    .quiz-opts,.gal-grid-2,.gal-grid-3{grid-template-columns:1fr;}
+    .quiz-opt img{height:200px;}
+  }
+
+  /* ============ 页脚 ============ */
+  .footer{
+    border-top:1px solid var(--border);
+    padding:calc(var(--space)*1.25) calc(var(--space)*1.5);
+    text-align:center;
+    font-size:12.5px;
+    color:var(--faint);
+    letter-spacing:0.02em;
+  }
+
+  /* ============ 响应式 ============ */
+  @media (max-width:960px){
+    .grid{grid-template-columns:1fr;}
+    .intro h1{font-size:28px;}
+    .lesson-head h1{font-size:26px;}
+    .layout{grid-template-columns:1fr;}
+    .sidebar{position:static;max-height:none;}
+    .mindmap{flex-direction:column;gap:calc(var(--space)*1.5);}
+    .mm-root{padding-right:0;padding-bottom:2px;}
+    .mm-root::after{display:none;}
+    .mm-branches{border-left:none;}
+    .mm-branch{padding-left:0;}
+    .mm-branch::before{display:none;}
+    .group-row{flex-direction:column;}
+    .group-chip{width:100%;padding:12px 0;}
+    .page-actions{flex-direction:column;gap:14px;}
+    .cmp{grid-template-columns:1fr;}
+    .cmp-arrow{transform:rotate(90deg);}
+    .risk-branches{grid-template-columns:1fr;}
+    .risk-split::after{display:none;}
+    .inv-grid-2x2,.inv-grid-3{grid-template-columns:1fr;}
+    .inv-grid-2{grid-template-columns:1fr;}
+    .wx-tutorial{grid-template-columns:1fr;}
+    .wx-phone{align-items:flex-start;}
+  }
+</style>
+</head>
+<body>
+
+<header class="topbar" data-component="top-nav">
+  <div class="topbar-inner">
+    <div class="brand">
+      <svg class="brand-mark" viewBox="0 0 40 40" role="img" aria-label="出口易新人培训平台">
+        <rect x="0" y="0" width="40" height="40" rx="10" fill="var(--brand-green)"/>
+        <circle cx="20" cy="20" r="9" fill="var(--brand-olive)"/>
+      </svg>
+      <span class="brand-text">
+        <strong>出口易 · 新人培训平台</strong>
+        <small>Onboarding Center</small>
+      </span>
+    </div>
+    <nav class="menu" aria-label="平台主导航">
+      <span class="menu-item is-disabled" data-tip="建设中" aria-disabled="true">十二条令</span>
+      <span class="menu-item is-disabled" data-tip="建设中" aria-disabled="true">公司业务</span>
+      <span class="menu-item is-active" aria-current="page">财务报销与合同审批</span>
+      <span class="menu-item is-disabled" data-tip="建设中" aria-disabled="true">职场沟通</span>
+      <span class="menu-item is-disabled" data-tip="建设中" aria-disabled="true">职业道德操守</span>
+      <span class="menu-item is-disabled" data-tip="建设中" aria-disabled="true">资质荣誉</span>
+      <span class="menu-item is-disabled" data-tip="建设中" aria-disabled="true">组织架构</span>
+    </nav>
+  </div>
+</header>
+
+<main class="page">
+  <div class="crumbs">
+    <span>财务报销与合同审批</span>
+    <span>/</span>
+    <span class="cur">基础知识</span>
+  </div>
+
+  <div class="layout">
+
+  <!-- ===== 左侧竖导航（仅财务报销与合同审批模块显示） ===== -->
+  <aside class="sidebar" data-component="side-nav">
+    <div class="sidebar-title">
+      <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+        <path d="M2.5 4.5H13.5M2.5 8H13.5M2.5 11.5H9.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+      </svg>
+      财务报销与合同审批
+    </div>
+
+    <div class="nav-group open">
+      <button class="nav-group-head" type="button" aria-expanded="true">
+        <span class="nav-num">01</span>
+        <span class="glabel">认清公司主体</span>
+        <svg class="chevron" width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+          <path d="M3.5 6L8 10.5L12.5 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+      <div class="nav-children">
+        <button class="nav-leaf is-active" type="button" data-nav="1">实体地图</button>
+      </div>
+    </div>
+
+    <div class="nav-group open">
+      <button class="nav-group-head" type="button" aria-expanded="true">
+        <span class="nav-num">02</span>
+        <span class="glabel">财务的职能</span>
+        <svg class="chevron" width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+          <path d="M3.5 6L8 10.5L12.5 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+      <div class="nav-children">
+        <button class="nav-leaf" type="button" data-nav="2">财务职能与分工</button>
+        <button class="nav-leaf" type="button" data-nav="3">异常表现</button>
+        <button class="nav-leaf" type="button" data-nav="4">认识发票</button>
+      </div>
+    </div>
+
+    <div class="nav-group open">
+      <button class="nav-group-head" type="button" aria-expanded="true">
+        <span class="nav-num">03</span>
+        <span class="glabel">怎样正确报销</span>
+        <svg class="chevron" width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+          <path d="M3.5 6L8 10.5L12.5 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+      <div class="nav-children">
+        <button class="nav-leaf" type="button" data-nav="7">费用分类及归属</button>
+        <button class="nav-leaf" type="button" data-nav="8">报销人员对接</button>
+        <button class="nav-leaf is-locked" type="button" aria-disabled="true">报销原则<span class="lock-tip">建设中</span></button>
+        <button class="nav-leaf is-locked" type="button" aria-disabled="true">报销流程及状态<span class="lock-tip">建设中</span></button>
+        <button class="nav-leaf is-locked" type="button" aria-disabled="true">附件单据<span class="lock-tip">建设中</span></button>
+        <button class="nav-leaf is-locked" type="button" aria-disabled="true">差旅额度<span class="lock-tip">建设中</span></button>
+        <button class="nav-leaf" type="button" data-nav="5">企业微信申请差旅</button>
+      </div>
+    </div>
+
+    <div class="nav-group">
+      <button class="nav-group-head" type="button" aria-expanded="false">
+        <span class="nav-num">04</span>
+        <span class="glabel">实际怎么报销</span>
+        <svg class="chevron" width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+          <path d="M3.5 6L8 10.5L12.5 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+      <div class="nav-children">
+        <button class="nav-leaf" type="button" data-nav="6">系统模拟</button>
+        <button class="nav-leaf" type="button" data-nav="9">贴票要求</button>
+      </div>
+    </div>
+
+    <div class="nav-group">
+      <button class="nav-group-head" type="button" aria-expanded="false">
+        <span class="nav-num">05</span>
+        <span class="glabel">合同怎么审批</span>
+        <svg class="chevron" width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+          <path d="M3.5 6L8 10.5L12.5 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+      <div class="nav-children">
+        <button class="nav-leaf is-locked" type="button" aria-disabled="true">企业微信审批<span class="lock-tip">建设中</span></button>
+        <button class="nav-leaf is-locked" type="button" aria-disabled="true">合同盖章<span class="lock-tip">建设中</span></button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ===== 右侧内容列 ===== -->
+  <div class="content-col">
+
+  <!-- ===== 第 1 页：实体地图 ===== -->
+  <section class="view active" data-view="1">
+  <div class="grid">
+    <!-- 左栏：本课导语 -->
+    <section class="intro" data-component="lesson-intro">
+      <svg class="module-mark" viewBox="0 0 40 40" role="img" aria-hidden="true">
+        <rect x="0" y="0" width="40" height="40" rx="10" fill="var(--brand-green)"/>
+        <circle cx="20" cy="20" r="9" fill="var(--brand-olive)"/>
+      </svg>
+      <p class="eyebrow">实体地图 / 01</p>
+      <h1>一个品牌名，背后对应多家法律主体。</h1>
+      <p class="lead">工作中看到「出口易」，先确认业务地区，再选择准确的公司全称。点击右侧地区，可展开查看对应实体。</p>
+      <p class="module-note">这是财务模块的第一课：先弄清楚<b>「和谁打交道」</b>，之后的报销抬头、合同主体选择才能一次做对。</p>
+      <div class="callout" data-component="callout">
+        <span class="callout-tag">重点</span>
+        <p>「出口易」是品牌名称，<u>不是法律主体</u>。</p>
+      </div>
+    </section>
+
+    <!-- 右栏：各地区公司实体 -->
+    <aside class="card" data-component="entity-accordion">
+      <div class="card-head">
+        <div>
+          <h2>各地区公司实体</h2>
+          <p class="sub">共 5 个地区 · 点击查看详情</p>
+        </div>
+        <span class="badge">物流事业部</span>
+      </div>
+
+      <div class="acc-list">
+        <div class="acc-item">
+          <button class="acc-trigger" type="button" aria-expanded="false">
+            <span class="acc-icon gz" aria-hidden="true">穗</span>
+            <span>
+              <span class="acc-name">广州公司</span><br>
+              <span class="acc-meta">3 家实体</span>
+            </span>
+            <svg class="chevron" width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+              <path d="M3.5 6L8 10.5L12.5 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+          <div class="acc-panel">
+            <div class="acc-panel-inner">
+              <p class="entity-count">广州地区共 <strong>3 家</strong> 法律实体。</p>
+              <p class="acc-note">涉及报销抬头、合同主体选择时，请以<b>财务主数据</b>中的公司全称与税号为准，勿凭记忆填写。</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="acc-item">
+          <button class="acc-trigger" type="button" aria-expanded="false">
+            <span class="acc-icon sh" aria-hidden="true">沪</span>
+            <span>
+              <span class="acc-name">上海公司</span><br>
+              <span class="acc-meta">1 家实体</span>
+            </span>
+            <svg class="chevron" width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+              <path d="M3.5 6L8 10.5L12.5 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+          <div class="acc-panel">
+            <div class="acc-panel-inner">
+              <p class="entity-count">上海地区共 <strong>1 家</strong> 法律实体。</p>
+              <p class="acc-note">确认业务发生地在上海后，再核对<b>财务主数据</b>中的准确全称。</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="acc-item">
+          <button class="acc-trigger" type="button" aria-expanded="false">
+            <span class="acc-icon sz" aria-hidden="true">深</span>
+            <span>
+              <span class="acc-name">深圳公司</span><br>
+              <span class="acc-meta">1 家实体</span>
+            </span>
+            <svg class="chevron" width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+              <path d="M3.5 6L8 10.5L12.5 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+          <div class="acc-panel">
+            <div class="acc-panel-inner">
+              <p class="entity-count">深圳地区共 <strong>1 家</strong> 法律实体。</p>
+              <p class="acc-note">确认业务发生地在深圳后，再核对<b>财务主数据</b>中的准确全称。</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="acc-item">
+          <button class="acc-trigger" type="button" aria-expanded="false">
+            <span class="acc-icon hk" aria-hidden="true">港</span>
+            <span>
+              <span class="acc-name">香港公司</span><br>
+              <span class="acc-meta">2 家实体</span>
+            </span>
+            <svg class="chevron" width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+              <path d="M3.5 6L8 10.5L12.5 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+          <div class="acc-panel">
+            <div class="acc-panel-inner">
+              <p class="entity-count">香港地区共 <strong>2 家</strong> 法律实体。</p>
+              <p class="acc-note">涉及跨境业务与外汇事项，主体选择请先与<b>财务对接人</b>确认。</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="acc-item open">
+          <button class="acc-trigger" type="button" aria-expanded="true">
+            <span class="acc-icon ow" aria-hidden="true">外</span>
+            <span>
+              <span class="acc-name">海外公司</span><br>
+              <span class="acc-meta">多地实体</span>
+            </span>
+            <svg class="chevron" width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+              <path d="M3.5 6L8 10.5L12.5 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+          <div class="acc-panel">
+            <div class="acc-panel-inner">
+              <div class="region-codes" aria-label="海外实体所在地区代码">
+                <span class="code-chip">US</span>
+                <span class="code-chip">ON</span>
+                <span class="code-chip">NJ</span>
+                <span class="code-chip">DE</span>
+                <span class="code-chip">FL</span>
+                <span class="code-chip">AU</span>
+                <span class="code-chip more">…</span>
+              </div>
+              <p class="acc-note">海外实体请以<b>业务所在地</b>与<b>财务主数据</b>为准。</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </aside>
+  </div>
+
+  <div class="page-actions" data-component="page-nav">
+    <span class="page-indicator">第 1 / 9 页 · 基础知识</span>
+    <div class="page-actions-btns">
+      <button class="btn btn-primary" type="button" data-goto="2">
+        下一步
+        <svg width="15" height="15" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+          <path d="M6 3.5L10.5 8L6 12.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+  </section>
+
+  <!-- ===== 第 2 页：财务职能与分工 ===== -->
+  <section class="view" data-view="2">
+    <div class="lesson-head" data-component="lesson-intro">
+      <p class="eyebrow">职能与分工 / 02</p>
+      <h1>财务的两大职能，四个专业小组。</h1>
+      <p class="lead">先看懂财务部门「做什么」，再认识「谁在做」——这决定了你日后找谁对接、走哪条流程。</p>
+    </div>
+
+    <!-- 财务职能思维导图 -->
+    <div class="mindmap" data-component="mindmap">
+      <div class="mm-root"><span>职能</span></div>
+      <div class="mm-branches">
+        <div class="mm-branch">
+          <div class="mm-node">核算与分析</div>
+          <div class="mm-leafs">
+            <div class="mm-leaf">
+              <p>将公司各种经济业务<b>量化、数据化</b>，直观体现，以便管理层和投资者做决策。</p>
+            </div>
+          </div>
+        </div>
+        <div class="mm-branch">
+          <div class="mm-node">规范与监督</div>
+          <div class="mm-leafs">
+            <div class="mm-leaf">
+              <span class="leaf-tag">外部</span>
+              <p>接受<b>事务所、税局、银行</b>等外部单位或行政机构的监督。</p>
+            </div>
+            <div class="mm-leaf">
+              <span class="leaf-tag">内部</span>
+              <p>对公司经济活动<b>全过程规范</b>：业务起始抑制风险，业务当中控制风险，防范公司利益被侵犯，同时规避法律、税务风险。</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 财务部分工 -->
+    <h2 class="section-title">财务部分工</h2>
+    <p class="section-sub">四个小组各管一摊 · 报销付款前先找对组织</p>
+    <div class="groups" data-component="finance-groups">
+      <div class="group-row g1">
+        <div class="group-chip"><span>应收组</span></div>
+        <div class="group-body">
+          <ul class="group-duty">
+            <li>收入相关系统设置和结算（自定义报价设置、汇率、ERP 系统操作）</li>
+            <li>开票客户采集和开具、欠费客户管理等</li>
+          </ul>
+          <div class="group-links">
+            <span class="link-label">对接</span>
+            <span class="gchip">客户发展部</span>
+            <span class="gchip">各BU产品运营</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="group-row g2">
+        <div class="group-chip"><span>成本结算组</span></div>
+        <div class="group-body">
+          <ul class="group-duty">
+            <li>供应商管理、账单核对、毛利分析等</li>
+          </ul>
+          <div class="group-links">
+            <span class="link-label">对接</span>
+            <span class="gchip">各BU</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="group-row g3">
+        <div class="group-chip"><span>账务组</span></div>
+        <div class="group-body">
+          <ul class="group-duty">
+            <li>费用报销、各报表数据提供</li>
+            <li>对接税局、统计局、审计等</li>
+          </ul>
+          <div class="group-links">
+            <span class="link-label">对接</span>
+            <span class="gchip">各部门</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="group-row g4">
+        <div class="group-chip"><span>资金组</span></div>
+        <div class="group-body">
+          <ul class="group-duty">
+            <li>客户充值、付款、充值收据开具</li>
+            <li>银行管理与维护等</li>
+          </ul>
+          <div class="group-links">
+            <span class="link-label">对接</span>
+            <span class="gchip">客户发展部</span>
+            <span class="gchip">各BU</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="page-actions" data-component="page-nav">
+      <span class="page-indicator">第 2 / 9 页 · 基础知识</span>
+      <div class="page-actions-btns">
+        <button class="btn btn-ghost" type="button" data-goto="1">
+          <svg width="15" height="15" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+            <path d="M10 3.5L5.5 8L10 12.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          上一步
+        </button>
+        <button class="btn btn-primary" type="button" data-goto="3">
+          下一步
+          <svg width="15" height="15" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+            <path d="M6 3.5L10.5 8L6 12.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== 第 3 页：异常表现 ===== -->
+  <section class="view" data-view="3">
+    <div class="lesson-head" data-component="lesson-intro">
+      <p class="eyebrow">财务的职能 / 异常表现</p>
+      <h1>守住底线：有理有据，合规合法。</h1>
+      <p class="lead">财务工作的立足点只有两条；一旦偏离，就落入了下面四种异常表现。对照自查，一条都不能碰。</p>
+    </div>
+
+    <!-- 立足点 vs 异常表现 -->
+    <div class="cmp" data-component="anomaly-compare">
+      <div class="cmp-card cmp-good">
+        <p class="cmp-label">财务立足点</p>
+        <div class="cmp-words">
+          <div class="cmp-word">有理有据<small>业务真实发生，凭证齐全有效</small></div>
+          <div class="cmp-word">合规合法<small>符合制度流程，不越法律红线</small></div>
+        </div>
+      </div>
+      <div class="cmp-arrow" aria-hidden="true">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none">
+          <path d="M6 5l7 7-7 7" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M13 5l7 7-7 7" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" opacity="0.45"/>
+        </svg>
+      </div>
+      <div class="cmp-card">
+        <p class="cmp-label">财务异常表现</p>
+        <div class="cmp-list">
+          <div class="cmp-item is-head">
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+              <path d="M8 1.5l1.9 4.1 4.5.5-3.3 3 .9 4.4L8 11.3l-4 2.2.9-4.4-3.3-3 4.5-.5L8 1.5z"/>
+            </svg>
+            不合规、不合法
+          </div>
+          <div class="cmp-item">
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+              <path d="M8 1.5l1.9 4.1 4.5.5-3.3 3 .9 4.4L8 11.3l-4 2.2.9-4.4-3.3-3 4.5-.5L8 1.5z"/>
+            </svg>
+            不真实
+          </div>
+          <div class="cmp-item">
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+              <path d="M8 1.5l1.9 4.1 4.5.5-3.3 3 .9 4.4L8 11.3l-4 2.2.9-4.4-3.3-3 4.5-.5L8 1.5z"/>
+            </svg>
+            不合理
+          </div>
+          <div class="cmp-item">
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+              <path d="M8 1.5l1.9 4.1 4.5.5-3.3 3 .9 4.4L8 11.3l-4 2.2.9-4.4-3.3-3 4.5-.5L8 1.5z"/>
+            </svg>
+            不完整
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 不合规不合法 分解树 -->
+    <div class="risk-tree" data-component="risk-tree">
+      <div class="risk-root">
+        <span class="risk-chip">不合规不合法</span>
+        <p class="risk-desc"><b>违规</b>影响公司健康发展，造成公司损失；<b>违法</b>带来税务、法律风险。</p>
+      </div>
+      <div class="risk-split" aria-hidden="true"></div>
+      <div class="risk-branches">
+        <div class="risk-branch">
+          <span class="risk-head">不真实</span>
+          <div class="risk-body">
+            <p>未实际发生，或<b>实际发生小于票面金额</b>；实际开展业务与报销业务不一致。</p>
+          </div>
+        </div>
+        <div class="risk-branch">
+          <span class="risk-head">不合理</span>
+          <div class="risk-body">
+            <p><b>明显高于市价</b>的采购；发生时间点不合理；与成本最优原则相反。</p>
+          </div>
+        </div>
+        <div class="risk-branch">
+          <span class="risk-head">不完整</span>
+          <div class="risk-body">
+            <p>不获取<b>发票等原始凭证</b>；不签订合同采购；采用复印件代替原件等。</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="page-actions" data-component="page-nav">
+      <span class="page-indicator">第 3 / 9 页 · 基础知识</span>
+      <div class="page-actions-btns">
+        <button class="btn btn-ghost" type="button" data-goto="2">
+          <svg width="15" height="15" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+            <path d="M10 3.5L5.5 8L10 12.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          上一步
+        </button>
+        <button class="btn btn-primary" type="button" data-goto="4">
+          下一步
+          <svg width="15" height="15" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+            <path d="M6 3.5L10.5 8L6 12.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== 第 4 页：认识发票 ===== -->
+  <section class="view" data-view="4">
+    <div class="lesson-head" data-component="lesson-intro">
+      <p class="eyebrow">财务的职能 / 认识发票</p>
+      <h1>认得六类常见发票，报销不走弯路。</h1>
+      <p class="lead">点击任意发票图片可放大查看票面细节。提交报销前，先确认手里的是哪一类发票。</p>
+    </div>
+
+    <!-- 四类单张发票 -->
+    <div class="inv-block">
+      <div class="inv-grid-2x2" data-component="invoice-gallery">
+        <div class="inv-card">
+          <div class="inv-card-head">
+            <h3>增值税专用发票</h3>
+            <span class="inv-count">可抵扣</span>
+          </div>
+          <div class="inv-figs">
+            <figure class="inv-fig" data-full="assets/invoices/zzs-zp.png" data-cap="增值税专用发票">
+              <img src="assets/invoices/zzs-zp.png" alt="增值税专用发票票样" loading="lazy">
+              <span class="zoom-hint">
+                <svg width="11" height="11" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                  <circle cx="7" cy="7" r="4.5" stroke="currentColor" stroke-width="1.8"/>
+                  <path d="M10.5 10.5L14 14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                  <path d="M7 4.8v4.4M4.8 7h4.4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+                </svg>
+                点击放大
+              </span>
+            </figure>
+          </div>
+        </div>
+
+        <div class="inv-card">
+          <div class="inv-card-head">
+            <h3>全电发票（普票 / 专票）</h3>
+            <span class="inv-count">数电票</span>
+          </div>
+          <div class="inv-figs">
+            <figure class="inv-fig" data-full="assets/invoices/qd-fp.png" data-cap="全电发票（普票 / 专票）">
+              <img src="assets/invoices/qd-fp.png" alt="全电发票票样" loading="lazy">
+              <span class="zoom-hint">
+                <svg width="11" height="11" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                  <circle cx="7" cy="7" r="4.5" stroke="currentColor" stroke-width="1.8"/>
+                  <path d="M10.5 10.5L14 14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                  <path d="M7 4.8v4.4M4.8 7h4.4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+                </svg>
+                点击放大
+              </span>
+            </figure>
+          </div>
+        </div>
+
+        <div class="inv-card">
+          <div class="inv-card-head">
+            <h3>增值税电子发票</h3>
+            <span class="inv-count">电子票</span>
+          </div>
+          <div class="inv-figs">
+            <figure class="inv-fig" data-full="assets/invoices/zzs-dz.png" data-cap="增值税电子发票">
+              <img src="assets/invoices/zzs-dz.png" alt="增值税电子发票票样" loading="lazy">
+              <span class="zoom-hint">
+                <svg width="11" height="11" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                  <circle cx="7" cy="7" r="4.5" stroke="currentColor" stroke-width="1.8"/>
+                  <path d="M10.5 10.5L14 14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                  <path d="M7 4.8v4.4M4.8 7h4.4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+                </svg>
+                点击放大
+              </span>
+            </figure>
+          </div>
+        </div>
+
+        <div class="inv-card">
+          <div class="inv-card-head">
+            <h3>通用机打发票</h3>
+            <span class="inv-count">机打票</span>
+          </div>
+          <div class="inv-figs">
+            <figure class="inv-fig" data-full="assets/invoices/ty-jd.png" data-cap="通用机打发票">
+              <img src="assets/invoices/ty-jd.png" alt="通用机打发票票样" loading="lazy">
+              <span class="zoom-hint">
+                <svg width="11" height="11" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                  <circle cx="7" cy="7" r="4.5" stroke="currentColor" stroke-width="1.8"/>
+                  <path d="M10.5 10.5L14 14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                  <path d="M7 4.8v4.4M4.8 7h4.4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+                </svg>
+                点击放大
+              </span>
+            </figure>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 定额发票：3 张 -->
+    <div class="inv-block">
+      <div class="inv-card">
+        <div class="inv-card-head">
+          <h3>定额发票</h3>
+          <span class="inv-count">3 张票样</span>
+        </div>
+        <div class="inv-grid-3">
+          <figure class="inv-fig" data-full="assets/invoices/de1.png" data-cap="定额发票 · 票样 1">
+            <img src="assets/invoices/de1.png" alt="定额发票票样一" loading="lazy">
+            <span class="zoom-hint">
+              <svg width="11" height="11" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                <circle cx="7" cy="7" r="4.5" stroke="currentColor" stroke-width="1.8"/>
+                <path d="M10.5 10.5L14 14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                <path d="M7 4.8v4.4M4.8 7h4.4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+              </svg>
+              点击放大
+            </span>
+          </figure>
+          <figure class="inv-fig" data-full="assets/invoices/de2.png" data-cap="定额发票 · 票样 2">
+            <img src="assets/invoices/de2.png" alt="定额发票票样二" loading="lazy">
+            <span class="zoom-hint">
+              <svg width="11" height="11" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                <circle cx="7" cy="7" r="4.5" stroke="currentColor" stroke-width="1.8"/>
+                <path d="M10.5 10.5L14 14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                <path d="M7 4.8v4.4M4.8 7h4.4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+              </svg>
+              点击放大
+            </span>
+          </figure>
+          <figure class="inv-fig" data-full="assets/invoices/de3.png" data-cap="定额发票 · 票样 3">
+            <img src="assets/invoices/de3.png" alt="定额发票票样三" loading="lazy">
+            <span class="zoom-hint">
+              <svg width="11" height="11" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                <circle cx="7" cy="7" r="4.5" stroke="currentColor" stroke-width="1.8"/>
+                <path d="M10.5 10.5L14 14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                <path d="M7 4.8v4.4M4.8 7h4.4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+              </svg>
+              点击放大
+            </span>
+          </figure>
+        </div>
+      </div>
+    </div>
+
+    <!-- 航空运输电子客票行程单：2 张 -->
+    <div class="inv-block">
+      <div class="inv-card">
+        <div class="inv-card-head">
+          <h3>航空运输电子客票行程单</h3>
+          <span class="inv-count">2 张票样</span>
+        </div>
+        <div class="inv-grid-2">
+          <figure class="inv-fig" data-full="assets/invoices/hk1.png" data-cap="航空运输电子客票行程单 · 票样 1">
+            <img src="assets/invoices/hk1.png" alt="航空运输电子客票行程单票样一" loading="lazy">
+            <span class="zoom-hint">
+              <svg width="11" height="11" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                <circle cx="7" cy="7" r="4.5" stroke="currentColor" stroke-width="1.8"/>
+                <path d="M10.5 10.5L14 14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                <path d="M7 4.8v4.4M4.8 7h4.4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+              </svg>
+              点击放大
+            </span>
+          </figure>
+          <figure class="inv-fig" data-full="assets/invoices/hk2.png" data-cap="航空运输电子客票行程单 · 票样 2">
+            <img src="assets/invoices/hk2.png" alt="航空运输电子客票行程单票样二" loading="lazy">
+            <span class="zoom-hint">
+              <svg width="11" height="11" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                <circle cx="7" cy="7" r="4.5" stroke="currentColor" stroke-width="1.8"/>
+                <path d="M10.5 10.5L14 14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                <path d="M7 4.8v4.4M4.8 7h4.4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+              </svg>
+              点击放大
+            </span>
+          </figure>
+        </div>
+      </div>
+    </div>
+
+    <div class="page-actions" data-component="page-nav">
+      <span class="page-indicator">第 4 / 9 页 · 基础知识</span>
+      <div class="page-actions-btns">
+        <button class="btn btn-ghost" type="button" data-goto="3">
+          <svg width="15" height="15" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+            <path d="M10 3.5L5.5 8L10 12.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          上一步
+        </button>
+        <button class="btn btn-primary" type="button" data-goto="7">
+          下一步
+          <svg width="15" height="15" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+            <path d="M6 3.5L10.5 8L6 12.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== 第 7 视图：费用分类及归属（阅读顺序第 5 页） ===== -->
+  <section class="view" data-view="7">
+    <div class="lesson-head" data-component="lesson-intro">
+      <p class="eyebrow">怎样正确报销 / 费用分类及归属</p>
+      <h1>先分清费用类别，再找准归属公司。</h1>
+      <p class="lead">报销前先回答两个问题：这笔钱是<b>哪一类费用</b>、应该<b>归属哪家公司主体</b>——答案对了，报销单才不会被打回。</p>
+    </div>
+
+    <!-- 费用分类 -->
+    <h2 class="section-title">费用分类</h2>
+    <p class="section-sub">按受益原则，本制度所称费用分两类</p>
+    <div class="fee-grid" data-component="fee-categories">
+      <div class="fee-card personal">
+        <div class="fee-head">
+          <span class="fee-ico" aria-hidden="true">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+              <circle cx="12" cy="8" r="3.4" stroke="currentColor" stroke-width="1.7"/>
+              <path d="M5 20c.8-3.6 3.6-5.6 7-5.6s6.2 2 7 5.6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+            </svg>
+          </span>
+          <div>
+            <h3>个人因公费用</h3>
+            <small>个人垫付 · 因公发生</small>
+          </div>
+        </div>
+        <p class="fee-desc">员工个人为公司业务先行垫付的费用，按受益原则归类，凭票报销。</p>
+        <div class="fee-chips">
+          <span class="fee-chip">差旅费</span>
+          <span class="fee-chip">住宿费</span>
+          <span class="fee-chip">交通费</span>
+          <span class="fee-chip">等</span>
+        </div>
+        <span class="fee-mode">
+          <svg width="13" height="13" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+            <rect x="2" y="3" width="12" height="10.5" rx="1.8" stroke="currentColor" stroke-width="1.5"/>
+            <path d="M4.5 8.5l2.2 2.2 4.8-5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          系统新建「报销单」模式
+        </span>
+      </div>
+
+      <div class="fee-card corp">
+        <div class="fee-head">
+          <span class="fee-ico" aria-hidden="true">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+              <path d="M3.5 9.2L12 4l8.5 5.2V19a1.2 1.2 0 01-1.2 1.2H4.7A1.2 1.2 0 013.5 19V9.2z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
+              <path d="M9 20.2v-6h6v6" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
+            </svg>
+          </span>
+          <div>
+            <h3>公司费用</h3>
+            <small>公司直接支出 · 经营相关</small>
+          </div>
+        </div>
+        <p class="fee-desc">以公司名义为经营目的发生的支出，同样走报销单流程结算。</p>
+        <div class="fee-chips">
+          <span class="fee-chip">采购经营物资</span>
+          <span class="fee-chip">办公设备</span>
+          <span class="fee-chip">营销推广</span>
+          <span class="fee-chip">等</span>
+        </div>
+        <span class="fee-mode">
+          <svg width="13" height="13" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+            <rect x="2" y="3" width="12" height="10.5" rx="1.8" stroke="currentColor" stroke-width="1.5"/>
+            <path d="M4.5 8.5l2.2 2.2 4.8-5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          系统新建「报销单」模式
+        </span>
+      </div>
+    </div>
+
+    <!-- 费用归属公司 -->
+    <div class="attr-card" data-component="fee-attribution">
+      <h2 class="section-title">费用归属公司</h2>
+      <p class="section-sub">判断费用记到哪家主体名下</p>
+
+      <div class="attr-rule-grid">
+        <div class="attr-rule">
+          <span class="attr-num">1</span>
+          <div>
+            <b>基本原则</b>
+            <small>费用归属<b>签合同的公司主体</b>——合同跟谁签，费用就记在谁名下。</small>
+          </div>
+        </div>
+        <div class="attr-rule">
+          <span class="attr-num">2</span>
+          <div>
+            <b>受益原则</b>
+            <small>费用归属<b>该笔费用产生的受益公司主体</b>——谁受益，谁承担。</small>
+          </div>
+        </div>
+      </div>
+
+      <h2 class="section-title">集团的公司主体</h2>
+      <p class="section-sub">报销时可在以下主体中选择</p>
+      <div class="attr-entities">
+        <span class="ent-chip"><span class="dot-mini" aria-hidden="true"></span>贝法易信息技术有限公司</span>
+        <span class="ent-chip"><span class="dot-mini" aria-hidden="true"></span>广州市贝法易信息科技有限公司</span>
+        <span class="ent-chip"><span class="dot-mini" aria-hidden="true"></span>深圳市易商供应链有限公司</span>
+        <span class="ent-chip"><span class="dot-mini" aria-hidden="true"></span>上海程洲信息科技有限公司</span>
+      </div>
+
+      <h2 class="section-title">三流一致</h2>
+      <p class="section-sub">报销合规的核心校验口径：三条流指向同一主体</p>
+      <div class="flow-row" data-component="three-flows">
+        <div class="flow-node">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M6 3.5h9.5L18 6v14.5H6V3.5z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
+            <path d="M9 9h6M9 12.5h6M9 16h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+          <b>发票流</b>
+          <small>发票开给哪家公司主体</small>
+        </div>
+        <span class="flow-arrow" aria-hidden="true">
+          <svg width="18" height="18" viewBox="0 0 16 16" fill="none"><path d="M3.5 8h9M9 4.5L12.5 8 9 11.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </span>
+        <div class="flow-node">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <circle cx="12" cy="12" r="8.5" stroke="currentColor" stroke-width="1.7"/>
+            <path d="M12 7.5V12l3 2" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <b>资金流</b>
+          <small>款项从哪家主体支付</small>
+        </div>
+        <span class="flow-arrow" aria-hidden="true">
+          <svg width="18" height="18" viewBox="0 0 16 16" fill="none"><path d="M3.5 8h9M9 4.5L12.5 8 9 11.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </span>
+        <div class="flow-node">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M3.5 8L12 3.5 20.5 8v8L12 20.5 3.5 16V8z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
+            <path d="M3.5 8L12 12.5 20.5 8M12 12.5v8" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
+          </svg>
+          <b>业务流</b>
+          <small>合同流、货物流</small>
+        </div>
+      </div>
+      <p class="flow-eq">发票流 = 资金流 = 业务流，三者指向同一公司主体</p>
+    </div>
+
+    <div class="page-actions" data-component="page-nav">
+      <span class="page-indicator">第 5 / 9 页 · 基础知识</span>
+      <div class="page-actions-btns">
+        <button class="btn btn-ghost" type="button" data-goto="4">
+          <svg width="15" height="15" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+            <path d="M10 3.5L5.5 8L10 12.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          上一步
+        </button>
+        <button class="btn btn-primary" type="button" data-goto="8">
+          下一步
+          <svg width="15" height="15" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+            <path d="M6 3.5L10.5 8L6 12.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== 第 8 视图：报销人员对接（阅读顺序第 6 页） ===== -->
+  <section class="view" data-view="8">
+    <div class="lesson-head" data-component="lesson-intro">
+      <p class="eyebrow">怎样正确报销 / 报销人员对接</p>
+      <h1>报销找谁审？对号入座找财务。</h1>
+      <p class="lead">按所属公司主体，交给对应的财务人员审核、报销；报销中有任何疑问，直接找TA解答。</p>
+    </div>
+
+    <div class="contact-intro" data-component="contact-intro">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.7"/>
+        <path d="M12 10.8v5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+        <circle cx="12" cy="7.6" r="1.15" fill="currentColor"/>
+      </svg>
+      <p>报销单提交后由<b>所属公司的对接财务</b>审核——报销前先在下表找到自己公司主体对应的负责人，有疑问<b>提前问</b>，比打回重来快得多。</p>
+    </div>
+
+    <!-- 物流事业部 -->
+    <div class="biz-block" data-component="contact-group">
+      <div class="biz-head">
+        <span class="biz-badge">物流事业部</span>
+        <span class="line" aria-hidden="true"></span>
+        <span class="biz-count">4 位对接财务</span>
+      </div>
+      <div class="contact-grid">
+        <div class="contact-card">
+          <span class="avatar" aria-hidden="true">
+            <svg width="56" height="56" viewBox="0 0 56 56">
+              <rect width="56" height="56" fill="var(--av-a-bg)"/>
+              <circle cx="28" cy="22" r="9.5" fill="var(--av-a-fg)"/>
+              <path d="M10 52c1.8-8.5 9-12.8 18-12.8S44.2 43.5 46 52H10z" fill="var(--av-a-fg)"/>
+              <path d="M20 17.5c1.5-4.5 5.5-6.5 10-5.5" stroke="var(--av-a-bg)" stroke-width="2.6" fill="none" stroke-linecap="round"/>
+            </svg>
+          </span>
+          <div class="contact-body">
+            <div class="contact-name">陈滢<span class="contact-role">物流事业部</span></div>
+            <div class="contact-orgs">
+              <span class="org-chip">CA公司</span>
+              <span class="org-chip">美国公司</span>
+              <span class="org-chip">广州出口易</span>
+              <span class="org-chip">深圳易商</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="contact-card">
+          <span class="avatar" aria-hidden="true">
+            <svg width="56" height="56" viewBox="0 0 56 56">
+              <rect width="56" height="56" fill="var(--av-b-bg)"/>
+              <circle cx="28" cy="22" r="9.5" fill="var(--av-b-fg)"/>
+              <path d="M10 52c1.8-8.5 9-12.8 18-12.8S44.2 43.5 46 52H10z" fill="var(--av-b-fg)"/>
+              <path d="M18.5 19c-1.5-5 2-8.5 7-8.5s8.5 3.5 7 8.5" stroke="var(--av-b-bg)" stroke-width="2.6" fill="none" stroke-linecap="round"/>
+            </svg>
+          </span>
+          <div class="contact-body">
+            <div class="contact-name">陈丽纯<span class="contact-role">物流事业部</span></div>
+            <div class="contact-orgs">
+              <span class="org-chip">广州贝法易</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="contact-card">
+          <span class="avatar" aria-hidden="true">
+            <svg width="56" height="56" viewBox="0 0 56 56">
+              <rect width="56" height="56" fill="var(--av-c-bg)"/>
+              <circle cx="28" cy="22" r="9.5" fill="var(--av-c-fg)"/>
+              <path d="M10 52c1.8-8.5 9-12.8 18-12.8S44.2 43.5 46 52H10z" fill="var(--av-c-fg)"/>
+              <path d="M19 16.5h18M19 20.5h18" stroke="var(--av-c-bg)" stroke-width="2.2" stroke-linecap="round"/>
+            </svg>
+          </span>
+          <div class="contact-body">
+            <div class="contact-name">莫何冰<span class="contact-role">物流事业部</span></div>
+            <div class="contact-orgs">
+              <span class="org-chip">香港公司</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="contact-card">
+          <span class="avatar" aria-hidden="true">
+            <svg width="56" height="56" viewBox="0 0 56 56">
+              <rect width="56" height="56" fill="var(--av-d-bg)"/>
+              <circle cx="28" cy="22" r="9.5" fill="var(--av-d-fg)"/>
+              <path d="M10 52c1.8-8.5 9-12.8 18-12.8S44.2 43.5 46 52H10z" fill="var(--av-d-fg)"/>
+              <path d="M23 17c3.5-3 6.5-3 10 0" stroke="var(--av-d-bg)" stroke-width="2.6" fill="none" stroke-linecap="round"/>
+            </svg>
+          </span>
+          <div class="contact-body">
+            <div class="contact-name">林静欣<span class="contact-role">多主体对接</span></div>
+            <div class="contact-orgs">
+              <span class="org-chip">广州维元</span>
+              <span class="org-chip">上海程洲</span>
+              <span class="org-chip">DE</span>
+              <span class="org-chip">FL</span>
+              <span class="org-chip">AU公司</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SAAS 事业部 + DM 项目 -->
+    <div class="biz-block" data-component="contact-group">
+      <div class="biz-head">
+        <span class="biz-badge alt">SAAS 事业部 / DM 项目</span>
+        <span class="line" aria-hidden="true"></span>
+        <span class="biz-count">由林静欣统一对接</span>
+      </div>
+      <div class="contact-grid">
+        <div class="contact-card">
+          <span class="avatar" aria-hidden="true">
+            <svg width="56" height="56" viewBox="0 0 56 56">
+              <rect width="56" height="56" fill="var(--av-d-bg)"/>
+              <circle cx="28" cy="22" r="9.5" fill="var(--av-d-fg)"/>
+              <path d="M10 52c1.8-8.5 9-12.8 18-12.8S44.2 43.5 46 52H10z" fill="var(--av-d-fg)"/>
+              <path d="M23 17c3.5-3 6.5-3 10 0" stroke="var(--av-d-bg)" stroke-width="2.6" fill="none" stroke-linecap="round"/>
+            </svg>
+          </span>
+          <div class="contact-body">
+            <div class="contact-name">林静欣<span class="contact-role">SAAS事业部</span></div>
+            <div class="contact-orgs">
+              <span class="org-chip">亚速维亿</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="contact-card">
+          <span class="avatar" aria-hidden="true">
+            <svg width="56" height="56" viewBox="0 0 56 56">
+              <rect width="56" height="56" fill="var(--av-d-bg)"/>
+              <circle cx="28" cy="22" r="9.5" fill="var(--av-d-fg)"/>
+              <path d="M10 52c1.8-8.5 9-12.8 18-12.8S44.2 43.5 46 52H10z" fill="var(--av-d-fg)"/>
+              <path d="M23 17c3.5-3 6.5-3 10 0" stroke="var(--av-d-bg)" stroke-width="2.6" fill="none" stroke-linecap="round"/>
+            </svg>
+          </span>
+          <div class="contact-body">
+            <div class="contact-name">林静欣<span class="contact-role">DM项目</span></div>
+            <div class="contact-orgs">
+              <span class="org-chip">广州斗满</span>
+              <span class="org-chip">法国DM</span>
+              <span class="org-chip">德国DM</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="page-actions" data-component="page-nav">
+      <span class="page-indicator">第 7 / 9 页 · 基础知识</span>
+      <div class="page-actions-btns">
+        <button class="btn btn-ghost" type="button" data-goto="7">
+          <svg width="15" height="15" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+            <path d="M10 3.5L5.5 8L10 12.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          上一步
+        </button>
+        <button class="btn btn-primary" type="button" data-goto="5">
+          下一步
+          <svg width="15" height="15" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+            <path d="M6 3.5L10.5 8L6 12.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== 第 5 页：企业微信申请差旅（交互引导） ===== -->
+  <section class="view" data-view="5">
+    <div class="lesson-head" data-component="lesson-intro">
+      <p class="eyebrow">怎样正确报销 / 企业微信申请差旅</p>
+      <h1>跟着手机走一遍：企微上发起差旅申请。</h1>
+      <p class="lead">按照右侧引导，依次点击屏幕上的高亮位置，模拟完成一次「出差 / 外勤」申请。</p>
+    </div>
+
+    <div class="wx-tutorial" data-component="wecom-tutorial">
+      <div class="wx-guide">
+        <ol class="wx-step-list" id="wxSteps">
+          <li data-step="1">
+            <span class="wx-step-num">1</span>
+            <div><b>打开工作台</b><small>在企业微信底部导航点击「工作台」</small></div>
+          </li>
+          <li data-step="2">
+            <span class="wx-step-num">2</span>
+            <div><b>进入审批</b><small>在「内部管理」中点击「审批」</small></div>
+          </li>
+          <li data-step="3">
+            <span class="wx-step-num">3</span>
+            <div><b>选择申请类型</b><small>在「发起申请」页点击「出差」或「外勤」</small></div>
+          </li>
+          <li data-step="4">
+            <span class="wx-step-num">4</span>
+            <div><b>填写并提交</b><small>按表单要求填写，提交给直接部门负责人审批</small></div>
+          </li>
+        </ol>
+        <div class="wx-hint" id="wxHint" aria-live="polite">
+          <span class="dot" aria-hidden="true"></span>
+          <strong id="wxHintMain">请点击</strong>
+          <span id="wxHintSub">点击底部导航的「工作台」</span>
+        </div>
+        <button class="btn btn-ghost" type="button" id="wxReset">重新开始</button>
+      </div>
+
+      <div class="wx-phone">
+        <div class="wx-screen">
+          <img id="wxImg" src="assets/wecom/workbench.jpg" alt="企业微信工作台">
+          <div class="wx-box" id="wxBoxA" title="点击"></div>
+          <div class="wx-box hidden" id="wxBoxB" title="点击"></div>
+        </div>
+        <div class="wx-toggle" id="wxToggle" hidden>
+          <button type="button" data-form="chuchai">出差申请表单</button>
+          <button type="button" data-form="waiqin">外勤申请表单</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="page-actions" data-component="page-nav">
+      <span class="page-indicator">第 6 / 9 页 · 基础知识</span>
+      <div class="page-actions-btns">
+        <button class="btn btn-ghost" type="button" data-goto="8">
+          <svg width="15" height="15" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+            <path d="M10 3.5L5.5 8L10 12.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          上一步
+        </button>
+        <button class="btn btn-primary" type="button" data-goto="6">
+          下一步
+          <svg width="15" height="15" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+            <path d="M6 3.5L10.5 8L6 12.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== 第 6 页：系统模拟（PC 端报销系统交互引导） ===== -->
+  <section class="view" data-view="6">
+    <div class="lesson-head" data-component="lesson-intro">
+      <p class="eyebrow">实际怎么报销 / 系统模拟</p>
+      <h1>PC 端实操：在报销系统里提交报销单。</h1>
+      <p class="lead">报销单系统需访问 <b>www.chukou1.com</b> 并登录。按照下方引导，依次点击屏幕上的高亮位置，模拟走一遍报销单的创建流程。</p>
+    </div>
+
+    <div class="pc-flow" data-component="reimburse-tutorial">
+      <!-- 步骤引导：横排在上方 -->
+      <ol class="pc-steps-row" id="pcSteps">
+        <li data-step="1">
+          <span class="wx-step-num">步骤 1</span>
+          <div><b>打开报销单</b><small>登录后，点击左侧菜单「报销管理 → 报销单」</small></div>
+        </li>
+        <li data-step="2">
+          <span class="wx-step-num">步骤 2</span>
+          <div><b>新建报销单</b><small>点击页面上方的「新建报销单」按钮</small></div>
+        </li>
+        <li data-step="3">
+          <span class="wx-step-num">步骤 3</span>
+          <div><b>填写基本信息</b><small>在表单上半部分填写报销基本信息</small></div>
+        </li>
+        <li data-step="4">
+          <span class="wx-step-num">步骤 4</span>
+          <div><b>填写明细并提交</b><small>在表单下半部分填写费用明细，确认无误后提交</small></div>
+        </li>
+      </ol>
+
+      <div class="pc-hint-row">
+        <div class="wx-hint" id="pcHint" aria-live="polite">
+          <span class="dot" aria-hidden="true"></span>
+          <strong id="pcHintMain">请点击</strong>
+          <span id="pcHintSub">点击左侧菜单的「报销单」</span>
+        </div>
+        <button class="btn btn-ghost" type="button" id="pcReset">重新开始</button>
+      </div>
+
+      <!-- 交互图：放大放下方 -->
+      <div class="pc-big">
+        <div class="pc-window">
+          <div class="pc-titlebar">
+            <span class="pc-dots" aria-hidden="true"><i></i><i></i><i></i></span>
+            <span class="pc-url">
+              <svg width="11" height="11" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                <rect x="3" y="7" width="10" height="7" rx="1.5" stroke="currentColor" stroke-width="1.6"/>
+                <path d="M5.5 7V5a2.5 2.5 0 015 0v2" stroke="currentColor" stroke-width="1.6"/>
+              </svg>
+              www.chukou1.com
+            </span>
+          </div>
+          <div class="pc-screen">
+            <img id="pcImg" src="assets/reimburse/01.png" alt="报销系统页面">
+            <div class="wx-box" id="pcBoxA" title="点击"></div>
+            <div class="wx-box hidden" id="pcBoxB" title="点击"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="page-actions" data-component="page-nav">
+      <span class="page-indicator">第 8 / 9 页 · 基础知识</span>
+      <div class="page-actions-btns">
+        <button class="btn btn-ghost" type="button" data-goto="5">
+          <svg width="15" height="15" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+            <path d="M10 3.5L5.5 8L10 12.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          上一步
+        </button>
+        <button class="btn btn-primary" type="button" data-goto="9">
+          下一步
+          <svg width="15" height="15" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+            <path d="M6 3.5L10.5 8L6 12.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== 第 9 视图：贴票要求（阅读顺序第 9 页） ===== -->
+  <section class="view" data-view="9">
+    <div class="lesson-head" data-component="lesson-intro">
+      <p class="eyebrow">实际怎么报销 / 贴票要求</p>
+      <h1>贴票有讲究：先来做个小测试。</h1>
+      <p class="lead">报销单据需要贴票后提交。先凭直觉选一选哪种贴法正确，再看标准示范。</p>
+    </div>
+
+    <!-- 选择题 -->
+    <div class="quiz-card" data-component="paste-quiz">
+      <p class="quiz-q">报销时需要贴票，你认为下面哪种贴票方法是正确的？</p>
+      <p class="quiz-sub">请选择你认为正确的方式</p>
+      <div class="quiz-opts">
+        <button class="quiz-opt" type="button" data-answer="correct">
+          <img src="assets/paste/correct1-1.png" alt="贴法示范A：发票整齐排列">
+          <span class="pick"><span class="ring" aria-hidden="true"></span>选这个</span>
+        </button>
+        <button class="quiz-opt" type="button" data-answer="wrong">
+          <img src="assets/paste/wrong1.png" alt="贴法示范B：发票随意叠压">
+          <span class="pick"><span class="ring" aria-hidden="true"></span>选这个</span>
+        </button>
+      </div>
+      <div class="quiz-result" id="pqResult" role="status">
+        <span class="mark" id="pqMark" aria-hidden="true"></span>
+        <div>
+          <p class="verdict" id="pqVerdict"></p>
+          <p class="explain" id="pqExplain"></p>
+        </div>
+      </div>
+      <button class="btn btn-ghost" type="button" id="pqReset">重新作答</button>
+    </div>
+
+    <!-- 正确贴法示范（作答后展开） -->
+    <div class="gallery" id="pqGallery" data-component="paste-gallery">
+      <h2 class="section-title">正确的贴票方式</h2>
+      <p class="section-sub">点击任意图片可放大查看 · 贴票核心：整齐、不遮挡票面信息</p>
+
+      <div class="gal-group">
+        <div class="gal-grid-2">
+          <div class="gal-item">
+            <h3>机打发票 · 平铺式</h3>
+            <span class="sub">票据大小相近时，逐张编号、平铺粘贴，互不遮挡</span>
+            <figure class="inv-fig" data-full="assets/paste/correct1-1.png" data-cap="正确贴图 1-1 · 机打发票平铺">
+              <img src="assets/paste/correct1-1.png" alt="机打发票平铺式贴法示范" loading="lazy">
+              <span class="zoom-hint">
+                <svg width="11" height="11" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                  <circle cx="7" cy="7" r="4.5" stroke="currentColor" stroke-width="1.8"/>
+                  <path d="M10.5 10.5L14 14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                  <path d="M7 4.8v4.4M4.8 7h4.4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+                </svg>
+                点击放大
+              </span>
+            </figure>
+          </div>
+          <div class="gal-item">
+            <h3>机打发票 · 阶梯式</h3>
+            <span class="sub">票据较多时，分排阶梯粘贴，每张的金额与号码露出可查</span>
+            <figure class="inv-fig" data-full="assets/paste/correct1-2.png" data-cap="正确贴图 1-2 · 机打发票阶梯式">
+              <img src="assets/paste/correct1-2.png" alt="机打发票阶梯式贴法示范" loading="lazy">
+              <span class="zoom-hint">
+                <svg width="11" height="11" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                  <circle cx="7" cy="7" r="4.5" stroke="currentColor" stroke-width="1.8"/>
+                  <path d="M10.5 10.5L14 14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                  <path d="M7 4.8v4.4M4.8 7h4.4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+                </svg>
+                点击放大
+              </span>
+            </figure>
+          </div>
+        </div>
+      </div>
+
+      <div class="gal-group">
+        <div class="gal-grid-2">
+          <div class="gal-item">
+            <h3>车票 · 逐张排列</h3>
+            <span class="sub">火车票等交通票据按行程顺序排列粘贴</span>
+            <figure class="inv-fig" data-full="assets/paste/correct2-1.png" data-cap="正确贴图 2-1 · 车票逐张排列">
+              <img src="assets/paste/correct2-1.png" alt="车票逐张排列贴法示范" loading="lazy">
+              <span class="zoom-hint">
+                <svg width="11" height="11" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                  <circle cx="7" cy="7" r="4.5" stroke="currentColor" stroke-width="1.8"/>
+                  <path d="M10.5 10.5L14 14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                  <path d="M7 4.8v4.4M4.8 7h4.4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+                </svg>
+                点击放大
+              </span>
+            </figure>
+          </div>
+          <div class="gal-item">
+            <h3>车票 + 定额发票 · 混合粘贴</h3>
+            <span class="sub">不同票种分区粘贴，票据信息完整露出</span>
+            <figure class="inv-fig" data-full="assets/paste/correct2-2.png" data-cap="正确贴图 2-2 · 车票与定额发票混合">
+              <img src="assets/paste/correct2-2.png" alt="车票与定额发票混合贴法示范" loading="lazy">
+              <span class="zoom-hint">
+                <svg width="11" height="11" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                  <circle cx="7" cy="7" r="4.5" stroke="currentColor" stroke-width="1.8"/>
+                  <path d="M10.5 10.5L14 14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                  <path d="M7 4.8v4.4M4.8 7h4.4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+                </svg>
+                点击放大
+              </span>
+            </figure>
+          </div>
+        </div>
+      </div>
+
+      <div class="gal-group">
+        <div class="gal-grid-3">
+          <div class="gal-item">
+            <h3>分类粘贴 · 注明事由</h3>
+            <span class="sub">同类费用分组粘贴，并手写注明客户与费用事由</span>
+            <figure class="inv-fig" data-full="assets/paste/correct3.png" data-cap="正确贴图 3 · 分类粘贴并注明事由">
+              <img src="assets/paste/correct3.png" alt="分类粘贴并注明事由示范" loading="lazy">
+              <span class="zoom-hint">
+                <svg width="11" height="11" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                  <circle cx="7" cy="7" r="4.5" stroke="currentColor" stroke-width="1.8"/>
+                  <path d="M10.5 10.5L14 14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                  <path d="M7 4.8v4.4M4.8 7h4.4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+                </svg>
+                点击放大
+              </span>
+            </figure>
+          </div>
+          <div class="gal-note">
+            <div class="gal-note-item">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <rect x="3.5" y="5" width="17" height="15.5" rx="2" stroke="currentColor" stroke-width="1.7"/>
+                <path d="M8 3.5v3M16 3.5v3M3.5 10h17" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+              </svg>
+              <p><b>出差报销</b>须附上 HR 系统上的<b>出差申请单</b>。</p>
+            </div>
+            <div class="gal-note-item">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M9 4.5h6l1 3.5h3.5v11h-15v-11H8l1-3.5z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
+                <circle cx="12" cy="13.5" r="2.8" stroke="currentColor" stroke-width="1.7"/>
+              </svg>
+              <p><b>业务招待</b>须附上经部门负责人签批的<b>业务招待申请单</b>。</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="page-actions" data-component="page-nav">
+      <span class="page-indicator">第 9 / 9 页 · 基础知识</span>
+      <div class="page-actions-btns">
+        <button class="btn btn-ghost" type="button" data-goto="6">
+          <svg width="15" height="15" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+            <path d="M10 3.5L5.5 8L10 12.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          上一步
+        </button>
+        <button class="btn btn-primary is-disabled" type="button" data-tip="后续内容建设中" aria-disabled="true">
+          下一步
+          <svg width="15" height="15" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+            <path d="M6 3.5L10.5 8L6 12.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  </div><!-- /content-col -->
+  </div><!-- /layout -->
+</main>
+
+<footer class="footer">
+  内部培训资料 · 仅限公司内部使用
+</footer>
+
+<!-- 发票放大预览灯箱 -->
+<div class="lightbox" id="lightbox" data-component="lightbox" role="dialog" aria-modal="true" aria-label="发票放大预览">
+  <button class="lightbox-close" type="button" aria-label="关闭预览">
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+      <path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+    </svg>
+  </button>
+  <img src="" alt="发票放大预览">
+  <p class="lightbox-cap"></p>
+</div>
+
+<script>
+  // 手风琴：点击切换展开/折叠，允许多项同时展开
+  document.querySelectorAll('.acc-trigger').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var item = btn.closest('.acc-item');
+      var open = item.classList.toggle('open');
+      btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+    });
+  });
+
+  // 翻页：切换视图并回到页面顶部，同时同步侧导航高亮
+  function gotoView(n) {
+    document.querySelectorAll('.view').forEach(function (v) {
+      v.classList.toggle('active', v.dataset.view === String(n));
+    });
+    document.querySelectorAll('.nav-leaf[data-nav]').forEach(function (leaf) {
+      leaf.classList.toggle('is-active', leaf.dataset.nav === String(n));
+    });
+    // 进入「企业微信申请差旅」页时，引导流程从头开始
+    if (String(n) === '5') wxGo(1);
+    // 进入「系统模拟」页时，引导流程从头开始
+    if (String(n) === '6') pcGo(1);
+    // 进入「贴票要求」页时，测试题从头开始
+    if (String(n) === '9') pqReset();
+    window.scrollTo(0, 0);
+  }
+  document.querySelectorAll('[data-goto]').forEach(function (btn) {
+    if (btn.classList.contains('is-disabled')) return;
+    btn.addEventListener('click', function () {
+      gotoView(btn.dataset.goto);
+    });
+  });
+
+  // 侧导航：叶子节点跳转对应页面
+  document.querySelectorAll('.nav-leaf[data-nav]').forEach(function (leaf) {
+    leaf.addEventListener('click', function () {
+      gotoView(leaf.dataset.nav);
+    });
+  });
+
+  // 侧导航：章节展开/收起
+  document.querySelectorAll('.nav-group-head').forEach(function (head) {
+    head.addEventListener('click', function () {
+      var group = head.closest('.nav-group');
+      var open = group.classList.toggle('open');
+      head.setAttribute('aria-expanded', open ? 'true' : 'false');
+    });
+  });
+
+  // 发票灯箱：点击放大预览
+  var lightbox = document.getElementById('lightbox');
+  var lbImg = lightbox.querySelector('img');
+  var lbCap = lightbox.querySelector('.lightbox-cap');
+  function closeLightbox(){ lightbox.classList.remove('open'); }
+  document.querySelectorAll('.inv-fig').forEach(function (fig) {
+    fig.addEventListener('click', function () {
+      lbImg.src = fig.dataset.full;
+      lbImg.alt = fig.dataset.cap + ' 放大预览';
+      lbCap.textContent = fig.dataset.cap;
+      lightbox.classList.add('open');
+    });
+  });
+  lightbox.addEventListener('click', closeLightbox);
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') closeLightbox();
+  });
+
+  // 企业微信申请差旅：分步交互引导
+  var wxImg = document.getElementById('wxImg');
+  var wxBoxA = document.getElementById('wxBoxA');
+  var wxBoxB = document.getElementById('wxBoxB');
+  var wxHintMain = document.getElementById('wxHintMain');
+  var wxHintSub = document.getElementById('wxHintSub');
+  var wxToggle = document.getElementById('wxToggle');
+  var wxSteps = document.getElementById('wxSteps');
+  var wxStep = 0;       // 当前步骤（1-4）
+  var wxForm = null;    // 用户选择：chuchai / waiqin
+
+  // 各步骤引导框配置（百分比坐标，基于截图 1216x2640 实测）
+  var WX_STEPS = {
+    1: {
+      img: 'assets/wecom/workbench.jpg', alt: '企业微信工作台',
+      hint: '请点击', sub: '点击底部导航的「工作台」',
+      boxes: [{ el: 'A', l: 62.5, t: 92.8, w: 14.6, h: 7.0, cls: 'pulse', target: null }]
+    },
+    2: {
+      img: 'assets/wecom/workbench.jpg', alt: '企业微信工作台',
+      hint: '请点击', sub: '点击「内部管理」中的「审批」',
+      boxes: [{ el: 'A', l: 27.8, t: 55.6, w: 21.3, h: 12.5, cls: 'pulse', target: null }]
+    },
+    3: {
+      img: 'assets/wecom/create.jpg', alt: '发起申请',
+      hint: '选择出差或外勤', sub: '点击「出差」或「外勤」，进入对应申请表单',
+      boxes: [
+        { el: 'A', l: 38.7, t: 25.4, w: 22.5, h: 8.5, cls: 'blink', target: 'chuchai' },
+        { el: 'B', l: 70.0, t: 25.4, w: 22.5, h: 8.5, cls: 'blink b', target: 'waiqin' }
+      ]
+    }
+  };
+
+  function wxPlaceBox(box, cfg) {
+    box.classList.remove('hidden', 'pulse', 'blink', 'b');
+    if (!cfg) { box.classList.add('hidden'); return; }
+    box.style.left = cfg.l + '%';
+    box.style.top = cfg.t + '%';
+    box.style.width = cfg.w + '%';
+    box.style.height = cfg.h + '%';
+    cfg.cls.split(' ').forEach(function (c) { box.classList.add(c); });
+    box.dataset.target = cfg.target || '';
+  }
+
+  function wxGo(step, form) {
+    wxStep = step;
+    if (form) wxForm = form;
+    // 步骤列表状态
+    wxSteps.querySelectorAll('li').forEach(function (li) {
+      var s = Number(li.dataset.step);
+      li.classList.toggle('is-current', s === step);
+      li.classList.toggle('is-done', s < step);
+    });
+    if (step >= 1 && step <= 3) {
+      var cfg = WX_STEPS[step];
+      wxImg.src = cfg.img;
+      wxImg.alt = cfg.alt;
+      wxHintMain.textContent = cfg.hint;
+      wxHintSub.textContent = cfg.sub;
+      wxPlaceBox(wxBoxA, cfg.boxes[0] || null);
+      wxPlaceBox(wxBoxB, cfg.boxes[1] || null);
+      wxToggle.hidden = true;
+    } else if (step === 4) {
+      // 展示所选表单
+      wxImg.src = wxForm === 'chuchai' ? 'assets/wecom/chuchai.jpg' : 'assets/wecom/waiqin.jpg';
+      wxImg.alt = wxForm === 'chuchai' ? '出差申请表单' : '外勤申请表单';
+      wxHintMain.textContent = wxForm === 'chuchai' ? '已选择：出差' : '已选择：外勤';
+      wxHintSub.textContent = '按表单要求填写并提交，审批人已由管理员预设';
+      wxPlaceBox(wxBoxA, null);
+      wxPlaceBox(wxBoxB, null);
+      wxToggle.hidden = false;
+      wxToggle.querySelectorAll('button').forEach(function (b) {
+        b.classList.toggle('is-active', b.dataset.form === wxForm);
+      });
+    }
+  }
+
+  // 点击引导框：按当前步骤推进
+  function wxBoxClick(target) {
+    if (wxStep === 1) { wxGo(2); return; }
+    if (wxStep === 2) { wxGo(3); return; }
+    if (wxStep === 3 && target) { wxGo(4, target); }
+  }
+  wxBoxA.addEventListener('click', function () { wxBoxClick(wxBoxA.dataset.target); });
+  wxBoxB.addEventListener('click', function () { wxBoxClick(wxBoxB.dataset.target); });
+
+  // 第 4 步：切换查看出差 / 外勤表单
+  wxToggle.querySelectorAll('button').forEach(function (b) {
+    b.addEventListener('click', function () { wxGo(4, b.dataset.form); });
+  });
+
+  // 重新开始
+  document.getElementById('wxReset').addEventListener('click', function () { wxGo(1); });
+
+  // 初始状态
+  wxGo(1);
+
+  // 系统模拟（PC 端报销系统）：分步交互引导
+  var pcImg = document.getElementById('pcImg');
+  var pcBoxA = document.getElementById('pcBoxA');
+  var pcBoxB = document.getElementById('pcBoxB');
+  var pcHintMain = document.getElementById('pcHintMain');
+  var pcHintSub = document.getElementById('pcHintSub');
+  var pcSteps = document.getElementById('pcSteps');
+  var pcStep = 0;
+
+  // 引导框坐标基于标注图与原图的像素差异实测（%相对各截图）
+  var PC_STEPS = {
+    1: {
+      img: 'assets/reimburse/01.png', alt: '报销单列表页',
+      hint: '请点击', sub: '点击左侧菜单「报销管理 → 报销单」',
+      boxes: [{ l: 0.2, t: 84.6, w: 7.2, h: 5.2, cls: 'blink' }]
+    },
+    2: {
+      img: 'assets/reimburse/01.png', alt: '报销单列表页',
+      hint: '请点击', sub: '点击页面右上方的「新建报销单」按钮',
+      boxes: [{ l: 69.3, t: 3.8, w: 8.6, h: 6.9, cls: 'blink' }]
+    },
+    3: {
+      img: 'assets/reimburse/02.png', alt: '新建报销单表单页',
+      hint: '请查看', sub: '这部分需要在系统中填写报销基本信息，看完点击框内继续',
+      boxes: [{ l: 10.4, t: 14.5, w: 34.4, h: 55.8, cls: 'blink' }]
+    },
+    4: {
+      img: 'assets/reimburse/02.png', alt: '新建报销单表单页',
+      hint: '请查看', sub: '这部分需要填写费用明细并提交，看完点击框内完成',
+      boxes: [{ l: 8.9, t: 74.6, w: 89.2, h: 24.5, cls: 'blink' }]
+    }
+  };
+
+  function pcPlaceBox(box, cfg) {
+    box.classList.remove('hidden', 'pulse', 'blink', 'b');
+    if (!cfg) { box.classList.add('hidden'); return; }
+    box.style.left = cfg.l + '%';
+    box.style.top = cfg.t + '%';
+    box.style.width = cfg.w + '%';
+    box.style.height = cfg.h + '%';
+    cfg.cls.split(' ').forEach(function (c) { box.classList.add(c); });
+  }
+
+  function pcGo(step) {
+    pcStep = step;
+    pcSteps.querySelectorAll('li').forEach(function (li) {
+      var s = Number(li.dataset.step);
+      li.classList.toggle('is-current', s === step);
+      li.classList.toggle('is-done', s < step);
+    });
+    if (step >= 1 && step <= 4) {
+      var cfg = PC_STEPS[step];
+      pcImg.src = cfg.img;
+      pcImg.alt = cfg.alt;
+      pcHintMain.textContent = cfg.hint;
+      pcHintSub.textContent = cfg.sub;
+      pcPlaceBox(pcBoxA, cfg.boxes[0] || null);
+      pcPlaceBox(pcBoxB, cfg.boxes[1] || null);
+    } else if (step === 5) {
+      // 完成
+      pcHintMain.textContent = '流程完成';
+      pcHintSub.textContent = '实际操作时按此流程在 www.chukou1.com 中填写并提交';
+      pcPlaceBox(pcBoxA, null);
+      pcPlaceBox(pcBoxB, null);
+      pcSteps.querySelectorAll('li').forEach(function (li) {
+        li.classList.remove('is-current');
+        li.classList.add('is-done');
+      });
+    }
+  }
+
+  function pcBoxClick() {
+    if (pcStep >= 1 && pcStep <= 4) pcGo(pcStep + 1);
+  }
+  pcBoxA.addEventListener('click', pcBoxClick);
+  pcBoxB.addEventListener('click', pcBoxClick);
+
+  document.getElementById('pcReset').addEventListener('click', function () { pcGo(1); });
+
+  pcGo(1);
+
+  // 贴票要求：选择题 + 正确示例画廊
+  var pqResult = document.getElementById('pqResult');
+  var pqMark = document.getElementById('pqMark');
+  var pqVerdict = document.getElementById('pqVerdict');
+  var pqExplain = document.getElementById('pqExplain');
+  var pqGallery = document.getElementById('pqGallery');
+  var pqAnswered = false;
+
+  var PQ_CHECK = '<svg width="52" height="52" viewBox="0 0 52 52" fill="none"><circle cx="26" cy="26" r="23" stroke="#17A34A" stroke-width="3.5"/><path d="M15.5 27l7.5 7.5L37 18.5" stroke="#17A34A" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  var PQ_CROSS = '<svg width="52" height="52" viewBox="0 0 52 52" fill="none"><circle cx="26" cy="26" r="23" stroke="var(--accent)" stroke-width="3.5"/><path d="M18 18l16 16M34 18l-16 16" stroke="var(--accent)" stroke-width="4" stroke-linecap="round"/></svg>';
+
+  function pqReset() {
+    pqAnswered = false;
+    pqResult.className = 'quiz-result';
+    pqResult.classList.remove('show');
+    pqGallery.classList.remove('show');
+    document.querySelectorAll('.quiz-opt').forEach(function (b) {
+      b.classList.remove('chosen', 'dim');
+      b.disabled = false;
+    });
+  }
+
+  document.querySelectorAll('.quiz-opt').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      if (pqAnswered) return;
+      pqAnswered = true;
+      var isCorrect = btn.dataset.answer === 'correct';
+      document.querySelectorAll('.quiz-opt').forEach(function (b) {
+        if (b === btn) { b.classList.add('chosen'); }
+        else { b.classList.add('dim'); }
+        b.disabled = true;
+      });
+      pqResult.classList.add('show');
+      if (isCorrect) {
+        pqResult.classList.add('ok');
+        pqMark.innerHTML = PQ_CHECK;
+        pqVerdict.textContent = '回答正确';
+        pqExplain.textContent = '整齐、不遮挡票面信息的贴法才是规范的——下面来看几种标准的贴票方式。';
+      } else {
+        pqResult.classList.add('bad');
+        pqMark.innerHTML = PQ_CROSS;
+        pqVerdict.textContent = '回答错误';
+        pqExplain.textContent = '随意叠压会遮挡票面金额与发票号码，审核时无法核对。正确做法见下方示范。';
+      }
+      pqGallery.classList.add('show');
+      // 展开后轻量滚动到画廊
+      setTimeout(function () {
+        pqGallery.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 200);
+    });
+  });
+
+  document.getElementById('pqReset').addEventListener('click', pqReset);
+
+  // 初始状态
+  pqReset();
+</script>
+
+</body>
+</html>
