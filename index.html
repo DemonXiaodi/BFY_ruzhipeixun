@@ -120,9 +120,13 @@
   .menu{
     display:flex;
     align-items:center;
-    gap:calc(var(--space)*0.5);
-    overflow-x:auto;
-    scrollbar-width:none;
+    gap:10px;
+    overflow:visible;
+    padding-left:4px;
+  }
+  @media (max-width:760px){
+    .menu{gap:4px;}
+    .menu-item{padding:7px 9px;font-size:13px;}
   }
   .menu::-webkit-scrollbar{display:none;}
   .menu-item{
@@ -745,6 +749,10 @@
     transition:transform .2s ease;
   }
   .nav-group.open > .nav-group-head .chevron{transform:rotate(180deg);}
+  /* 职业道德：扁平 4 项，点击直接切换模块 */
+  .sidebar-ethics .nav-group-head{cursor:pointer}
+  .sidebar-ethics .nav-group-head.is-active{color:var(--primary);background:var(--hover);font-weight:700}
+  .sidebar-ethics .nav-group-head.is-active .nav-num{color:var(--primary)}
 
   .nav-children{
     display:none;
@@ -4149,17 +4157,6 @@
   body.module-ethics .sidebar-comm{display:none;}
   body.module-ethics .sidebar-company{display:none;}
   body.module-ethics .sidebar-ethics{display:block;}
-  .sidebar-ethics .nav-check{
-    margin-left:auto;font-size:11px;font-weight:700;color:#0c7a44;
-    background:#e6f7f3;border-radius:999px;padding:2px 8px;flex:none;
-  }
-  .eth-progress{padding:10px 14px 14px;border-bottom:1px solid var(--line);margin-bottom:10px;}
-  .eth-prog-label{display:block;font-size:12px;color:var(--muted);margin-bottom:6px;}
-  .eth-prog-label b{font-size:15px;color:var(--primary);font-weight:800;}
-  .eth-prog-bar{height:7px;border-radius:99px;background:var(--line);overflow:hidden;}
-  .eth-prog-fill{height:100%;width:0;border-radius:99px;background:linear-gradient(90deg,#7fe0c8,#0fa38a);transition:width .5s ease;}
-  .eth-reset{display:block;width:calc(100% - 28px);margin:2px 14px 12px;padding:7px 12px;font-size:12px;color:var(--muted);background:transparent;border:1px solid var(--line);border-radius:8px;cursor:pointer;transition:.15s;white-space:nowrap;text-align:center;}
-  .eth-reset:hover{color:var(--red);border-color:var(--red);background:rgba(214,52,46,.04);}
   .view-ethics .ethics-scope{padding:0 0 40px;}
   .view-ethics .ethics-scope .module-panel{display:none;}
   .view-ethics .ethics-scope .module-panel.active{display:block;}
@@ -4499,22 +4496,202 @@
 }
 </style>
 <link rel="stylesheet" href="assets/game/game.css">
+<style id="onb-style">
+/* ===== 出口易 · 入职交互升级（onb-* 命名空间） ===== */
+.onb-lock{overflow:hidden!important}
+
+/* 身份录入弹窗 */
+.onb-mask{position:fixed;inset:0;z-index:2000;display:flex;align-items:center;justify-content:center;padding:24px;background:rgba(31,33,38,.45);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);opacity:0;transition:opacity .28s ease}
+.onb-mask.show{opacity:1}
+.onb-modal{width:min(460px,100%);background:var(--surface);border-radius:calc(var(--radius) + 8px);box-shadow:0 30px 80px rgba(31,33,38,.30);padding:30px 32px 26px;transform:translateY(16px) scale(.97);transition:transform .32s cubic-bezier(.2,.8,.2,1);border:1px solid var(--border)}
+.onb-mask.show .onb-modal{transform:none}
+.onb-modal-head{text-align:center;margin-bottom:22px}
+.onb-modal-emoji{font-size:48px;line-height:1;filter:drop-shadow(0 6px 14px rgba(95,127,29,.25))}
+.onb-modal-head h2{margin:12px 0 6px;font-size:22px;color:var(--ink-black);font-weight:800;letter-spacing:.4px}
+.onb-modal-head p{margin:0;color:var(--muted);font-size:13.5px}
+.onb-form{display:flex;flex-direction:column;gap:14px}
+.onb-field{display:flex;flex-direction:column;gap:6px}
+.onb-field>span{font-size:13px;color:var(--ink-black);font-weight:600}
+.onb-field input,.onb-field select{height:46px;padding:0 14px;border:1.5px solid var(--border);border-radius:12px;font-size:15px;color:var(--ink-black);background:#FBFBFD;outline:none;transition:border-color .2s,box-shadow .2s;font-family:inherit;width:100%;box-sizing:border-box}
+.onb-field input:focus,.onb-field select:focus{border-color:var(--primary);box-shadow:0 0 0 4px color-mix(in srgb,var(--primary) 16%,transparent)}
+.onb-field select{appearance:none;-webkit-appearance:none;-moz-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23888' stroke-width='1.6' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;padding-right:34px}
+.onb-err{margin:0;color:var(--accent);font-size:13px;font-weight:600}
+.onb-submit{margin-top:8px;height:50px;border:0;border-radius:14px;background:linear-gradient(135deg,var(--c-gz),var(--c-sh));color:#fff;font-size:16px;font-weight:800;letter-spacing:2px;cursor:pointer;transition:transform .15s,box-shadow .2s;box-shadow:0 10px 24px rgba(95,127,29,.35);font-family:inherit}
+.onb-submit:hover{transform:translateY(-1px);box-shadow:0 14px 30px rgba(95,127,29,.42)}
+.onb-submit:active{transform:translateY(0)}
+.onb-tip{margin:12px 0 0;text-align:center;color:var(--faint);font-size:12px}
+
+/* Toast 提示 */
+.onb-toast-host{position:fixed;left:50%;bottom:32px;transform:translateX(-50%);z-index:2100;display:flex;flex-direction:column;gap:10px;align-items:center;pointer-events:none}
+.onb-toast{display:flex;align-items:center;gap:9px;background:linear-gradient(135deg,#1F9A4A,#14793A);color:#fff;padding:12px 20px;border-radius:999px;font-size:14px;font-weight:600;box-shadow:0 14px 34px rgba(20,121,58,.32);opacity:0;transform:translateY(14px) scale(.96);transition:opacity .3s ease,transform .3s ease}
+.onb-toast.show{opacity:1;transform:none}
+.onb-toast-ico{font-size:16px}
+
+/* 模块完成庆祝 */
+.onb-party{position:fixed;inset:0;z-index:2200;display:flex;align-items:center;justify-content:center;pointer-events:none}
+.onb-party-card{position:relative;background:var(--surface);border-radius:24px;padding:36px 48px;text-align:center;box-shadow:0 30px 80px rgba(31,33,38,.32);transform:scale(.7);opacity:0;transition:transform .42s cubic-bezier(.2,1.3,.4,1),opacity .35s ease;border:1px solid var(--border)}
+.onb-party.show .onb-party-card{transform:scale(1);opacity:1}
+.onb-party-emoji{font-size:66px;animation:onb-bounce 1s ease infinite}
+@keyframes onb-bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+.onb-party-title{margin-top:12px;font-size:24px;font-weight:800;color:var(--ink-black)}
+.onb-party-sub{margin-top:6px;color:var(--muted);font-size:14px}
+.onb-conf{position:absolute;top:-12px;width:10px;height:15px;border-radius:2px;opacity:0}
+.onb-party.show .onb-conf{animation:onb-confetti 1.5s ease forwards}
+@keyframes onb-confetti{0%{opacity:1;transform:translateY(0) rotate(0)}100%{opacity:0;transform:translateY(380px) rotate(540deg)}}
+
+/* 顶栏：状态圆点（悬浮显示进度） */
+.menu{margin-left:auto}
+.menu-item[data-topnav]{display:inline-flex;flex-direction:row;align-items:center;gap:8px;padding:8px 12px;line-height:1.25}
+.mi-label{white-space:nowrap;font-size:14px}
+.mod-dot{position:relative;width:8px;height:8px;border-radius:50%;box-sizing:border-box;transition:transform .15s ease;flex-shrink:0}
+.mod-dot.done{background:#10B981}
+.mod-dot.doing{background:#2563EB;box-shadow:0 0 0 3px rgba(37,99,235,.18)}
+.mod-dot.todo{border:1.5px solid #D1D5DB;background:#fff}
+.mod-dot::after{content:attr(data-tip);position:absolute;top:calc(100% + 6px);left:50%;transform:translateX(-50%) scale(.95);opacity:0;pointer-events:none;white-space:nowrap;background:rgba(17,24,39,.85);color:#fff;font-size:11px;font-weight:500;padding:4px 8px;border-radius:6px;transition:opacity .15s ease,transform .15s ease;z-index:30}
+.menu-item[data-topnav]:hover .mod-dot::after{opacity:1;transform:translateX(-50%) scale(1)}
+.menu-item[data-topnav]:hover .mod-dot{transform:scale(1.15)}
+/* 隐藏顶部导航 active 下划线（避免黑线）与空 tooltip */
+.mod-dot[data-tip=""]::after{display:none;}
+
+/* 顶栏：学员菜单 */
+.onb-user{position:relative;margin-left:14px;flex-shrink:0}
+.onb-user-btn{display:inline-flex;align-items:center;gap:8px;height:40px;padding:0 12px 0 8px;border:1px solid var(--border);border-radius:999px;background:var(--surface);cursor:pointer;font-family:inherit;transition:background .15s ease,border-color .15s ease}
+.onb-user-btn:hover{background:var(--hover);border-color:color-mix(in srgb,var(--fg) 16%,transparent)}
+.onb-avatar{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--c-gz),var(--c-sh));color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;flex-shrink:0}
+.onb-user-name{font-size:13.5px;font-weight:600;color:var(--fg);max-width:90px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.onb-caret{font-size:10px;color:var(--faint)}
+.onb-menu{position:absolute;top:48px;right:0;width:230px;background:var(--surface);border:1px solid var(--border);border-radius:14px;box-shadow:var(--shadow);padding:8px;z-index:30}
+.onb-menu-info{display:flex;flex-direction:column;gap:2px;padding:8px 10px 12px;border-bottom:1px solid var(--border);margin-bottom:6px}
+.onb-menu-info b{font-size:14px;color:var(--ink-black)}
+.onb-menu-info span{font-size:12px;color:var(--muted)}
+.onb-menu-info .dim{color:var(--faint)}
+.onb-menu-item{display:block;width:100%;text-align:left;border:0;background:transparent;padding:9px 10px;border-radius:9px;font-size:13.5px;color:var(--fg);cursor:pointer;font-family:inherit;transition:background .15s ease}
+.onb-menu-item:hover{background:var(--hover)}
+.onb-menu-item.danger{color:var(--accent)}
+.onb-menu-item.danger.armed{background:color-mix(in srgb,var(--accent) 12%,transparent);color:var(--accent);font-weight:700}
+
+/* 侧栏：状态圆点 + 模块进度 */
+.pg-dot{position:absolute;left:26px;top:50%;transform:translateY(-50%);width:9px;height:9px;border-radius:50%;flex-shrink:0;box-sizing:border-box;background:var(--faint);transition:background .2s ease,box-shadow .2s ease}
+.nav-leaf:has(.pg-dot)::before{display:none}
+.pg-dot.is-done{background:var(--ok);box-shadow:0 0 0 3px color-mix(in srgb,var(--ok) 18%,transparent)}
+.pg-dot.is-current{background:var(--primary);box-shadow:0 0 0 3px color-mix(in srgb,var(--primary) 20%,transparent)}
+.pg-dot.is-done::after{content:"";position:absolute;left:2.5px;top:1px;width:3px;height:5px;border:solid #fff;border-width:0 1.5px 1.5px 0;transform:rotate(45deg)}
+.pg-dot[data-eth-dot]{position:static;transform:none;top:auto;left:auto;flex-shrink:0}
+.sidebar-progress{margin:0 4px 12px;padding:10px 12px;background:color-mix(in srgb,var(--primary) 6%,transparent);border-radius:12px}
+.sp-text{font-size:12.5px;color:var(--muted);margin-bottom:7px}
+.sp-text b{color:var(--primary);font-size:14px}
+.sp-bar{height:7px;border-radius:999px;background:var(--panel);overflow:hidden}
+.sp-bar i{display:block;height:100%;width:0;border-radius:999px;background:linear-gradient(90deg,var(--c-gz),var(--c-sh));transition:width .5s cubic-bezier(.2,.8,.2,1)}
+
+/* ============ 首页（无顶栏导航 / 无左侧菜单） ============ */
+.brand{cursor:pointer;}
+body.module-home .topbar{display:none;}
+body.module-home .crumbs{display:none;}
+body.module-home .sidebar{display:none;}
+body.module-home .layout{grid-template-columns:minmax(0,1fr);}
+body.module-home .page{max-width:1180px;padding-top:calc(var(--space)*1.5);}
+/* ===== 首页（飞书风格：白色顶栏 + 欢迎卡片 + 严格上下分区卡片） ===== */
+.home-topbar{display:flex;align-items:center;justify-content:space-between;gap:16px;background:#fff;border:1px solid var(--line);border-radius:16px;padding:16px 32px;margin-bottom:24px;}
+.home-logo{height:36px;width:auto;max-width:160px;display:block;}
+.home-brand{display:flex;align-items:center;gap:12px;min-width:0;}
+.home-brand-text{display:flex;flex-direction:column;line-height:1.25;min-width:0;}
+.home-brand-text strong{font-size:16px;font-weight:700;color:#111827;letter-spacing:.3px;}
+.home-brand-text small{font-size:11px;color:#9CA3AF;letter-spacing:1.5px;}
+.home-user{position:relative;display:flex;align-items:center;gap:10px;cursor:pointer;}
+.home-avatar{width:36px;height:36px;border-radius:50%;background:#4F46E5;color:#fff;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;flex:none;}
+.home-user-info{display:flex;flex-direction:column;line-height:1.3;}
+.home-user-info b{font-size:14px;font-weight:700;color:#111827;}
+.home-user-info span{font-size:12px;color:#9CA3AF;}
+.home-caret{font-size:10px;color:#9CA3AF;margin-left:2px;}
+.home-user-menu{position:absolute;top:calc(100% + 10px);right:0;min-width:160px;background:#fff;border:1px solid var(--line);border-radius:12px;box-shadow:0 12px 30px rgba(17,24,39,.12);padding:6px;opacity:0;transform:translateY(-6px);pointer-events:none;transition:opacity .18s,transform .18s;z-index:5;}
+.home-user-menu.on{opacity:1;transform:none;pointer-events:auto;}
+.home-user-menu button{display:flex;width:100%;align-items:center;gap:8px;background:transparent;border:0;padding:9px 12px;border-radius:8px;font-size:13.5px;color:#374151;cursor:pointer;font-family:inherit;text-align:left;}
+.home-user-menu button:hover{background:#F3F4F6;color:#DC2626;}
+
+.home-hero{display:flex;align-items:center;justify-content:space-between;gap:24px;flex-wrap:wrap;background:#fff;border:1px solid #F3F4F6;border-radius:16px;box-shadow:0 4px 20px rgba(0,0,0,.06);padding:28px 32px;margin-bottom:24px;}
+.home-hero-left{min-width:0;flex:1 1 320px;}
+.home-greeting{margin:0 0 10px;font-size:24px;font-weight:700;color:#111827;}
+.home-progress-text{margin:0 0 14px;font-size:14px;color:#6B7280;}
+.home-progress-text b{font-size:20px;font-weight:800;color:#111827;}
+.home-progress{height:8px;border-radius:999px;background:#E5E7EB;overflow:hidden;max-width:400px;}
+.home-progress i{display:block;height:100%;width:0;border-radius:999px;background:linear-gradient(90deg,#4F46E5,#7C3AED);transition:width .8s cubic-bezier(.2,.8,.2,1);}
+.home-continue{flex:none;display:inline-flex;align-items:center;gap:8px;border:0;border-radius:10px;background:linear-gradient(135deg,#2563EB 0%,#3B82F6 100%);color:#fff;padding:12px 24px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap;transition:transform .15s,box-shadow .2s;box-shadow:0 8px 20px rgba(37,99,235,.28);}
+.home-continue:hover{transform:translateY(-2px);box-shadow:0 12px 26px rgba(37,99,235,.38);}
+.home-continue::before{content:"▶";font-size:10px;}
+
+.home-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px;}
+@media (max-width:1080px){.home-grid{grid-template-columns:repeat(2,minmax(0,1fr));}}
+@media (max-width:720px){.home-grid{grid-template-columns:minmax(0,1fr);}}
+
+/* 卡片主题（柔和渐变 / 图标容器 / 进度填充） */
+.home-card.t1{--card-bg:linear-gradient(180deg,#F0F9FF 0%,#FFFFFF 72%);--ic-bg:#DBEAFE;--ic-fg:#2563EB;--bar:#3B82F6;--art:rgba(59,130,246,.10)}
+.home-card.t2{--card-bg:linear-gradient(180deg,#F5F3FF 0%,#FFFFFF 72%);--ic-bg:#EDE9FE;--ic-fg:#7C3AED;--bar:#8B5CF6;--art:rgba(139,92,246,.10)}
+.home-card.t3{--card-bg:linear-gradient(180deg,#FFF7ED 0%,#FFFFFF 72%);--ic-bg:#FFEDD5;--ic-fg:#EA580C;--bar:#F97316;--art:rgba(249,115,22,.10)}
+.home-card.t4{--card-bg:linear-gradient(180deg,#ECFDF5 0%,#FFFFFF 72%);--ic-bg:#D1FAE5;--ic-fg:#059669;--bar:#10B981;--art:rgba(16,185,129,.10)}
+.home-card.t5{--card-bg:linear-gradient(180deg,#EFF6FF 0%,#FFFFFF 72%);--ic-bg:#DBEAFE;--ic-fg:#2563EB;--bar:#3B82F6;--art:rgba(59,130,246,.10)}
+.home-card.t6{--card-bg:linear-gradient(180deg,#FEF2F2 0%,#FFFFFF 72%);--ic-bg:#FEE2E2;--ic-fg:#DC2626;--bar:#EF4444;--art:rgba(239,68,68,.10)}
+.home-card{position:relative;display:flex;flex-direction:column;min-height:232px;text-align:left;background:var(--card-bg,#fff);border:1px solid rgba(17,24,39,.05);border-radius:20px;padding:20px;cursor:pointer;box-shadow:0 4px 20px rgba(0,0,0,.06);font-family:inherit;overflow:hidden;transition:transform .3s ease,box-shadow .3s ease;transform:translateY(16px);opacity:0;animation:homeIn .5s ease-out forwards;}
+.home-card:hover{transform:translateY(-4px);box-shadow:0 8px 32px rgba(0,0,0,.1);}
+.home-card:active{transform:translateY(1px);}
+.home-card:focus-visible{outline:3px solid rgba(79,70,229,.4);outline-offset:2px;}
+@keyframes homeIn{to{transform:none;opacity:1}}
+.home-card.is-done{opacity:.9;filter:saturate(.75);}
+.home-card.is-todo{--card-bg:linear-gradient(180deg,#F9FAFB 0%,#FFFFFF 72%);--ic-bg:#F3F4F6;--ic-fg:#9CA3AF;--bar:#D1D5DB;--art:rgba(156,163,175,.08);opacity:.75;}
+/* 卡片头部：标题 + 图标 */
+.home-card-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:8px;}
+.home-card-name{margin:0;font-size:18px;font-weight:700;color:#111827;line-height:1.3;flex:1 1 auto;}
+.home-card-ico{flex:none;width:44px;height:44px;border-radius:50%;background:var(--ic-bg,#DBEAFE);color:var(--ic-fg,#2563EB);display:flex;align-items:center;justify-content:center;transition:transform .2s ease;}
+.home-card-ico svg{width:22px;height:22px;display:block;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;fill:none;}
+.home-card:hover .home-card-ico{transform:scale(1.1);}
+/* 简介 */
+.home-card-desc{margin:0 0 16px;font-size:13px;line-height:1.6;color:#6B7280;}
+/* 进度 */
+.home-card-progress{display:flex;align-items:center;gap:10px;margin-top:auto;}
+.home-card-bar{flex:1;height:6px;border-radius:3px;background:#F3F4F6;overflow:hidden;}
+.home-card-bar i{display:block;height:100%;width:0;border-radius:3px;background:var(--bar,#3B82F6);transition:width .8s cubic-bezier(.2,.8,.2,1);}
+.home-card-pct{flex:none;min-width:34px;text-align:right;font-size:12px;font-weight:700;color:var(--ic-fg,#2563EB);}
+/* 底部状态 */
+.home-card-foot{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:12px;}
+.home-card-status{font-size:11px;font-weight:600;padding:4px 10px;border-radius:20px;white-space:nowrap;}
+.home-card.is-doing .home-card-status{background:#EFF6FF;color:#2563EB;}
+.home-card.is-done .home-card-status{background:#ECFDF5;color:#059669;}
+.home-card.is-todo .home-card-status{background:#F3F4F6;color:#6B7280;}
+.home-card-extra{font-size:12px;color:#6B7280;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+/* 装饰图形 */
+.home-card-art{position:absolute;right:-18px;bottom:-18px;width:96px;height:96px;border-radius:50%;background:var(--art,rgba(59,130,246,.08));pointer-events:none;}
+.home-card-art::after{content:"";position:absolute;left:-34px;top:14px;width:56px;height:56px;border-radius:50%;border:2px solid var(--art,rgba(59,130,246,.12));background:transparent;}
+.home-foot{margin-top:32px;text-align:center;font-size:12px;color:#9CA3AF;}
+/* 退出登录二次确认弹窗 */
+.onb-cmask{position:fixed;inset:0;z-index:2100;display:flex;align-items:center;justify-content:center;padding:24px;background:rgba(31,33,38,.45);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);opacity:0;transition:opacity .25s ease}
+.onb-cmask.onb-show{opacity:1}
+.onb-cdialog{width:min(420px,92vw);background:var(--surface);border-radius:20px;box-shadow:0 24px 60px rgba(20,30,45,.28);padding:28px 26px 22px;text-align:center;transform:translateY(14px) scale(.97);transition:transform .25s cubic-bezier(.2,.8,.2,1)}
+.onb-cmask.onb-show .onb-cdialog{transform:none}
+.onb-cico{width:54px;height:54px;margin:0 auto 12px;border-radius:50%;background:color-mix(in srgb,var(--warn) 15%,transparent);display:flex;align-items:center;justify-content:center;font-size:26px}
+.onb-ctitle{margin:0 0 8px;font-size:18px;font-weight:800}
+.onb-ctext{margin:0 0 20px;font-size:13.5px;line-height:1.7;color:var(--muted)}
+.onb-ctext b{color:var(--warn)}
+.onb-cbtns{display:flex;gap:12px}
+.onb-cbtn{flex:1;height:44px;border:0;border-radius:12px;font-size:14.5px;font-weight:700;cursor:pointer;transition:transform .15s,box-shadow .2s,background .15s;font-family:inherit}
+.onb-ccancel{background:var(--panel);color:var(--muted)}
+.onb-ccancel:hover{background:var(--line)}
+.onb-cok{background:linear-gradient(135deg,var(--c-gz),var(--c-sh));color:#fff;box-shadow:0 8px 20px color-mix(in srgb,var(--c-sh) 35%,transparent)}
+.onb-cok:hover{transform:translateY(-1px)}
+.home-foot{margin-top:calc(var(--space)*2);text-align:center;font-size:12px;color:var(--faint);}
+</style>
 </head>
 <body>
 
 <header class="topbar" data-component="top-nav">
   <div class="topbar-inner">
     <div class="brand">
-      <svg class="brand-mark" viewBox="0 0 40 40" role="img" aria-label="出口易新人培训平台">
-        <rect x="0" y="0" width="40" height="40" rx="10" fill="var(--brand-green)"/>
-        <circle cx="20" cy="20" r="9" fill="var(--brand-olive)"/>
-      </svg>
+      <img class="brand-mark" src="assets/chukouyi-logo.png" alt="出口易新人培训平台" style="height:44px;width:auto;display:block;border-radius:0;background:transparent;">
       <span class="brand-text">
         <strong>出口易 · 新人培训平台</strong>
         <small>Onboarding Center</small>
       </span>
     </div>
     <nav class="menu" aria-label="平台主导航">
+      <button class="menu-item" type="button" data-topnav="home">首页</button>
       <button class="menu-item" type="button" data-topnav="40">公司简介</button>
       <button class="menu-item" type="button" data-topnav="31">企业文化与组织架构</button>
       <button class="menu-item" type="button" data-topnav="15">十二条令</button>
@@ -4533,6 +4710,43 @@
   </div>
 
   <div class="layout">
+
+  <!-- ===== 首页：进入平台后的第一个页面（无顶部导航 / 无左侧菜单） ===== -->
+  <section class="view view-home active" data-view="home">
+    <header class="home-topbar">
+      <div class="home-brand">
+        <img class="home-logo" src="assets/chukouyi-logo.png" alt="贝法易新人培训平台">
+        <div class="home-brand-text">
+          <strong>贝法易 新人培训平台</strong>
+          <small>BFE ONBOARDING</small>
+        </div>
+      </div>
+      <div class="home-user" id="homeUser" title="点击查看菜单">
+        <span class="home-avatar" id="homeAvatar">新</span>
+        <div class="home-user-info">
+          <b id="homeUserName">新同学</b>
+          <span id="homeUserId">工号 —</span>
+        </div>
+        <span class="home-caret">▼</span>
+        <div class="home-user-menu" id="homeUserMenu">
+          <button type="button" id="homeLogout">退出登录</button>
+        </div>
+      </div>
+    </header>
+
+    <section class="home-hero">
+      <div class="home-hero-left">
+        <h1 class="home-greeting" id="homeGreeting">👋 欢迎回来！</h1>
+        <p class="home-progress-text" id="homeProgressText">学习进度：已完成 <b>0</b> / 0 个子页面</p>
+        <div class="home-progress"><i id="homeProgressBar"></i></div>
+      </div>
+      <button class="home-continue" type="button" id="homeContinue">▶ 继续学习</button>
+    </section>
+
+    <div class="home-grid" id="homeGrid"></div>
+
+    <p class="home-foot">数据将于下次同步时保存</p>
+  </section>
 
   <!-- ===== 左侧竖导航（仅财务报销与合同审批模块显示） ===== -->
   <aside class="sidebar sidebar-fin" data-component="side-nav">
@@ -4765,95 +4979,32 @@
       职业道德
     </div>
 
-    <div class="eth-progress">
-      <span class="eth-prog-label">学习进度 <b id="progressNum">0</b> / 5</span>
-      <div class="eth-prog-bar"><div class="eth-prog-fill" id="progressFill"></div></div>
-    </div>
-    <button class="eth-reset" id="resetBtn" type="button" title="重置所有学习进度">重置进度</button>
-
     <div class="nav-group open" data-module="1">
-      <button class="nav-group-head" type="button" aria-expanded="true">
+      <button class="nav-group-head" type="button" data-eth-module="1" aria-expanded="true">
         <span class="nav-num">01</span>
         <span class="glabel">信息保险箱</span>
-        <svg class="chevron" width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-          <path d="M3.5 6L8 10.5L12.5 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
       </button>
-      <div class="nav-children">
-        <button class="nav-leaf" type="button" data-eth-module="1" data-eth-leaf="m1-know">什么是保密信息</button>
-        <button class="nav-leaf" type="button" data-eth-module="1" data-eth-leaf="m1-why">为什么需要保密</button>
-        <button class="nav-leaf" type="button" data-eth-module="1" data-eth-leaf="m1-challenge">保密信息判断挑战</button>
-      </div>
     </div>
 
     <div class="nav-group open" data-module="2">
-      <button class="nav-group-head" type="button" aria-expanded="true">
+      <button class="nav-group-head" type="button" data-eth-module="2" aria-expanded="true">
         <span class="nav-num">02</span>
         <span class="glabel">职业边界</span>
-        <svg class="chevron" width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-          <path d="M3.5 6L8 10.5L12.5 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
       </button>
-      <div class="nav-children">
-        <button class="nav-leaf" type="button" data-eth-module="2" data-eth-leaf="m2-track">职业赛道与护栏</button>
-        <button class="nav-leaf" type="button" data-eth-module="2" data-eth-leaf="m2-story">情景案例 · 小王跳槽</button>
-      </div>
     </div>
 
     <div class="nav-group open" data-module="3">
-      <button class="nav-group-head" type="button" aria-expanded="true">
+      <button class="nav-group-head" type="button" data-eth-module="3" aria-expanded="true">
         <span class="nav-num">03</span>
         <span class="glabel">职业红线</span>
-        <svg class="chevron" width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-          <path d="M3.5 6L8 10.5L12.5 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
       </button>
-      <div class="nav-children">
-        <button class="nav-leaf" type="button" data-eth-module="3" data-eth-leaf="m3-principles">五项职业道德准则</button>
-        <button class="nav-leaf" type="button" data-eth-module="3" data-eth-leaf="m3-redlines">四条职业红线</button>
-      </div>
     </div>
 
     <div class="nav-group open" data-module="4">
-      <button class="nav-group-head" type="button" aria-expanded="true">
+      <button class="nav-group-head" type="button" data-eth-module="4" aria-expanded="true">
         <span class="nav-num">04</span>
         <span class="glabel">利益诱惑</span>
-        <svg class="chevron" width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-          <path d="M3.5 6L8 10.5L12.5 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
       </button>
-      <div class="nav-children">
-        <button class="nav-leaf" type="button" data-eth-module="4" data-eth-leaf="m4-scenarios">情景判断</button>
-        <button class="nav-leaf" type="button" data-eth-module="4" data-eth-leaf="m4-temptations">识别利益诱惑</button>
-        <button class="nav-leaf" type="button" data-eth-module="4" data-eth-leaf="m4-gifts">礼品与利益判断</button>
-      </div>
-    </div>
-
-    <div class="nav-group open" data-module="5">
-      <button class="nav-group-head" type="button" aria-expanded="true">
-        <span class="nav-num">05</span>
-        <span class="glabel">守护什么</span>
-        <svg class="chevron" width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-          <path d="M3.5 6L8 10.5L12.5 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-      </button>
-      <div class="nav-children">
-        <button class="nav-leaf" type="button" data-eth-module="5" data-eth-leaf="m5-values">我们守护的价值</button>
-        <button class="nav-leaf" type="button" data-eth-module="5" data-eth-leaf="m5-finish">完成本模块</button>
-      </div>
-    </div>
-
-    <div class="nav-group" data-module="exam">
-      <button class="nav-group-head" type="button" aria-expanded="false">
-        <span class="nav-num">06</span>
-        <span class="glabel">终极挑战</span>
-        <svg class="chevron" width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-          <path d="M3.5 6L8 10.5L12.5 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-      </button>
-      <div class="nav-children">
-        <button class="nav-leaf is-locked" type="button" data-eth-module="exam" data-eth-leaf="exam">终极考试</button>
-      </div>
     </div>
   </aside>
 
@@ -6765,7 +6916,7 @@
 
   <!-- ===== 第 15 视图：十二条令 · 互动游戏（独立模块） ===== -->
   <section class="view view-game" data-view="15">
-    <iframe class="game-full" src="assets/game/twelve-rules.html?v=20260903b" title="十二条令 · 入职培训互动游戏" data-component="game-root"></iframe>
+    <iframe class="game-full" src="assets/game/twelve-rules.html?v=20260904c" title="十二条令 · 入职培训互动游戏" data-component="game-root"></iframe>
   </section>
 
   <!-- ===== 第 22 视图：职业道德（平台内联模块，侧栏与其它模块统一） ===== -->
@@ -6977,23 +7128,15 @@
     <div class="grid g3" id="giftGrid"></div>
     <p class="fb-note" style="margin-top:16px">📌 具体礼品、礼金和商务宴请处理标准，请以公司正式制度为准。</p>
     <div id="m4Done"></div>
-  </section>
-      <section class="module-panel" id="mod-5">
-    <div class="panel-head">
-      <span class="tag">🌟 模块 05</span>
+
+    <div class="divider"></div>
+
+    <div class="panel-head" style="margin-top:8px">
+      <span class="tag">🌟 我们守护的价值</span>
       <h2>我们守护的，远不止货物</h2>
       <p class="lead">把前面学到的，沉淀成你自己的职业信念。</p>
     </div>
-
     <div class="grid g3" id="valueGrid"></div>
-    <div id="m5-values" style="position:absolute;margin-top:-20px"></div>
-
-    <div class="card know-card mt24" style="text-align:center" id="m5-finish">
-      <div class="ico" style="margin:0 auto 10px">🛡️</div>
-      <h4>守护，是一种长期主义</h4>
-      <p>守住底线的人，才值得被长期信任；而信任，是职场里最稀缺、也最贵的资产。</p>
-      <button class="btn btn-success mt16" id="m5FinishBtn">✓ 完成本模块，解锁终极挑战</button>
-    </div>
     <div id="m5Done"></div>
   </section>
       <section class="module-panel" id="mod-exam">
@@ -7566,7 +7709,7 @@
     </div>
 
     <div class="warmup-wrap" data-component="reply-game">
-      <iframe class="warmup-frame" src="assets/game/reply-game/reply-game.html" title="模拟回复 · 邮件谈判专家情景演练"></iframe>
+      <iframe class="warmup-frame" src="assets/game/reply-game/reply-game.html?v=20260904d" title="模拟回复 · 邮件谈判专家情景演练"></iframe>
     </div>
 
     <div class="page-actions" data-component="page-nav">
@@ -7856,7 +7999,7 @@
       </div>
 
       <div class="orgexp-card">
-        <aside class="orgexp-side collapsed" id="orgexp-side">
+        <aside class="orgexp-side" id="orgexp-side">
           <div class="orgexp-brand">
             <div class="orgexp-brand-row">
               <span class="orgexp-logo">🪐</span>
@@ -7872,7 +8015,7 @@
 
         <div class="orgexp-view" id="orgexp-view">
           <canvas class="orgexp-canvas" id="orgexp-canvas" width="920" height="560"></canvas>
-          <button class="orgexp-open show" id="orgexp-open" type="button" aria-label="展开导航">☰ 组织层级</button>
+          <button class="orgexp-open" id="orgexp-open" type="button" aria-label="展开导航">☰ 组织层级</button>
         </div>
       </div>
 
@@ -7947,7 +8090,7 @@
   </section>
 
   <!-- ===== 公司简介 · 第 1 页：企业概况 ===== -->
-  <section class="view active" data-view="40">
+  <section class="view" data-view="40">
     <div class="lesson-head" data-component="lesson-intro">
       <p class="eyebrow">企业概况 / 01</p>
       <h1>一家深耕跨境出口 19 年的跨境电商物流服务商。</h1>
@@ -8932,12 +9075,14 @@
     if (String(n) === '9') pqReset();
     // 进入「企业微信审批」页时，引导流程从头开始
     if (String(n) === '14') { document.getElementById('ctChosen').classList.remove('show'); ctGo(1); }
-    // 模块切换：十二条令游戏(15) / 职场沟通(16-19) / 财务模块 互斥高亮、侧栏与面包屑切换
+    // 模块切换：首页(home) / 十二条令游戏(15) / 职场沟通(16-19) / 财务模块 互斥高亮、侧栏与面包屑切换
+    var isHome = String(n) === 'home';
     var isGame = String(n) === '15';
     var isComm = ['16', '17', '18', '19', '20', '21'].indexOf(String(n)) !== -1;
     var isCulture = ['31', '33'].indexOf(String(n)) !== -1;
     var isCompany = ['40', '41', '42', '43'].indexOf(String(n)) !== -1;
     var isEthics = String(n) === '22';
+    document.body.classList.toggle('module-home', isHome);
     document.body.classList.toggle('module-game', isGame);
     document.body.classList.toggle('module-company', isCompany);
     document.body.classList.toggle('module-comm', isComm);
@@ -8950,14 +9095,17 @@
     // 预热挑战未完成时：处于预热页则游戏全屏（隐藏侧栏），完成或离开后恢复
     var warmFullscreen = (String(n) === '19') && !window.commUnlocked;
     document.body.classList.toggle('module-warmup', warmFullscreen);
-    var mod = isGame ? '15' : (isComm ? '19' : (isCulture ? '31' : (isCompany ? '40' : (isEthics ? '22' : '40'))));
+    // 首页不点亮任何导航项（首页本身隐藏导航栏）
+    var mod = isHome ? '' : (isGame ? '15' : (isComm ? '19' : (isCulture ? '31' : (isCompany ? '40' : (isEthics ? '22' : '1')))));
     document.querySelectorAll('.menu-item[data-topnav]').forEach(function (m) {
       var active = m.dataset.topnav === mod;
       m.classList.toggle('is-active', active);
       if (active) { m.setAttribute('aria-current', 'page'); } else { m.removeAttribute('aria-current'); }
     });
     var crumbs = document.querySelector('.crumbs');
-    if (isGame) {
+    if (isHome) {
+      // 首页无面包屑（.crumbs 已被隐藏），保持内容不变即可
+    } else if (isGame) {
       crumbs.innerHTML = '<span>十二条令</span><span>/</span><span class="cur">互动游戏</span>';
     } else if (isComm) {
       var commNames = { '19': '预热挑战', '16': '沟通技巧', '17': '邮件写作要点', '20': '邮件写作技巧', '18': '模拟回复游戏', '21': '如何开会' };
@@ -9530,8 +9678,8 @@
       var n = parseInt(m[1], 10);
       if (!isNaN(n)) gotoView(n);
     } else {
-      // 默认进入【公司简介】(view 40)，而非原先的财务报销页
-      gotoView(40);
+      // 默认进入【首页】(home)，登录后在此选择要学习的模块
+      gotoView('home');
     }
   })();
 </script>
@@ -9833,8 +9981,10 @@ function completedCount(){ return state.modules.filter(Boolean).length; }
 /* ================= 进度 UI ================= */
 function renderProgress(){
   const n = completedCount();
-  $("#progressNum").textContent = n;
-  $("#progressFill").style.width = (n/5*100)+"%";
+  const pn = document.getElementById("progressNum");
+  const pf = document.getElementById("progressFill");
+  if(pn) pn.textContent = n;
+  if(pf) pf.style.width = (n/5*100)+"%";
 }
 const NAV_LEAVES = {
   1:[{id:"m1-know",label:"什么是保密信息"},{id:"m1-why",label:"为什么需要保密"},{id:"m1-challenge",label:"保密信息判断挑战"}],
@@ -9857,11 +10007,7 @@ function renderNav(){
     if(isActive || done) g.classList.add("open");
     const head = g.querySelector(".nav-group-head");
     if(head) head.setAttribute("aria-expanded", g.classList.contains("open") ? "true" : "false");
-    let chk = head ? head.querySelector(".nav-check") : null;
-    if(done){
-      if(!chk && head){ chk = document.createElement("span"); chk.className = "nav-check"; head.appendChild(chk); }
-      if(chk){ chk.textContent = "\u2713 \u5df2\u5b8c\u6210"; chk.style.display = ""; }
-    } else if(chk){ chk.style.display = "none"; }
+    if(head) head.classList.toggle("is-active", isActive);
     g.querySelectorAll(".nav-leaf").forEach(function(l){
       let act = false;
       if(isExam){ act = isActive; }
@@ -9874,7 +10020,7 @@ function renderNav(){
 
 function showModule(id){
   if(id !== "exam") id = Number(id);
-  state.currentModule = id;
+  state.currentModule = (id === 5 ? 4 : id);
   if(id !== "exam") state.currentLeaf = state.currentLeaf || (NAV_LEAVES[id] && NAV_LEAVES[id][0] ? NAV_LEAVES[id][0].id : null);
   $$(".module-panel").forEach(p=>p.classList.remove("active"));
   const panel = $("#mod-"+id);
@@ -9891,6 +10037,12 @@ function completeModule(idx){
   if(doneDiv) doneDiv.innerHTML = moduleDoneHtml(idx);
   toast(`模块 0${idx+1} 已完成，学习进度 +1 🎉`);
   if(completedCount()===5){ toast("全部模块完成！终极挑战已解锁 🏆"); }
+    if(window.ONB && window.ONB.mark){
+      if(idx===0) window.ONB.mark('eth:1');
+      if(idx===1) window.ONB.mark('eth:2');
+      if(idx===2) window.ONB.mark('eth:3');
+      if(idx===3) window.ONB.mark('eth:4');
+    }
 }
 function moduleDoneHtml(idx){
   const names = ["信息保险箱","职业边界","职业红线","利益诱惑","守护什么"];
@@ -10132,10 +10284,11 @@ function bindSupplier(){
 
 /* ================= 模块05 ================= */
 function bindM5(){
-  $("#m5FinishBtn").addEventListener("click", ()=>{
-    completeModule(4);
-    toast("终极挑战已解锁，去拿你的「靠谱值」吧 🏆");
-    setTimeout(()=>showModule("exam"), 600);
+  var btn = $("#m5FinishBtn");
+  if(!btn) return;
+  btn.addEventListener("click", ()=>{
+    completeModule(3);
+    toast("「利益诱惑」模块完成 🎉");
   });
 }
 
@@ -10309,6 +10462,13 @@ function load(){
 /* ================= 初始化 ================= */
 function init(){
   load();
+  // 恢复已完成模块的绿色"已完成"卡片（与进度状态保持一致）
+  for(var i=0;i<4;i++){
+    if(state.modules[i]){
+      var d = $("#m"+(i+1)+"Done");
+      if(d && !d.firstElementChild) d.innerHTML = moduleDoneHtml(i);
+    }
+  }
   renderProgress();
   renderPrinciples();
   renderRedlines();
@@ -10330,11 +10490,6 @@ function init(){
       return;
     }
   });
-  $("#resetBtn").addEventListener("click", ()=>{
-    if(!confirm("确定要重置所有学习进度吗？")) return;
-    localStorage.removeItem(LS_KEY);
-    location.reload();
-  });
 
   // 首次进入：若全部完成，展示完成页入口
   showModule(state.currentModule || 1);
@@ -10345,29 +10500,14 @@ function init(){
 init();
 
 
-/* 平台侧栏导航 -> 职业道德模块内部切换 */
+/* 平台侧栏导航 -> 职业道德模块切换（扁平 4 项，点击直接切换模块） */
   function bindEthicsNav() {
-    var leaves = document.querySelectorAll('.sidebar-ethics .nav-leaf');
-    if (!leaves.length) { setTimeout(bindEthicsNav, 60); return; }
-    leaves.forEach(function (l) {
-      l.addEventListener('click', function () {
-        if (l.classList.contains('is-locked')) {
-          if (typeof toast === 'function') toast('完成 5 个模块后解锁终极挑战 \uD83C\uDFC6');
-          return;
-        }
-        var m = l.dataset.ethModule;
-        var leaf = l.dataset.ethLeaf;
-        if (String(m) === 'exam') {
-          state.currentLeaf = 'exam';
-          showModule('exam');
-        } else {
-          if (leaf) state.currentLeaf = leaf;
-          showModule(Number(m));
-          if (leaf) {
-            var el = document.getElementById(leaf);
-            if (el) setTimeout(function () { el.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 60);
-          }
-        }
+    var heads = document.querySelectorAll('.sidebar-ethics .nav-group-head[data-eth-module]');
+    heads.forEach(function (h) {
+      h.addEventListener('click', function () {
+        var m = h.getAttribute('data-eth-module');
+        if (String(m) === 'exam') { showModule('exam'); }
+        else { showModule(Number(m)); }
         save();
       });
     });
@@ -10378,5 +10518,6 @@ init();
 
 <script src="assets/org-explorer.js"></script>
 
+<script src="assets/onboarding.js"></script>
 </body>
 </html>

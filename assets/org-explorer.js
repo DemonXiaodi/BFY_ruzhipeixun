@@ -387,6 +387,8 @@
    * 六、组织树导航
    * ========================================================================= */
   var openState = { ceo: true };
+  /* 层级默认展开：进入即显示完整的「集团 → 部门 → 子部门」三级组织架构 */
+  DEPARTMENTS.forEach(function (d) { openState['dept:' + d.name] = true; });
 
   function findDept(name) {
     for (var i = 0; i < DEPARTMENTS.length; i++) if (DEPARTMENTS[i].name === name) return DEPARTMENTS[i];

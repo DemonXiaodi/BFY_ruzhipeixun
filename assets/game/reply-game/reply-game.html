@@ -1301,6 +1301,11 @@
             if (state.gameOver) return;
             state.gameOver = true;
             state.tagsEnabled = false;
+            try {
+                if (window.parent && window.parent !== window) {
+                    window.parent.postMessage({ source: 'onb-reply-game', event: 'complete', type: type }, '*');
+                }
+            } catch (_) {}
             const ending = ENDINGS[type];
             if (!ending) return;
 
