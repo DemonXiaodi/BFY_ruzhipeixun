@@ -130,6 +130,18 @@
   }
 
   /* ========================= 错误码 -> 文案 ========================= */
+  // 企业微信接口错误：detail 为数字 errcode（如 2022013 字段类型错误）
+  // 代理不可达：detail 为 'HTTP_405' 等字符串，说明当前本地服务没有同步代理路由
+  function webhookErrMessage(detail) {
+    if (detail === 'HTTP_405') {
+      return '同步服务不可用：当前本地服务没有同步代理，请改用项目自带的 server.js / start.bat 启动页面（不要用 Vite、Live Server、python -m http.server 等普通静态服务器）';
+    }
+    if (typeof detail === 'string' && detail.indexOf('HTTP_') === 0) {
+      return '同步服务异常（' + detail + '）：请确认通过项目自带的 server.js / start.bat 启动页面';
+    }
+    return '同步失败，错误码：' + (detail != null ? detail : '?');
+  }
+
   function messageFor(err) {
     switch (err && err.code) {
       case 'NO_IDENTITY': return '请先完成身份录入';
@@ -138,7 +150,7 @@
       case 'TOO_FREQUENT':return '提交过于频繁，请稍后再试';
       case 'NO_CHANGE':   return '没有新进度需要同步';
       case 'NETWORK':     return '网络异常，请检查网络连接后重试';
-      case 'WEBHOOK_ERR': return '同步失败，错误码：' + (err.detail != null ? err.detail : '?');
+      case 'WEBHOOK_ERR': return webhookErrMessage(err.detail);
       default:            return '同步失败，请重试';
     }
   }
@@ -216,7 +228,7 @@
     try {
       var data = readData();
       if (!data || !data.userInfo) return;
-      if (!window.WECOM_CONFIG || !window.WECOM_CONFIG.webhook) return;
+      if (!window.WECOM_CONFIG || (!window.WECOM_CONFIG.endpoint && !window.WECOM_CONFIG.webhook)) return;
       if (!shouldAutoSubmit(moduleName, data)) return;
       submitToWecom().catch(function () { /* 自动模式静默：失败留待下次有增量或手动同步 */ });
     } catch (e) { /* 忽略自动提交异常，绝不阻塞主流程 */ }
