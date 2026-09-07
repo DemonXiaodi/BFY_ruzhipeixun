@@ -158,6 +158,7 @@
     saveData(data);
     updateUI();
     maybeCelebrate(moduleName);
+    if (window.DataCollector) window.DataCollector.checkAndAutoSubmit(moduleName); // 数据变化后尝试上报企业微信
     return m;
   }
 
@@ -172,6 +173,7 @@
     recomputeCompleted(moduleName);
     saveData(data);   // 展示「页面已学完」提示的同时写入
     updateUI();
+    if (window.DataCollector) window.DataCollector.checkAndAutoSubmit(moduleName); // 数据变化后尝试上报企业微信
     return true;
   }
 
@@ -877,6 +879,7 @@
           updateUI();
           showToast('页面已学完 ✅');
           maybeCelebrate('职场沟通');
+          if (window.DataCollector) window.DataCollector.checkAndAutoSubmit('职场沟通'); // 沟通预热答题完成后尝试上报
         }
       }
     });

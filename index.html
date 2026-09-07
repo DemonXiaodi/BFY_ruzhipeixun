@@ -4677,6 +4677,16 @@ body.module-home .page{max-width:1180px;padding-top:calc(var(--space)*1.5);}
 .onb-cok{background:linear-gradient(135deg,var(--c-gz),var(--c-sh));color:#fff;box-shadow:0 8px 20px color-mix(in srgb,var(--c-sh) 35%,transparent)}
 .onb-cok:hover{transform:translateY(-1px)}
 .home-foot{margin-top:calc(var(--space)*2);text-align:center;font-size:12px;color:var(--faint);}
+/* 首页：企业微信同步按钮 */
+.home-sync{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-top:24px;padding:16px 20px;background:#fff;border:1px solid #F3F4F6;border-radius:14px;box-shadow:0 4px 20px rgba(0,0,0,.05);}
+.home-sync-hint{font-size:13px;color:#6B7280;line-height:1.5;}
+.home-sync-actions{display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
+.home-sync-btn{flex:none;display:inline-flex;align-items:center;gap:8px;border:0;border-radius:10px;background:linear-gradient(135deg,#2563EB 0%,#3B82F6 100%);color:#fff;padding:11px 20px;font-size:13.5px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap;box-shadow:0 8px 20px rgba(37,99,235,.25);transition:transform .15s ease,box-shadow .2s ease,opacity .2s ease;}
+.home-sync-btn:hover{transform:translateY(-1px);box-shadow:0 12px 26px rgba(37,99,235,.35);}
+.home-sync-btn:disabled{opacity:.6;cursor:not-allowed;transform:none;}
+.home-sync-status{font-size:13px;min-width:0;}
+.home-sync-status.ok{color:#059669;font-weight:600;}
+.home-sync-status.err{color:#DC2626;font-weight:600;}
 </style>
 </head>
 <body>
@@ -4745,7 +4755,13 @@ body.module-home .page{max-width:1180px;padding-top:calc(var(--space)*1.5);}
 
     <div class="home-grid" id="homeGrid"></div>
 
-    <p class="home-foot">数据将于下次同步时保存</p>
+    <div class="home-sync">
+      <span class="home-sync-hint">学习进度会随学习自动上报；也可随时手动同步到企业微信智能表格</span>
+      <div class="home-sync-actions">
+        <button class="home-sync-btn" type="button" id="wecomSyncBtn">同步所有数据到企业微信</button>
+        <span class="home-sync-status" id="wecomSyncStatus"></span>
+      </div>
+    </div>
   </section>
 
   <!-- ===== 左侧竖导航（仅财务报销与合同审批模块显示） ===== -->
@@ -10518,6 +10534,8 @@ init();
 
 <script src="assets/org-explorer.js"></script>
 
+<script src="assets/config.js"></script>
+<script src="assets/dataCollector.js"></script>
 <script src="assets/onboarding.js"></script>
 </body>
 </html>
