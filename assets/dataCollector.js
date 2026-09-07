@@ -47,7 +47,9 @@
     return n;
   }
   function toStatus(m) {
-    return (m && m.completed) ? '完成' : '未完成';
+    // 企业微信智能表格「单选(single_select)」值类型为 Option 数组（长度≤1），
+    // 每个 Option 用 {text:选项名}；裸串 "完成" 会被 2022013 拒绝。详见官方文档 FIELD_TYPE_SINGLE_SELECT。
+    return (m && m.completed) ? [{ text: '完成' }] : [{ text: '未完成' }];
   }
   // 数值字段：未产生（null/undefined）时不写入该列，避免智能表格对空值报错
   function setNum(obj, key, v) { if (typeof v === 'number') obj[key] = v; }
@@ -69,7 +71,12 @@
       'f04Gwj': u.id != null ? u.id : '',
       'ftQMc5': u.name != null ? u.name : '',
       'ftk5Tx': u.department != null ? u.department : '',
-      'fn8TJd': u.hireDate ? new Date(u.hireDate).getTime() : null,
+      // 入职日期 date_time 类型：值必须是「毫秒时间戳的字符串」（官方文档 FIELD_TYPE_DATE_TIME）
+      'fn8TJd': (function () {
+        if (!u.hireDate) return null;
+        var ms = new Date(u.hireDate).getTime();
+        return isNaN(ms) ? null : String(ms);
+      })(),
 
       // 公司简介
       'f7ZLNA': cv('公司简介'),
@@ -102,12 +109,11 @@
       'fzrq8R': new Date().toISOString()
     };
 
-    // 数值字段：非数字则剔除该键（留空列）
+    // 数值字段：非数字则剔除该键（留空列）；fn8TJd 为 date_time 字符串，不在此列
     setNum(v, 'fWTCea', v['fWTCea']);
     setNum(v, 'fRXN4T', v['fRXN4T']);
     setNum(v, 'fBh0rO', v['fBh0rO']);
     setNum(v, 'fiyFC8', v['fiyFC8']);
-    if (typeof v['fn8TJd'] !== 'number') delete v['fn8TJd'];
 
     return v;
   }
@@ -128,6 +134,7 @@
     switch (err && err.code) {
       case 'NO_IDENTITY': return '请先完成身份录入';
       case 'NO_CONFIG':   return '未配置企业微信同步地址';
+      case 'NEED_SERVER': return '请通过本地服务(http)打开后使用同步（双击 index.html 无法同步）';
       case 'TOO_FREQUENT':return '提交过于频繁，请稍后再试';
       case 'NO_CHANGE':   return '没有新进度需要同步';
       case 'NETWORK':     return '网络异常，请检查网络连接后重试';
@@ -144,8 +151,13 @@
   function submitToWecom(opts) {
     opts = opts || {};
     return new Promise(function (resolve, reject) {
+      // file:// 下没有同源服务可代理，直接给出明确引导，避免无意义的网络报错
+      if (location.protocol === 'file:') { reject({ code: 'NEED_SERVER' }); return; }
+
       var cfg = window.WECOM_CONFIG;
-      if (!cfg || !cfg.webhook) { reject({ code: 'NO_CONFIG' }); return; }
+      // 优先走同源代理 endpoint（server.js 转发，规避 CORS）；旧配置仅含 webhook 时退回直连
+      var target = (cfg && cfg.endpoint) || (cfg && cfg.webhook);
+      if (!target) { reject({ code: 'NO_CONFIG' }); return; }
 
       var data = readData();
       if (!data || !data.userInfo) { reject({ code: 'NO_IDENTITY' }); return; }
@@ -162,7 +174,7 @@
 
       var body = JSON.stringify(buildPayload(data));
 
-      fetch(cfg.webhook, {
+      fetch(target, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: body

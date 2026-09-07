@@ -1,10 +1,24 @@
 // 零依赖静态文件服务（Python 不可用时的兜底方案）
 const http = require('http');
+const https = require('https');
 const fs = require('fs');
 const path = require('path');
 
 const PORT = Number(process.argv[2]) || 5180;
 const ROOT = __dirname;
+
+// 服务端持有的企业微信 Webhook（密钥不下发浏览器）：优先环境变量，其次 server-config.json
+function loadWebhook() {
+  if (process.env.WECOM_WEBHOOK) return process.env.WECOM_WEBHOOK;
+  try {
+    const j = JSON.parse(fs.readFileSync(path.join(ROOT, 'server-config.json'), 'utf8'));
+    if (j && j.webhook) return j.webhook;
+  } catch (e) {
+    /* 无配置文件时回退到环境变量/为空 */
+  }
+  return '';
+}
+
 
 const MIME = {
   '.html': 'text/html; charset=utf-8',
@@ -38,6 +52,41 @@ http
       return;
     }
     if (urlPath === '/') urlPath = '/index.html';
+
+    // ---- 企业微信智能表格同步代理（同源，绕开浏览器 CORS）----
+    // 浏览器只调同域 /api/wecom-sync；密钥仅在服务端（server-config.json / 环境变量），不下发浏览器。
+    if (req.method === 'POST' && urlPath === '/api/wecom-sync') {
+      const webhook = loadWebhook();
+      if (!webhook) {
+        res.writeHead(500, { 'Content-Type': 'application/json; charset=utf-8' });
+        res.end(JSON.stringify({ errcode: -1, errmsg: '服务端未配置企业微信 Webhook（请设置 server-config.json 或环境变量 WECOM_WEBHOOK）' }));
+        return;
+      }
+      let body = '';
+      req.on('data', (c) => (body += c));
+      req.on('end', () => {
+        const client = webhook.startsWith('https') ? https : http;
+        const upstream = client.request(
+          webhook,
+          { method: 'POST', headers: { 'Content-Type': 'application/json' } },
+          (up) => {
+            let out = '';
+            up.on('data', (d) => (out += d));
+            up.on('end', () => {
+              res.writeHead(up.statusCode, { 'Content-Type': 'application/json; charset=utf-8' });
+              res.end(out);
+            });
+          }
+        );
+        upstream.on('error', (e) => {
+          res.writeHead(502, { 'Content-Type': 'application/json; charset=utf-8' });
+          res.end(JSON.stringify({ errcode: -2, errmsg: '上游企业微信服务异常：' + e.message }));
+        });
+        upstream.write(body);
+        upstream.end();
+      });
+      return;
+    }
 
     const filePath = path.join(ROOT, urlPath);
     // 防目录穿越
