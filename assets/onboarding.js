@@ -158,7 +158,6 @@
     saveData(data);
     updateUI();
     maybeCelebrate(moduleName);
-    if (window.DataCollector) window.DataCollector.checkAndAutoSubmit(moduleName); // 数据变化后尝试上报企业微信
     return m;
   }
 
@@ -173,7 +172,6 @@
     recomputeCompleted(moduleName);
     saveData(data);   // 展示「页面已学完」提示的同时写入
     updateUI();
-    if (window.DataCollector) window.DataCollector.checkAndAutoSubmit(moduleName); // 数据变化后尝试上报企业微信
     return true;
   }
 
@@ -289,6 +287,8 @@
     if (celebratedInSession[moduleName]) return;
     celebratedInSession[moduleName] = true;
     setTimeout(function () { celebrate(moduleName); }, 320);
+    // 模块完成（🎉 弹窗出现）时自动提交一次学习记录到企业微信
+    if (window.DataCollector) window.DataCollector.checkAndAutoSubmit(moduleName);
   }
 
   /* ------------------------------ Toast ------------------------------ */
@@ -600,18 +600,6 @@
     '19': '<svg viewBox="0 0 24 24" stroke="currentColor"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg>',
     '22': '<svg viewBox="0 0 24 24" stroke="currentColor"><path d="M12 3v18"/><path d="M3 21h18"/><path d="M3 7h18"/><path d="M6 7l-3 6a3 3 0 0 0 6 0z"/><path d="M18 7l-3 6a3 3 0 0 0 6 0z"/></svg>'
   };
-  function sortHomeModules() {
-    var rank = function (st) {
-      if (st.completed || (st.total && st.done >= st.total)) return 1; // 已完成
-      if (st.done > 0) return 0;                                       // 进行中
-      return 2;                                                        // 未开始
-    };
-    return MODULES.slice().sort(function (a, b) {
-      var ra = rank(moduleStat(a)), rb = rank(moduleStat(b));
-      if (ra !== rb) return ra - rb;
-      return MODULES.indexOf(a) - MODULES.indexOf(b); // 同状态保持原顺序
-    });
-  }
   function homeCardHtml(meta, idx) {
     var st = moduleStat(meta);
     var m = data.modules[meta.name] || {};
@@ -664,15 +652,24 @@
     var u = getUserInfo();
     var displayName = u && u.name ? u.name : '新同学';
     var el;
-    if ((el = $('#homeGreeting'))) el.textContent = '👋 欢迎回来，' + displayName + '！';
+    // 首次登录（本机无学习进度记录）显示欢迎语；已有进度则显示「欢迎回来」
+    var hasProgress = false;
+    for (var _k in data.modules) {
+      var _m = data.modules[_k];
+      if (_m.completed) { hasProgress = true; break; }
+      if (_m.viewedPages && _m.viewedPages.some(function (x) { return x; })) { hasProgress = true; break; }
+    }
+    if ((el = $('#homeGreeting'))) el.textContent = hasProgress
+      ? '欢迎回来，' + displayName
+      : '欢迎' + displayName + '进入学习平台，开始学习之旅吧！';
     if ((el = $('#homeUserName'))) el.textContent = displayName;
     if ((el = $('#homeUserId'))) el.textContent = '工号 ' + (u && u.id ? u.id : '—');
     if ((el = $('#homeAvatar'))) el.textContent = displayName.charAt(0);
     var ov = getOverallProgress();
     if ((el = $('#homeProgressText'))) el.innerHTML = '学习进度：已完成 <b>' + ov.viewed + '</b> / ' + ov.total + ' 个子页面';
     if ((el = $('#homeProgressBar'))) { el.style.width = '0'; requestAnimationFrame(function () { el.style.width = ov.percent + '%'; }); }
-    // 卡片：按状态排序（进行中 → 已完成 → 未开始）+ 错峰淡入 + 进度条动画
-    grid.innerHTML = sortHomeModules().map(homeCardHtml).join('');
+    // 卡片：固定按 MODULES 定义顺序展示（公司简介 → … → 职业道德），不再按学习进度排序
+    grid.innerHTML = MODULES.map(homeCardHtml).join('');
     var bars = grid.querySelectorAll('.home-card-bar i');
     requestAnimationFrame(function () {
       bars.forEach(function (b) { b.style.width = (b.getAttribute('data-w') || 0) + '%'; });
@@ -879,7 +876,6 @@
           updateUI();
           showToast('页面已学完 ✅');
           maybeCelebrate('职场沟通');
-          if (window.DataCollector) window.DataCollector.checkAndAutoSubmit('职场沟通'); // 沟通预热答题完成后尝试上报
         }
       }
     });

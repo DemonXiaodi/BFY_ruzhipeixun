@@ -7,11 +7,9 @@
  *   - 防重复提交：30 秒节流 + 数据签名去重
  *
  * 接入（见 index.html）：config.js → dataCollector.js → onboarding.js
- * 自动触发点（在 onboarding.js 的写入函数末尾调用 checkAndAutoSubmit(moduleName)）：
- *   - 任意模块 completed 由 false 变 true（含「十二条令」两关通关、「职场沟通」全部子任务完成）
- *   - 触发庆祝动效后
- *   - 游戏成绩 game1Time / game2Score 落库后
- * 手动触发：首页「同步所有数据到企业微信」按钮（#wecomSyncBtn）
+ * 自动触发点：onboarding.js 在「模块完成、🎉 庆祝弹窗出现」时（maybeCelebrate）调用 checkAndAutoSubmit(moduleName)。
+ *   - 仅模块完成才自动提交，不再于每浏览一个页面就提交（避免过于频繁）。
+ * 手动触发：首页「提交学习记录」按钮（#wecomSyncBtn）。
  *
  * 注意：本文件不持有 Webhook 地址，地址来自 window.WECOM_CONFIG（assets/config.js，已 gitignore）。
  */
@@ -260,11 +258,11 @@
       }
       btn.disabled = true;
       var prev = btn.textContent;
-      btn.textContent = '同步中…';
+      btn.textContent = '提交中…';
       setStatus('', '');
 
       submitToWecom().then(function () {
-        setStatus('已于 ' + hhmmss() + ' 同步', 'ok');
+        setStatus('已于 ' + hhmmss() + ' 提交', 'ok');
       }).catch(function (err) {
         setStatus(messageFor(err), 'err');
       }).then(function () {
