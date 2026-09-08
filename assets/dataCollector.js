@@ -163,8 +163,9 @@
   function submitToWecom(opts) {
     opts = opts || {};
     return new Promise(function (resolve, reject) {
-      // file:// 下没有同源服务可代理，直接给出明确引导，避免无意义的网络报错
-      if (location.protocol === 'file:') { reject({ code: 'NEED_SERVER' }); return; }
+      // file:// 下若代理是同源路径（/api/wecom-sync）则无法访问，需要本地服务；
+      // 若代理是公网地址（http/https 开头，如独立部署的 Worker），跨域也能用，不拦截。
+      if (location.protocol === 'file:' && target.indexOf('http') !== 0) { reject({ code: 'NEED_SERVER' }); return; }
 
       var cfg = window.WECOM_CONFIG;
       // 优先走同源代理 endpoint（server.js 转发，规避 CORS）；旧配置仅含 webhook 时退回直连

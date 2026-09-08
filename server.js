@@ -4,8 +4,21 @@ const https = require('https');
 const fs = require('fs');
 const path = require('path');
 
-const PORT = Number(process.argv[2]) || 5180;
+const PORT = Number(process.env.PORT) || Number(process.argv[2]) || 5180;
 const ROOT = __dirname;
+
+// CORS：允许浏览器跨域调用本代理（静态托管场景）。
+// 默认回显请求方 Origin（即允许任何带 Origin 的站点调用）；
+// 若只想放开给固定站点，把下面 '*' 改成具体地址，如 'https://demonxiaodi.github.io'。
+function corsHeaders(req) {
+  const origin = (req && req.headers && req.headers.origin) || '*';
+  return {
+    'Access-Control-Allow-Origin': origin,
+    'Access-Control-Allow-Methods': 'POST, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type',
+    'Vary': 'Origin'
+  };
+}
 
 // 服务端持有的企业微信 Webhook（密钥不下发浏览器）：优先环境变量，其次 server-config.json
 function loadWebhook() {
@@ -53,12 +66,19 @@ http
     }
     if (urlPath === '/') urlPath = '/index.html';
 
+    // 代理的 CORS 预检：浏览器跨域 POST(带 JSON) 会先发 OPTIONS，必须回 204 + CORS 头
+    if (req.method === 'OPTIONS' && urlPath === '/api/wecom-sync') {
+      res.writeHead(204, corsHeaders(req));
+      res.end();
+      return;
+    }
+
     // ---- 企业微信智能表格同步代理（同源，绕开浏览器 CORS）----
     // 浏览器只调同域 /api/wecom-sync；密钥仅在服务端（server-config.json / 环境变量），不下发浏览器。
     if (req.method === 'POST' && urlPath === '/api/wecom-sync') {
       const webhook = loadWebhook();
       if (!webhook) {
-        res.writeHead(500, { 'Content-Type': 'application/json; charset=utf-8' });
+        res.writeHead(500, Object.assign({ 'Content-Type': 'application/json; charset=utf-8' }, corsHeaders(req)));
         res.end(JSON.stringify({ errcode: -1, errmsg: '服务端未配置企业微信 Webhook（请设置 server-config.json 或环境变量 WECOM_WEBHOOK）' }));
         return;
       }
@@ -73,13 +93,13 @@ http
             let out = '';
             up.on('data', (d) => (out += d));
             up.on('end', () => {
-              res.writeHead(up.statusCode, { 'Content-Type': 'application/json; charset=utf-8' });
+              res.writeHead(up.statusCode, Object.assign({ 'Content-Type': 'application/json; charset=utf-8' }, corsHeaders(req)));
               res.end(out);
             });
           }
         );
         upstream.on('error', (e) => {
-          res.writeHead(502, { 'Content-Type': 'application/json; charset=utf-8' });
+          res.writeHead(502, Object.assign({ 'Content-Type': 'application/json; charset=utf-8' }, corsHeaders(req)));
           res.end(JSON.stringify({ errcode: -2, errmsg: '上游企业微信服务异常：' + e.message }));
         });
         upstream.write(body);
