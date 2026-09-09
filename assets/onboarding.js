@@ -20,11 +20,11 @@
     { id: '31', name: '企业文化与组织架构', desc: '理解核心价值观、使命愿景与组织体系', target: '31', tint: 1, views: ['31', '33'] },
     { id: '15', name: '十二条令', desc: '通过情景判断游戏掌握公司十二条令', target: '15', tint: 3, views: ['game'] },
     { id: '1', name: '财务报销与合同审批', desc: '熟悉报销流程、审批规范与常见问题', target: '1', tint: 2, views: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14'] },
-    { id: '19', name: '职场沟通', desc: '学习邮件、即时通讯与跨部门协作技巧', target: '19', tint: 5, views: ['16', '17', '18', '19', '20', '21'] },
+    { id: '19', name: '职场沟通', desc: '学习邮件、即时通讯与跨部门协作技巧', target: '19', tint: 5, views: ['16', '17', '18', '19', '20', '21', '22'] },
     { id: '22', name: '职业道德', desc: '识别信息保密、职业边界与利益冲突红线', target: '22', tint: 6, views: ['eth:1', 'eth:2', 'eth:3', 'eth:4'] }
   ];
   /* 职场沟通内部三类：知识页 / 互动游戏 / 预热测验（下标对应 views 数组） */
-  var COMM = { knowledge: [0, 1, 4, 5], interactive: 2, quiz: 3 };
+  var COMM = { knowledge: [0, 1, 4, 5, 6], interactive: 2, quiz: 3 };
 
   var PAGE_INDEX = {};  // 页面标识 -> { mod: 模块名, idx: 下标 }
   MODULES.forEach(function (m) {
@@ -59,7 +59,7 @@
         '企业文化与组织架构': { totalPages: 2, viewedPages: falses(2), completed: false, lastUpdate: null },
         '十二条令': { game1Time: null, game1Accuracy: null, game2Score: null, game2Stars: null, stages: 0, completed: false, lastUpdate: null },
         '财务报销与合同审批': { totalPages: 14, viewedPages: falses(14), completed: false, lastUpdate: null },
-        '职场沟通': { totalPages: 6, viewedPages: falses(6), quizCorrect: null, quizTotal: null, knowledgeViewed: false, interactiveEnded: false, completed: false, lastUpdate: null },
+        '职场沟通': { totalPages: 7, viewedPages: falses(7), quizCorrect: null, quizTotal: null, knowledgeViewed: false, interactiveEnded: false, completed: false, lastUpdate: null },
         '职业道德': { totalPages: 4, viewedPages: falses(4), completed: false, lastUpdate: null }
       }
     };
@@ -805,11 +805,14 @@
       try {
         var f = $('iframe.game-full');
         var d = f && f.contentDocument;
-        if (d && d.body && /挑战完成|成绩单|通关/.test(d.body.innerText || '')) {
+        // 仅匹配结算屏标题「挑战完成」——它是结果页唯一文案。
+        // 注意：题目正文/选项里会出现「成绩单」「通关」等词（如 Q0014/Q0015），
+        // 若纳入匹配会误判为整体通关，故只认「挑战完成」。真正的完成以
+        // postMessage event:'complete'（listenGameComplete）为准，此处仅作兜底。
+        if (d && d.body && /挑战完成/.test(d.body.innerText || '')) {
           clearInterval(gameTimer); gameTimer = null; markPage('game'); return;
         }
-      } catch (e) { /* 跨域时退化为时长兜底 */ }
-      if (Date.now() - t0 > 90000) { clearInterval(gameTimer); gameTimer = null; markPage('game'); }
+      } catch (e) { /* 跨域时无法读取 iframe 内容，依赖 postMessage 完成通知 */ }
     }, 1500);
   }
 
