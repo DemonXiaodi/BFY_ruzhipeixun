@@ -20,11 +20,11 @@
     { id: '31', name: '企业文化与组织架构', desc: '理解核心价值观、使命愿景与组织体系', target: '31', tint: 1, views: ['31', '33'] },
     { id: '15', name: '十二条令', desc: '通过情景判断游戏掌握公司十二条令', target: '15', tint: 3, views: ['game'] },
     { id: '1', name: '财务报销与合同审批', desc: '熟悉报销流程、审批规范与常见问题', target: '1', tint: 2, views: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14'] },
-    { id: '19', name: '职场沟通', desc: '学习邮件、即时通讯与跨部门协作技巧', target: '19', tint: 5, views: ['16', '17', '18', '19', '20', '21'] },
-    { id: '22', name: '职业道德', desc: '识别信息保密、职业边界与利益冲突红线', target: '22', tint: 6, views: ['eth:1', 'eth:2', 'eth:3', 'eth:4'] }
+    { id: '19', name: '职场沟通', desc: '学习邮件、即时通讯与跨部门协作技巧', target: '19', tint: 5, views: ['16', '17', '18', '19', '20', '21', '22'] },
+    { id: '23', name: '职业道德', desc: '识别信息保密、职业边界与利益冲突红线', target: '23', tint: 6, views: ['eth:1', 'eth:2', 'eth:3', 'eth:4'] }
   ];
   /* 职场沟通内部三类：知识页 / 互动游戏 / 预热测验（下标对应 views 数组） */
-  var COMM = { knowledge: [0, 1, 4, 5], interactive: 2, quiz: 3 };
+  var COMM = { knowledge: [0, 1, 4, 5, 6], interactive: 2, quiz: 3 };
 
   var PAGE_INDEX = {};  // 页面标识 -> { mod: 模块名, idx: 下标 }
   MODULES.forEach(function (m) {
@@ -59,7 +59,7 @@
         '企业文化与组织架构': { totalPages: 2, viewedPages: falses(2), completed: false, lastUpdate: null },
         '十二条令': { game1Time: null, game1Accuracy: null, game2Score: null, game2Stars: null, stages: 0, completed: false, lastUpdate: null },
         '财务报销与合同审批': { totalPages: 14, viewedPages: falses(14), completed: false, lastUpdate: null },
-        '职场沟通': { totalPages: 6, viewedPages: falses(6), quizCorrect: null, quizTotal: null, knowledgeViewed: false, interactiveEnded: false, completed: false, lastUpdate: null },
+        '职场沟通': { totalPages: 7, viewedPages: falses(7), quizCorrect: null, quizTotal: null, knowledgeViewed: false, interactiveEnded: false, completed: false, lastUpdate: null },
         '职业道德': { totalPages: 4, viewedPages: falses(4), completed: false, lastUpdate: null }
       }
     };
@@ -242,7 +242,7 @@
     var v = $('.view.active');
     if (!v) return null;
     var id = v.getAttribute('data-view');
-    if (id === '22') {
+    if (id === '23') {
       var panel = $('.view-ethics .module-panel.active');
       var m = panel && /^mod-(\d+)$/.exec(panel.id);
       var n = m ? m[1] : '1';
@@ -598,7 +598,7 @@
     '15': '<svg viewBox="0 0 24 24" stroke="currentColor"><path d="M11 3h6a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h1"/><path d="M11 3a1 1 0 0 1-1 1H5a1 1 0 0 0-1 1v13a1 1 0 0 0 1 1h1"/><path d="M8 10h3"/><path d="M8 14h3"/></svg>',
     '1': '<svg viewBox="0 0 24 24" stroke="currentColor"><path d="M19 7V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-2"/><path d="M21 7H7a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h14a1 1 0 0 0 1-1V8a1 1 0 0 0-1-1z"/><path d="M16 12h.01"/></svg>',
     '19': '<svg viewBox="0 0 24 24" stroke="currentColor"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg>',
-    '22': '<svg viewBox="0 0 24 24" stroke="currentColor"><path d="M12 3v18"/><path d="M3 21h18"/><path d="M3 7h18"/><path d="M6 7l-3 6a3 3 0 0 0 6 0z"/><path d="M18 7l-3 6a3 3 0 0 0 6 0z"/></svg>'
+    '23': '<svg viewBox="0 0 24 24" stroke="currentColor"><path d="M12 3v18"/><path d="M3 21h18"/><path d="M3 7h18"/><path d="M6 7l-3 6a3 3 0 0 0 6 0z"/><path d="M18 7l-3 6a3 3 0 0 0 6 0z"/></svg>'
   };
   function homeCardHtml(meta, idx) {
     var st = moduleStat(meta);
@@ -805,11 +805,14 @@
       try {
         var f = $('iframe.game-full');
         var d = f && f.contentDocument;
-        if (d && d.body && /挑战完成|成绩单|通关/.test(d.body.innerText || '')) {
+        // 仅匹配结算屏标题「挑战完成」——它是结果页唯一文案。
+        // 注意：题目正文/选项里会出现「成绩单」「通关」等词（如 Q0014/Q0015），
+        // 若纳入匹配会误判为整体通关，故只认「挑战完成」。真正的完成以
+        // postMessage event:'complete'（listenGameComplete）为准，此处仅作兜底。
+        if (d && d.body && /挑战完成/.test(d.body.innerText || '')) {
           clearInterval(gameTimer); gameTimer = null; markPage('game'); return;
         }
-      } catch (e) { /* 跨域时退化为时长兜底 */ }
-      if (Date.now() - t0 > 90000) { clearInterval(gameTimer); gameTimer = null; markPage('game'); }
+      } catch (e) { /* 跨域时无法读取 iframe 内容，依赖 postMessage 完成通知 */ }
     }, 1500);
   }
 
