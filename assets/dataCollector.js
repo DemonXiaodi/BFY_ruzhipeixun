@@ -51,6 +51,13 @@
   }
   // 数值字段：未产生（null/undefined）时不写入该列，避免智能表格对空值报错
   function setNum(obj, key, v) { if (typeof v === 'number') obj[key] = v; }
+  // 最后更新时间格式化：yyyy-MM-dd HH:mm:ss（本地时间）
+  function pad2(n) { return (n < 10 ? '0' : '') + n; }
+  function formatDateTime(d) {
+    d = d || new Date();
+    return d.getFullYear() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDate()) +
+      ' ' + pad2(d.getHours()) + ':' + pad2(d.getMinutes()) + ':' + pad2(d.getSeconds());
+  }
 
   /**
    * 组装表格「字段ID -> 值」映射（不含时间字段 fzrq8R，用于去重签名）。
@@ -103,8 +110,8 @@
       'fMUOxi': cv('职业道德'),   // 职业道德-页数（number）
       'fnsPog': st('职业道德'),    // 职业道德-完成（single_select：完成/未完成）
 
-      // 最后更新时间（text）—— 仅参与实际提交，不参与去重签名
-      'fzrq8R': new Date().toISOString()
+      // 最后更新时间（text）—— 仅参与实际提交，不参与去重签名；格式 yyyy-MM-dd HH:mm:ss
+      'fzrq8R': formatDateTime(new Date())
     };
 
     // 数值字段：非数字则剔除该键（留空列）；fn8TJd 为 date_time 字符串，不在此列

@@ -354,7 +354,7 @@
       '</div>' +
       '<form class="onb-form" id="onbForm" novalidate>' +
       '<label class="onb-field"><span>姓名</span><input type="text" name="name" placeholder="请输入真实姓名" autocomplete="name"></label>' +
-      '<label class="onb-field"><span>工号</span><input type="text" name="empId" placeholder="如 BFE2026001"></label>' +
+      '<label class="onb-field"><span>工号</span><input type="text" name="empId" placeholder="请输入工号"></label>' +
       '<label class="onb-field"><span>部门</span><select name="dept"><option value="">请选择部门</option>' + opts + '</select></label>' +
       '<label class="onb-field"><span>入职日期</span><input type="date" name="hireDate"></label>' +
       '<p class="onb-err" id="onbErr" hidden></p>' +
