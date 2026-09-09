@@ -207,8 +207,6 @@
     display:block;
     margin-bottom:calc(var(--space)*1.25);
     box-shadow:var(--shadow);
-    object-fit:contain;
-    background:#fff;
   }
   .eyebrow{
     font-size:13px;
@@ -2001,7 +1999,10 @@
   <div class="grid">
     <!-- 左栏：本课导语 -->
     <section class="intro" data-component="lesson-intro">
-      <img class="module-mark" src="assets/chukouyi-logo3.png" alt="出口易" aria-hidden="true">
+      <svg class="module-mark" viewBox="0 0 40 40" role="img" aria-hidden="true">
+        <rect x="0" y="0" width="40" height="40" rx="10" fill="var(--brand-green)"/>
+        <circle cx="20" cy="20" r="9" fill="var(--brand-olive)"/>
+      </svg>
       <p class="eyebrow">实体地图 / 01</p>
       <h1>一个品牌名，背后对应多家法律主体。</h1>
       <p class="lead">工作中看到「出口易」，先确认业务地区，再选择准确的公司全称。点击右侧地区，可展开查看对应实体。</p>
