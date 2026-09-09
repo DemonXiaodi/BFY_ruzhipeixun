@@ -166,7 +166,7 @@
       if (!f || seen[f]) return;
       seen[f] = true;
       var img = new Image();
-      img.onload = function () { var b = computeBox(img); if (b) img._box = b; IMG[f] = img; };
+      img.onload = function () { try { var b = computeBox(img); if (b) img._box = b; } catch (_) {} IMG[f] = img; };
       img.onerror = function () {};
       img.src = f;
     }
