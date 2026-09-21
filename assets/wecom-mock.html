@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>企业微信扫码（模拟）</title>
+<style>
+  body{margin:0;font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;background:#fff;color:#1f2937;display:flex;flex-direction:column;align-items:center;padding:14px 14px 16px;box-sizing:border-box}
+  .qr{width:150px;height:150px;border-radius:12px;background:#0b1f3a;display:grid;grid-template-columns:repeat(11,1fr);grid-template-rows:repeat(11,1fr);gap:3px;padding:9px;box-sizing:border-box}
+  .qr i{background:#fff;border-radius:2px}
+  .qr i.d{background:transparent}
+  h3{font-size:15px;margin:12px 0 4px}
+  p{font-size:12px;color:#8a94a6;margin:0 0 10px;text-align:center;line-height:1.5}
+  .nm{width:200px;padding:9px 11px;border:1px solid #d4d9e2;border-radius:9px;font-size:13px;font-family:inherit;margin:0 0 10px;box-sizing:border-box;text-align:center}
+  .mock-confirm{appearance:none;border:0;background:#2f6fed;color:#fff;font-size:14px;font-weight:700;padding:10px 22px;border-radius:10px;cursor:pointer}
+  .mock-confirm:active{transform:translateY(1px)}
+  .ok{color:#1f9d6b;font-size:13px;margin-top:10px;display:none}
+</style>
+</head>
+<body>
+  <div class="qr" id="qr"></div>
+  <h3>企业微信扫码登录</h3>
+  <p>阶段1 模拟页：真实环境此处为企业微信实时二维码</p>
+  <input id="nameInput" class="nm" placeholder="测试用户名（留空=张三）" value="张三">
+  <button class="mock-confirm" id="mockConfirm" type="button">模拟扫码并确认登录</button>
+  <div class="ok" id="ok">已发送登录信息，请关闭弹窗</div>
+<script>
+  /* 把本页实际高度上报父窗口，让弹窗 iframe 自适应（避免按钮被裁掉） */
+  function reportHeight(){
+    try { window.parent.postMessage({ type:'nw_login_height', h: document.documentElement.scrollHeight }, '*'); } catch(e) {}
+  }
+  window.addEventListener('load', reportHeight);
+  window.addEventListener('resize', reportHeight);
+  /* 生成一个类似二维码的装饰图案（仅模拟视觉效果，稳定可复现） */
+  (function(){
+    var qr = document.getElementById('qr');
+    for(var i=0;i<121;i++){
+      var s = document.createElement('i');
+      if(((i*73 + (i % 7) * 31) % 5) === 0) s.className = 'd';
+      qr.appendChild(s);
+    }
+  })();
+  document.getElementById('mockConfirm').addEventListener('click', function(){
+    var name = (document.getElementById('nameInput').value || '张三').trim() || '张三';
+    var userid = 'mock-' + encodeURIComponent(name);
+    /* 跨域安全：用 postMessage 通知父窗口，真实企微回调同理 */
+    window.parent.postMessage({ type:'nw_login', name:name, userid:userid }, '*');
+    /* 同域时顺带写个 cookie 作会话标记（真实环境由 Worker 在自身域写） */
+    try { document.cookie = 'nw_user=' + encodeURIComponent(name) + ';path=/;max-age=86400;SameSite=Lax'; } catch(e) {}
+    document.getElementById('mockConfirm').style.display = 'none';
+    document.getElementById('ok').style.display = 'block';
+    reportHeight();
+  });
+</script>
+</body>
+</html>

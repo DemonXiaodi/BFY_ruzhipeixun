@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>企业微信登录 · 云端 Worker 自检页</title>
+<style>
+  *{box-sizing:border-box}
+  body{margin:0;font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;background:#f4f7fb;color:#1f2937;padding:28px;line-height:1.6}
+  .card{max-width:720px;margin:0 auto;background:#fff;border:1px solid #e4e7ec;border-radius:14px;padding:22px 24px;box-shadow:0 6px 24px rgba(31,41,55,.06)}
+  h1{font-size:18px;margin:0 0 4px}
+  .sub{color:#8a94a6;font-size:13px;margin:0 0 18px}
+  label{font-size:13px;font-weight:600;display:block;margin:14px 0 6px}
+  input{width:100%;padding:10px 12px;border:1px solid #d4d9e2;border-radius:9px;font-size:13px;font-family:inherit}
+  .row{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+  button{flex:1;min-width:150px;border:0;border-radius:10px;padding:11px 14px;font-size:14px;font-weight:700;cursor:pointer}
+  .b1{background:#2f6fed;color:#fff}
+  .b2{background:#eef2f8;color:#2f6fed}
+  .b3{background:#1f2937;color:#fff}
+  .b1:active,.b2:active,.b3:active{transform:translateY(1px)}
+  .status{margin-top:18px;padding:14px 16px;border-radius:10px;background:#f7f8fa;font-size:13px;white-space:pre-wrap;min-height:44px}
+  .status.ok{background:#e8f7f0;color:#1f9d6b}
+  .status.bad{background:#fdecec;color:#d23b3b}
+  code{background:#eef1f6;padding:1px 5px;border-radius:5px;font-size:12px}
+  .tip{font-size:12px;color:#8a94a6;margin-top:8px}
+  iframe{display:none}
+</style>
+</head>
+<body>
+<div class="card">
+  <h1>企业微信登录 · 云端 Worker 自检</h1>
+  <p class="sub">不依赖培训平台，直接验证你部署的 Cloudflare Worker（MOCK=1 下应回传「张三」）。</p>
+
+  <label>Worker 域名</label>
+  <input id="dom" value="https://bitter-sun-5ef1.anna1755670972.workers.dev">
+  <p class="tip">可用 <code>?worker=http://127.0.0.1:8391</code> 在地址栏临时覆盖（本地仿真用）。</p>
+
+  <label>测试用户名（mock 模式，留空=张三）</label>
+  <input id="nm" value="张三">
+
+  <div class="row">
+    <button class="b1" id="handshake">① iframe 握手测试</button>
+    <button class="b2" id="openwin">② 新窗口看回调 HTML</button>
+    <button class="b3" id="copycurl">③ 复制 curl 命令</button>
+  </div>
+
+  <div class="status" id="status">点「①」开始：会在本页插入隐藏 iframe 打 Worker 的 /callback?code=mock，并监听回传的 postMessage。</div>
+  <iframe id="f"></iframe>
+</div>
+<script>
+  var def = 'https://bitter-sun-5ef1.anna1755670972.workers.dev';
+  var ov = new URLSearchParams(location.search).get('worker');
+  var dom = document.getElementById('dom');
+  if (ov) dom.value = ov;
+  var st = document.getElementById('status');
+  function setStatus(msg, cls){ st.className = 'status' + (cls ? ' ' + cls : ''); st.textContent = msg; }
+
+  window.addEventListener('message', function(e){
+    var d = e.data;
+    if (d && d.type === 'nw_login' && d.name){
+      setStatus('✅ 握手成功！\n收到 name = "' + d.name + '"' + (d.userid ? '（userid=' + d.userid + '）' : '') + '\n来源：' + (e.origin || '?') + '\n→ 你的 Worker 在 MOCK 模式下正常工作，培训平台点「登录」会拿到同样的回传。', 'ok');
+    }
+  });
+
+  function cbUrl(){
+    var base = dom.value.replace(/\/+$/,'');
+    var nm = (document.getElementById('nm').value || '张三').trim() || '张三';
+    return base + '/callback?code=mock&name=' + encodeURIComponent(nm);
+  }
+  document.getElementById('handshake').addEventListener('click', function(){
+    var cb = cbUrl();
+    setStatus('请求中：' + cb + '\n（等待 Worker 回传 postMessage…）');
+    document.getElementById('f').src = cb;
+  });
+
+  document.getElementById('openwin').addEventListener('click', function(){
+    var cb = cbUrl();
+    window.open(cb, '_blank');
+    setStatus('已新开窗口打 ' + cb + '\n看页面是否显示「登录成功，正在返回…」、DevTools→Application→Cookies 是否有 nw_user=' + (new URLSearchParams(cb).get('name') || '张三') + '。', 'ok');
+  });
+
+  document.getElementById('copycurl').addEventListener('click', function(){
+    var cb = cbUrl();
+    var base = dom.value.replace(/\/+$/,'');
+    var nm = new URLSearchParams(cb).get('name') || '张三';
+    var cmd = 'curl -s "' + base + '/"\n# 期望: nw-login-worker ok\n\ncurl -si "' + cb + '"\n# 期望: 200 + postMessage({type:"nw_login",name:"' + nm + '" + set-cookie: nw_user=' + nm;
+    if (navigator.clipboard) navigator.clipboard.writeText(cmd).then(function(){ setStatus('已复制 curl 命令到剪贴板：\n\n' + cmd, 'ok'); }, function(){ setStatus(cmd); });
+    else setStatus(cmd);
+  });
+</script>
+</body>
+</html>

@@ -6091,10 +6091,14 @@ if (/(\?|&)old=1/.test(location.search)) {
     <div class="nw-nav on" data-view="home" title="首页"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 10.5L12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/></svg>首页</div>
     <div class="nw-nav" data-view="learn" title="学习"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 5.5h16v13H4z"/><path d="M8 3.5v4M16 3.5v4"/></svg>学习</div>
     <div class="nw-nav" id="nwNavQuiz" data-view="quiz" title="培训测验（学完模块后解锁）"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l2.4 5.2 5.6.7-4.1 3.9 1.1 5.6L12 15.8 7 18.4l1.1-5.6L4 8.9l5.6-.7z"/></svg>测验</div>
-    <div class="nw-foot">
-      <div class="nw-avatar">陈</div>
-      <div><div class="nm">【用户名】</div><div class="id">工号 8842</div></div>
-      <div class="nw-logout">退出</div>
+    <div class="nw-foot" id="nwFoot" title="点击登录">
+      <div class="nw-avatar" id="nwAvatar">?</div>
+      <div class="nw-uinfo">
+        <div class="nm" id="nwUname">未登录</div>
+        <div class="id" id="nwUid">点击登录记录学习进度</div>
+      </div>
+      <button class="nw-login-btn" id="nwLoginBtn" type="button">登录</button>
+      <button class="nw-logout" id="nwLogoutBtn" type="button" hidden>退出</button>
     </div>
   </aside>
 
@@ -6107,7 +6111,7 @@ if (/(\?|&)old=1/.test(location.search)) {
     <section class="nw-hero">
       <div class="nw-hero-top">
         <div>
-          <h1>hello，【用户名】! <span class="nw-wave">👋</span></h1>
+          <h1>hello，<span id="nwHomeHi">新同学</span>! <span class="nw-wave">👋</span></h1>
           <p class="nw-sub">继续你的学习之旅</p>
           <p class="nw-tip">学习完模块后会自动提交记录；也可以随时手动提交</p>
         </div>
@@ -11302,17 +11306,17 @@ function confetti(){
   }
 }
 
-/* ================= 持久化 ================= */
-const LS_KEY = "ethics-training-state";
+/* ================= 持久化（按用户隔离：key 带 nw_user_name 后缀） ================= */
+function ethicsKey(){ var u=''; try{ u=localStorage.getItem('nw_user_name')||''; }catch(e){} return 'ethics-training-state' + (u?('_'+u):''); }
 function save(){
-  try{ localStorage.setItem(LS_KEY, JSON.stringify({
+  try{ localStorage.setItem(ethicsKey(), JSON.stringify({
     modules:state.modules, currentModule:state.currentModule, currentLeaf:state.currentLeaf,
     examDone:state.examDone, examScore:state.examScore
   })); }catch(e){}
 }
 function load(){
   try{
-    const raw = localStorage.getItem(LS_KEY);
+    const raw = localStorage.getItem(ethicsKey());
     if(!raw) return;
     const d = JSON.parse(raw);
     if(d.modules) state.modules = d.modules;
@@ -11322,6 +11326,7 @@ function load(){
     if(d.examScore!=null) state.examScore = d.examScore;
   }catch(e){}
 }
+try { window.__ethicsKey = ethicsKey; } catch (e) {}
 
 /* 「清空学习进度」时同步复位旧版职业道德（ethics）模块的运行态：
    它的答题/展开状态既有内存 state 也有独立 localStorage，
@@ -11450,63 +11455,7 @@ init();
 <script src="assets/dataCollector.js"></script>
 
 
-<script type="application/json" id="zcData">[
-  {
-    "group": "职场沟通",
-    "t": "沟通预热选择题",
-    "html": "<div class=\"lesson-head\">\n      <p class=\"eyebrow\">职场沟通 / 预热挑战</p>\n      <h1>先来一轮选择题，摸摸你的沟通底子。</h1>\n      <p class=\"lead\">正式学习前，先用几道情景选择题热热身</p>\n    </div>\n\n    <div class=\"warmup-wrap\">\n      <iframe class=\"warmup-frame\" src=\"assets/game/bird-quiz/bird-quiz.html\" title=\"沟通预热 · 小鸟送快递答题游戏\"></iframe>\n    </div>"
-  },
-  {
-    "group": "职场沟通",
-    "t": "沟通技巧",
-    "html": "<div class=\"lesson-head\">\n      <p class=\"eyebrow\">职场沟通 / 沟通技巧</p>\n      <h1>四个沟通场景，一套职场表达心法。</h1>\n      <p class=\"lead\">跨部门协作、向上汇报、向下带人，最容易踩的坑都在「怎么说」。上下滑动下方卡片，把模糊表达换成精准沟通。</p>\n    </div>\n\n    <div class=\"cm-carousel\">\n      <div class=\"cm-track\">\n\n        <!-- 卡片 1：跨部门 · 需求传递 -->\n        <article class=\"cm-card\">\n          <div class=\"cm-card-top\">\n            <span class=\"cm-cat\">跨部门沟通 · 需求传递</span>\n            <span class=\"cm-idx\">01 / 04</span>\n          </div>\n          <div>\n            <h3>从「模糊要求」到「精准指令」</h3>\n            <p class=\"cm-sub\">用 5W1H 模型传递需求，一次说清、减少返工。</p>\n          </div>\n          <div>\n            <p class=\"cm-block-label\">5W1H 模型</p>\n            <div class=\"cm-5w1h\">\n              <div><b>What</b><span>做什么？</span></div>\n              <div><b>Why</b><span>为什么做？</span></div>\n              <div><b>Who</b><span>谁来做？</span></div>\n              <div><b>When</b><span>何时完成？</span></div>\n              <div><b>Where</b><span>交付渠道？</span></div>\n              <div><b>How</b><span>标准是什么？</span></div>\n            </div>\n          </div>\n          <div class=\"cm-vs\">\n            <div>\n              <p class=\"cm-block-label\">案例对比</p>\n            </div>\n            <div class=\"cm-bad\">\n              <span class=\"vtag\">\n                <svg width=\"11\" height=\"11\" viewBox=\"0 0 16 16\" fill=\"none\" aria-hidden=\"true\"><path d=\"M4 4l8 8M12 4l-8 8\" stroke=\"currentColor\" stroke-width=\"2.2\" stroke-linecap=\"round\"/></svg>\n                模糊\n              </span>\n              「帮我做个物料」\n            </div>\n            <span class=\"cm-arrow-down\" aria-hidden=\"true\">\n              <svg width=\"16\" height=\"16\" viewBox=\"0 0 16 16\" fill=\"none\"><path d=\"M8 3v10M3.5 8.5L8 13l4.5-4.5\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/></svg>\n            </span>\n            <div class=\"cm-good\">\n              <span class=\"vtag\">\n                <svg width=\"11\" height=\"11\" viewBox=\"0 0 16 16\" fill=\"none\" aria-hidden=\"true\"><path d=\"M3 8.5l3.2 3.2L13 5\" stroke=\"currentColor\" stroke-width=\"2.2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/></svg>\n                精准\n              </span>\n              「请<b>设计部</b>在 <b>10 月 20 日前</b>出 <b>3 版</b>新品海报（尺寸 60×90cm，需突出「续航 20 小时」卖点），物料需同步至<b>销售部张哥</b>用于终端推广。」\n            </div>\n          </div>\n        </article>\n\n        <!-- 卡片 2：跨部门 · 冲突化解 -->\n        <article class=\"cm-card\">\n          <div class=\"cm-card-top\">\n            <span class=\"cm-cat\">跨部门沟通 · 冲突化解</span>\n            <span class=\"cm-idx\">02 / 04</span>\n          </div>\n          <div>\n            <h3>「对事不对人」的沟通公式</h3>\n            <p class=\"cm-sub\">指责只会激化对立，公式让对话回到问题本身。</p>\n          </div>\n          <div>\n            <p class=\"cm-block-label\">沟通公式</p>\n            <div class=\"cm-formula\">\n              <span class=\"fchip\">客观事实</span>\n              <span class=\"fplus\">+</span>\n              <span class=\"fchip\">影响分析</span>\n              <span class=\"fplus\">+</span>\n              <span class=\"fchip\">解决建议</span>\n            </div>\n          </div>\n          <div class=\"cm-vs\">\n            <div>\n              <p class=\"cm-block-label\">示例 · 面对采购部延迟交物料</p>\n            </div>\n            <div class=\"cm-bad\">\n              <span class=\"vtag\">\n                <svg width=\"11\" height=\"11\" viewBox=\"0 0 16 16\" fill=\"none\" aria-hidden=\"true\"><path d=\"M4 4l8 8M12 4l-8 8\" stroke=\"currentColor\" stroke-width=\"2.2\" stroke-linecap=\"round\"/></svg>\n                不要说\n              </span>\n              「你们又拖进度」\n            </div>\n            <span class=\"cm-arrow-down\" aria-hidden=\"true\">\n              <svg width=\"16\" height=\"16\" viewBox=\"0 0 16 16\" fill=\"none\"><path d=\"M8 3v10M3.5 8.5L8 13l4.5-4.5\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/></svg>\n            </span>\n            <div class=\"cm-good\">\n              <span class=\"vtag\">\n                <svg width=\"11\" height=\"11\" viewBox=\"0 0 16 16\" fill=\"none\" aria-hidden=\"true\"><path d=\"M3 8.5l3.2 3.2L13 5\" stroke=\"currentColor\" stroke-width=\"2.2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/></svg>\n                而是说\n              </span>\n              「目前设计部因未收到物料，已延误 <b>2 天</b>（事实），可能错过 <b>双 11 预热</b>（影响），能否<b>优先交付核心款物料</b>，剩余款明天补送（建议）？」\n            </div>\n          </div>\n        </article>\n\n        <!-- 卡片 3：对上沟通 -->\n        <article class=\"cm-card\">\n          <div class=\"cm-card-top\">\n            <span class=\"cm-cat\">对上沟通</span>\n            <span class=\"cm-idx\">03 / 04</span>\n          </div>\n          <div>\n            <h3>给选择题，而非问答题</h3>\n            <p class=\"cm-sub\">带着思考和方案去汇报，而不是把问题原样抛给上级。</p>\n          </div>\n          <ul class=\"cm-points\">\n            <li>\n              <span class=\"pnum\">1</span>\n              <div>\n                <b>汇报结构：用「三条总结」</b>\n                <small>核心结论 → 理由一句依据 → 下一步请求。</small>\n              </div>\n            </li>\n            <li>\n              <span class=\"pnum\">2</span>\n              <div>\n                <b>问题请示：提前准备 2–3 个解决方案</b>\n                <small>标注「优劣势 + 资源需求」。如「申请加派 1 名客服——<b>方案一</b>：从行政部借调；<b>方案二</b>：临时外包，月成本增加 5000 元」。</small>\n              </div>\n            </li>\n            <li>\n              <span class=\"pnum\">3</span>\n              <div>\n                <b>进度通报：主动同步</b>\n                <small>汇报「进展 + 卡点 + 需要支持」，避免「等追问才汇报」。</small>\n              </div>\n            </li>\n          </ul>\n        </article>\n\n        <!-- 卡片 4：对下沟通 -->\n        <article class=\"cm-card\">\n          <div class=\"cm-card-top\">\n            <span class=\"cm-cat\">对下沟通</span>\n            <span class=\"cm-idx\">04 / 04</span>\n          </div>\n          <div>\n            <h3>给指令，也要给思路</h3>\n            <p class=\"cm-sub\">下属执行不到位，往往不是能力问题，而是信息没给够。</p>\n          </div>\n          <ul class=\"cm-points\">\n            <li>\n              <span class=\"pnum\">1</span>\n              <div>\n                <b>指令明确</b>\n                <small>用「书面 + 口头」双重确认，要求下属<b>复述核心要求</b>。</small>\n              </div>\n            </li>\n            <li>\n              <span class=\"pnum\">2</span>\n              <div>\n                <b>反馈具体</b>\n                <small>批评时说「你这次会议记录<b>漏了 3 个行动的 DDL</b>」，而非「你记录得太马虎」。</small>\n              </div>\n            </li>\n            <li>\n              <span class=\"pnum\">3</span>\n              <div>\n                <b>支持到位</b>\n                <small>传递任务后同步「<b>资源对接人、参考案例、风险预案</b>」，减少下属盲目摸索。</small>\n              </div>\n            </li>\n          </ul>\n        </article>\n\n      </div>\n\n      </div>\n    </div>"
-  },
-  {
-    "group": "职场沟通",
-    "t": "邮件写作要点",
-    "html": "<div class=\"lesson-head\">\n      <p class=\"eyebrow\">职场沟通 / 邮件写作</p>\n      <h1>一封专业的邮件，从动笔前开始。</h1>\n      <p class=\"lead\">邮件是职场最正式的沟通载体。发送前想清楚目的与范围，发送时遵守格式规范，才能让信息高效流动。</p>\n    </div>\n\n    <div class=\"mail-sec\">\n      <div class=\"mail-sec-head\">\n        <span class=\"mnum\">1</span>\n        <h2>发送前，先明确邮件目的</h2>\n        <span class=\"msub\">目的不同，写法不同</span>\n      </div>\n      <div class=\"mail-chips\">\n        <span class=\"mail-chip\">\n          <svg width=\"15\" height=\"15\" viewBox=\"0 0 16 16\" fill=\"none\" aria-hidden=\"true\"><path d=\"M8 2v8M8 13.5v.5M2.8 4.8C4.4 3 6.1 2.2 8 2.2s3.6.8 5.2 2.6\" stroke=\"currentColor\" stroke-width=\"1.6\" stroke-linecap=\"round\"/></svg>\n          申请审批\n        </span>\n        <span class=\"mail-chip\">\n          <svg width=\"15\" height=\"15\" viewBox=\"0 0 16 16\" fill=\"none\" aria-hidden=\"true\"><path d=\"M2.5 3.5h11v9h-11zM2.5 4l5.5 4.5L13.5 4\" stroke=\"currentColor\" stroke-width=\"1.6\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/></svg>\n          通知知会\n        </span>\n        <span class=\"mail-chip\">\n          <svg width=\"15\" height=\"15\" viewBox=\"0 0 16 16\" fill=\"none\" aria-hidden=\"true\"><path d=\"M3 1.5h7.5L13 4v10.5H3zM10.5 1.5V4H13\" stroke=\"currentColor\" stroke-width=\"1.6\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/></svg>\n          提出指令\n        </span>\n        <span class=\"mail-chip\">\n          <svg width=\"15\" height=\"15\" viewBox=\"0 0 16 16\" fill=\"none\" aria-hidden=\"true\"><circle cx=\"6.5\" cy=\"6.5\" r=\"4\" stroke=\"currentColor\" stroke-width=\"1.6\"/><path d=\"M9.6 9.6L14 14\" stroke=\"currentColor\" stroke-width=\"1.6\" stroke-linecap=\"round\"/></svg>\n          信息分享\n        </span>\n      </div>\n    </div>\n\n    <div class=\"mail-sec\">\n      <div class=\"mail-sec-head\">\n        <span class=\"mnum\">2</span>\n        <h2>发送范围：收件人与抄送</h2>\n        <span class=\"msub\">谁该收到，谁只需知道</span>\n      </div>\n      <div class=\"mail-cols\">\n        <div class=\"mail-col\">\n          <div class=\"mrow\"><span class=\"mtag mtag-to\">TO</span><h3>收件人 · 具体办事的人</h3></div>\n          <p><b>第一对接人</b>或准确需要回复的人。收到邮件即意味着「这件事需要你行动或答复」。</p>\n        </div>\n        <div class=\"mail-col\">\n          <div class=\"mrow\"><span class=\"mtag mtag-cc\">CC</span><h3>抄送 · 需要知晓的人</h3></div>\n          <p><b>双方上级</b>或需要知晓该事项内容的人。抄送是知会，不要求必须回复。</p>\n        </div>\n      </div>\n    </div>\n\n    <div class=\"mail-sec\">\n      <div class=\"mail-sec-head\">\n        <span class=\"mnum\">3</span>\n        <h2>格式建议：五步写法</h2>\n        <span class=\"msub\">从标题到发送检查</span>\n      </div>\n      <div class=\"mail-steps\">\n        <div class=\"mail-step\">\n          <span class=\"snum\">①</span>\n          <div>\n            <h4>标题 · 开头使用【】</h4>\n            <p>例如 <span class=\"mail-kw\">【XX项目】</span><span class=\"mail-kw\">【请审阅】</span><span class=\"mail-kw\">【请协助】</span><span class=\"mail-kw\">【请回复】</span>，让对方一眼看清邮件性质。</p>\n          </div>\n        </div>\n        <div class=\"mail-step\">\n          <span class=\"snum\">②</span>\n          <div>\n            <h4>称呼 · 覆盖收件人范围</h4>\n            <p>邮件需要写称呼，并思考称呼能否涵盖收件人范围——<b>发给个人还是多人</b>，用词不同。</p>\n          </div>\n        </div>\n        <div class=\"mail-step\">\n          <span class=\"snum\">③</span>\n          <div>\n            <h4>正文 · 结构明确，突出重点</h4>\n            <p>结构清晰、格式规整；<b>同样的项目保持类似的邮件模板</b>，方便收件人阅读理解；插入的表格、图片注意格式显示正确，<b>适当标注重点</b>。</p>\n          </div>\n        </div>\n        <div class=\"mail-step\">\n          <span class=\"snum\">④</span>\n          <div>\n            <h4>签名 · 留下联系方式</h4>\n            <p>一定要有对应联系人或签名，<b>尤其是涉及外部的邮件</b>，方便对方私下沟通联系。</p>\n          </div>\n        </div>\n        <div class=\"mail-step\">\n          <span class=\"snum\">⑤</span>\n          <div>\n            <h4>反复检查 · 发送自测与他测</h4>\n            <p>重要邮件建议<b>发送自测和他测</b>（比如内容较多、带图表的）。重要邮件发送后应<b>告知对方请查收</b>，企微邮件可直接转发到聊天。</p>\n          </div>\n        </div>\n      </div>\n    </div>\n\n    <div class=\"mail-sec\">\n      <div class=\"mail-sec-head\">\n        <span class=\"mnum\">4</span>\n        <h2>进阶要点：收件人顺序与正文结构</h2>\n        <span class=\"msub\">来自实际案例的两个补充</span>\n      </div>\n      <div class=\"mail-cols\">\n        <div class=\"mail-col\">\n          <h3>邮件的收件人顺序</h3>\n          <p>根据事情的<b>紧密相关程度</b>排序，<b>越相关的越放前面</b>——最需要行动的人，应排在收件列表的首位。</p>\n        </div>\n        <div class=\"mail-col\">\n          <h3>邮件的正文结构 · 倒叙</h3>\n          <div class=\"pyr\">\n            <div class=\"pl pl-1\"><b>重点</b><span><b>倒叙结构</b>：正文先写结果 / 诉求目的 / 审批事由。</span></div>\n            <div class=\"pl pl-2\"><b>其次</b><span>补充相关过程说明，列举数据论据，可分点列；重点字眼可加粗或更换字体颜色。</span></div>\n            <div class=\"pl pl-3\"><b>最后</b><span>其他论据材料有序整理在附件中，附件不宜太大，多个附件可整理成压缩包。</span></div>\n          </div>\n        </div>\n      </div>\n\n    </div>"
-  },
-  {
-    "group": "职场沟通",
-    "t": "邮件写作技巧",
-    "html": "<div class=\"lesson-head\">\n      <p class=\"eyebrow\">职场沟通 / 邮件写作技巧</p>\n      <h1>让 AI 帮你写邮件，再学会两个加分技巧。</h1>\n      <p class=\"lead\">写不出、写不好时，把要求讲清楚交给 AI 起草；重要邮件用「定时发送」和「已读回执」把控节奏。下面是可直接套用的提示词与操作指引。</p>\n    </div>\n\n    <div class=\"mail-sec\">\n      <div class=\"mail-sec-head\">\n        <span class=\"mnum\">1</span>\n        <h2>用 AI 写邮件：把要求说清楚</h2>\n        <span class=\"msub\">提示词 = 背景 + 任务 + 要求 + 语气</span>\n      </div>\n      <p style=\"font-size:13.5px;color:var(--muted);line-height:1.75;margin:0 0 calc(var(--space)*1.5);\">想让 AI 写出能直接发送的邮件，关键是把「发给谁、为什么写、要求是什么、什么语气」一次讲明白。以下提示词可直接复制到 AI 对话框使用，把方括号内容替换成你的实际情况。</p>\n\n      <div class=\"ai-prompts\">\n        <div class=\"ai-prompt\">\n          <div class=\"ai-prompt-head\">\n            <span class=\"ap-tag\">请示审批</span>\n            <button class=\"ap-copy\" type=\"button\" data-copy=\"zc-ap1\">复制提示词</button>\n          </div>\n          <p class=\"ap-title\">向领导申请资源 / 审批</p>\n          <pre class=\"ap-body\" id=\"zc-ap1\">请帮我起草一封发给直属领导的请示邮件。\n背景：[项目/事项背景，1-2 句]\n诉求：[希望审批或申请的具体事项]\n我的初步方案：[方案一]（优势/成本）；[方案二]（优势/成本）\n要求：标题使用【请审阅】开头；正文先说结论，再给方案对比；语气正式简洁，控制在 200 字以内。</pre>\n        </div>\n\n        <div class=\"ai-prompt\">\n          <div class=\"ai-prompt-head\">\n            <span class=\"ap-tag\">催办协调</span>\n            <button class=\"ap-copy\" type=\"button\" data-copy=\"zc-ap2\">复制提示词</button>\n          </div>\n          <p class=\"ap-title\">跨部门催进度（对事不对人）</p>\n          <pre class=\"ap-body\" id=\"zc-ap2\">请帮我起草一封跨部门催办邮件。\n背景：我需要[部门]提供的[具体物料/数据]，[时间点]曾沟通过一次，目前尚未收到，已影响[具体影响，如：项目延期 2 天]。\n诉求：希望对方[最晚时间]前提供[核心内容]，其余部分可次日补齐。\n要求：对事不对人，先讲事实和影响，再给出建议方案；语气客气但明确，不带指责。</pre>\n        </div>\n\n        <div class=\"ai-prompt\">\n          <div class=\"ai-prompt-head\">\n            <span class=\"ap-tag\">通知知会</span>\n            <button class=\"ap-copy\" type=\"button\" data-copy=\"zc-ap3\">复制提示词</button>\n          </div>\n          <p class=\"ap-title\">项目进展 / 事项通知</p>\n          <pre class=\"ap-body\" id=\"zc-ap3\">请帮我起草一封项目进展通知邮件，收件人为项目相关同事。\n背景：[项目名称]目前进展：[已完成的里程碑]，当前卡点：[问题及影响]，下一步：[计划与时间]。\n要求：标题使用【XX项目】开头；正文倒叙，先结论后过程，关键时间点加粗；收件人为多人，称呼使用通用称呼；300 字以内。</pre>\n        </div>\n\n        <div class=\"ai-prompt\">\n          <div class=\"ai-prompt-head\">\n            <span class=\"ap-tag\">回复修改</span>\n            <button class=\"ap-copy\" type=\"button\" data-copy=\"zc-ap4\">复制提示词</button>\n          </div>\n          <p class=\"ap-title\">把草稿改得更专业</p>\n          <pre class=\"ap-body\" id=\"zc-ap4\">请帮我修改下面这封邮件草稿，使其更专业：\n[粘贴你的草稿]\n修改要求：1) 主题不明确的改为【标签】+ 事项标题；2) 正文调整为倒叙结构，先说结论/诉求；3) 长句拆分，可分点的分点；4) 语气礼貌但不卑微；5) 检查错别字和标点。</pre>\n        </div>\n      </div>\n\n      <div class=\"callout\" style=\"max-width:none;margin-top:calc(var(--space)*1.75);\">\n        <span class=\"callout-tag\">注意</span>\n        <p>AI 起草后<u>务必人工核对</u>：收件人称呼、公司口径、数据数字、敏感信息。涉及公司机密的内容，先确认能否输入 AI 工具，再决定是否使用。</p>\n      </div>\n    </div>\n\n    <div class=\"mail-sec\">\n      <div class=\"mail-sec-head\">\n        <span class=\"mnum\">2</span>\n        <h2>定时发送：让对方在对的时间收到</h2>\n        <span class=\"msub\">路径：发信设置 → 定时发送</span>\n      </div>\n      <div class=\"mail-case\">\n        <figure class=\"inv-fig\" data-full=\"assets/email/mail-tips-3.png\" data-cap=\"发信设置菜单：分别发送 / 定时发送 / 高优先级 / 已读回执\">\n          <img src=\"assets/email/mail-tips-3.png\" alt=\"邮件写信窗口：点击发信设置展开菜单，高亮定时发送选项\">\n          <span class=\"zoom-hint\">\n            <svg width=\"11\" height=\"11\" viewBox=\"0 0 16 16\" fill=\"none\" aria-hidden=\"true\"><circle cx=\"7\" cy=\"7\" r=\"4.5\" stroke=\"currentColor\" stroke-width=\"1.8\"/><path d=\"M10.5 10.5L14 14M5.2 7h3.6M7 5.2v3.6\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\"/></svg>\n            点击放大\n          </span>\n        </figure>\n        <div class=\"mail-case-note\">\n          <h4>怎么设置</h4>\n          <p>写好邮件后，点击工具栏「<b>发信设置</b>」，在下拉菜单中选择「<b>定时发送</b>」，设置日期与时间后点「确定」。邮件将在指定时间自动发出。</p>\n          <h4 style=\"margin-top:14px;\">什么时候用</h4>\n          <p>· 不想让对方深夜 / 周末收到邮件，设定到<b>工作日上午</b>发出<br>· 需要<b>踩时间节点</b>发出的通知（如活动预告、阶段性汇报）<br>· 提前写好、按节奏分批发送的多封邮件</p>\n        </div>\n      </div>\n      <figure class=\"inv-fig\" style=\"max-width:520px;\" data-full=\"assets/email/mail-tips-4.png\" data-cap=\"设置发送时间：选择日期与时间后确定\">\n        <img src=\"assets/email/mail-tips-4.png\" alt=\"设置发送时间弹窗：日期选择 9月1日 星期二，时间选择 下午 6:15\">\n        <span class=\"zoom-hint\">\n          <svg width=\"11\" height=\"11\" viewBox=\"0 0 16 16\" fill=\"none\" aria-hidden=\"true\"><circle cx=\"7\" cy=\"7\" r=\"4.5\" stroke=\"currentColor\" stroke-width=\"1.8\"/><path d=\"M10.5 10.5L14 14M5.2 7h3.6M7 5.2v3.6\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\"/></svg>\n          点击放大\n        </span>\n        <figcaption class=\"inv-cap\" style=\"margin:8px 4px 0;font-size:12.5px;color:var(--faint);\">「定时发送」弹窗：选择日期与时间后点击确定</figcaption>\n      </figure>\n    </div>\n\n    <div class=\"mail-sec\">\n      <div class=\"mail-sec-head\">\n        <span class=\"mnum\">3</span>\n        <h2>已读回执：确认对方已经看过</h2>\n        <span class=\"msub\">路径：发信设置 → 已读回执</span>\n      </div>\n      <div class=\"mail-case\">\n        <figure class=\"inv-fig\" data-full=\"assets/email/mail-tips-2.png\" data-cap=\"发信设置菜单：选择已读回执\">\n          <img src=\"assets/email/mail-tips-2.png\" alt=\"邮件写信窗口：发信设置菜单中高亮已读回执选项\">\n          <span class=\"zoom-hint\">\n            <svg width=\"11\" height=\"11\" viewBox=\"0 0 16 16\" fill=\"none\" aria-hidden=\"true\"><circle cx=\"7\" cy=\"7\" r=\"4.5\" stroke=\"currentColor\" stroke-width=\"1.8\"/><path d=\"M10.5 10.5L14 14M5.2 7h3.6M7 5.2v3.6\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\"/></svg>\n            点击放大\n          </span>\n        </figure>\n        <div class=\"mail-case-note\">\n          <h4>怎么设置</h4>\n          <p>写邮件时点击「<b>发信设置</b> → <b>已读回执</b>」，对方打开邮件后你会收到系统通知，确认邮件已被阅读。</p>\n          <h4 style=\"margin-top:14px;\">什么时候用</h4>\n          <p>· <b>有时效要求</b>的邮件：审批、确认类事项，需要对方在截止前处理<br>· <b>重要且紧急</b>的知会：避免「发了就当对方知道了」<br>· 对方常常<b>漏看邮件</b>时，用回执确认触达</p>\n          <h4 style=\"margin-top:14px;\">提醒</h4>\n          <p>已读回执只是确认「已读」，对方可能读了未回。重要事项仍建议<b>同步企微消息提醒对方查收</b>。</p>\n        </div>\n      </div>\n    </div>\n\n    <div class=\"mail-sec\">\n      <div class=\"mail-sec-head\">\n        <span class=\"mnum\">4</span>\n        <h2>认识写信窗口</h2>\n        <span class=\"msub\">发送 / 附件 / 发信设置都在顶部工具栏</span>\n      </div>\n      <figure class=\"inv-fig\" data-full=\"assets/email/mail-tips-1.png\" data-cap=\"邮件写信窗口总览：工具栏、收件人、格式与签名\">\n        <img src=\"assets/email/mail-tips-1.png\" alt=\"邮件写信窗口：顶部发送、保存、附件、发信设置按钮，收件人抄送主题栏，格式工具栏含智能润色\">\n        <span class=\"zoom-hint\">\n          <svg width=\"11\" height=\"11\" viewBox=\"0 0 16 16\" fill=\"none\" aria-hidden=\"true\"><circle cx=\"7\" cy=\"7\" r=\"4.5\" stroke=\"currentColor\" stroke-width=\"1.8\"/><path d=\"M10.5 10.5L14 14M5.2 7h3.6M7 5.2v3.6\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\"/></svg>\n          点击放大\n        </span>\n        <figcaption class=\"inv-cap\" style=\"margin:8px 4px 0;font-size:12.5px;color:var(--faint);\">写信窗口：① 顶部工具栏（发送 / 附件 / 发信设置）② 收件人、抄送与主题 ③ 格式工具栏（含「智能润色」）④ 自动签名</figcaption>\n      </figure>\n    </div>"
-  },
-  {
-    "group": "职场沟通",
-    "t": "模拟回复邮件游戏",
-    "html": "<div class=\"lesson-head\">\n      <p class=\"eyebrow\">职场沟通 / 模拟回复游戏</p>\n      <h1>换你来回这封邮件，你会怎么写？</h1>\n      <p class=\"lead\">你将扮演回复者，根据客户情绪，回复邮件</p>\n    </div>\n\n    <div class=\"warmup-wrap\">\n      <iframe class=\"warmup-frame\" src=\"assets/game/reply-game/reply-game.html?v=20260918a\" title=\"模拟回复 · 邮件谈判专家情景演练\"></iframe>\n    </div>"
-  },
-  {
-    "group": "职场沟通",
-    "t": "如何开会",
-    "html": "<div class=\"lesson-head\">\n      <p class=\"eyebrow\">职场沟通 / 如何开会</p>\n      <h1>开一场有结论、能落地的会。</h1>\n      <p class=\"lead\">会议不是例行公事。从「要不要开」到「怎么跟」，五个环节决定一场会是富有成效还是浪费时间。</p>\n    </div>\n\n    <div class=\"callout\" style=\"max-width:none;margin-bottom:calc(var(--space)*2);\">\n      <span class=\"callout-tag\">一句真话</span>\n      <p>任何会议都是<u>要么富有成效，要么纯粹浪费时间</u>，二者必居其一。</p>\n    </div>\n\n    <div class=\"mail-sec\">\n      <div class=\"mail-sec-head\">\n        <span class=\"mnum\">1</span>\n        <h2>高效开会的五个环节</h2>\n        <span class=\"msub\">每一步都有讲究</span>\n      </div>\n      <div class=\"mt-steps\">\n        <div class=\"mt-step\">\n          <div class=\"mt-step-main\">\n            <span class=\"mt-num\">01</span>\n            <b>确定真要开会</b>\n          </div>\n          <p>非开不可？如果能<b>当机立断、面对面沟通</b>的，应选择更优方式。</p>\n        </div>\n        <div class=\"mt-step\">\n          <div class=\"mt-step-main\">\n            <span class=\"mt-num\">02</span>\n            <b>找对必须参会的人</b>\n          </div>\n          <p>别「误伤」无辜：<b>慎用全员参与</b>，不凑热闹，密切相关方才参加。</p>\n        </div>\n        <div class=\"mt-step\">\n          <div class=\"mt-step-main\">\n            <span class=\"mt-num\">03</span>\n            <b>围绕主题、按照流程讨论</b>\n          </div>\n          <p>拒绝「跑题」和「发散」：严格按照<b>会前发出的会议主题方向</b>进行讨论，听从会议主持的节奏。</p>\n        </div>\n        <div class=\"mt-step\">\n          <div class=\"mt-step-main\">\n            <span class=\"mt-num\">04</span>\n            <b>得出结论</b>\n          </div>\n          <p>形成<b>会议纪要并全员确认</b>：记录结论 → 关键讨论过程 → 行动计划 / 分工安排。</p>\n        </div>\n        <div class=\"mt-step\">\n          <div class=\"mt-step-main\">\n            <span class=\"mt-num\">05</span>\n            <b>落地跟踪实施情况</b>\n          </div>\n          <p>按照会议记录的安排，<b>阶段性复盘</b>落地情况。</p>\n        </div>\n      </div>\n    </div>\n\n    <div class=\"mail-sec\">\n      <div class=\"mail-sec-head\">\n        <span class=\"mnum\">2</span>\n        <h2>线上会与线下会：各自的准备流程</h2>\n        <span class=\"msub\">会前准备决定会议质量</span>\n      </div>\n      <div class=\"mt-cols\">\n        <div class=\"mt-col\">\n          <div class=\"mt-col-head online\">\n            <svg width=\"15\" height=\"15\" viewBox=\"0 0 16 16\" fill=\"none\" aria-hidden=\"true\"><rect x=\"1.5\" y=\"3.5\" width=\"13\" height=\"9\" rx=\"1.5\" stroke=\"currentColor\" stroke-width=\"1.6\"/><path d=\"M6 12.5v1.5M10 12.5v1.5M4 14h8\" stroke=\"currentColor\" stroke-width=\"1.6\" stroke-linecap=\"round\"/></svg>\n            线上开会\n          </div>\n          <ol class=\"mt-flow\">\n            <li><b>提前做好会议链接</b>，发送给参会人 / 参会群聊</li>\n            <li><b>日程设置提醒</b>，避免忘记</li>\n            <li><b>提前 15 分钟入会</b>，测试麦克风和声音、画面是否同步；提前打开共享文件</li>\n            <li><b>准时进入会议</b>，根据是否需要互动关闭静音；做好会议备忘</li>\n          </ol>\n        </div>\n        <div class=\"mt-col\">\n          <div class=\"mt-col-head offline\">\n            <svg width=\"15\" height=\"15\" viewBox=\"0 0 16 16\" fill=\"none\" aria-hidden=\"true\"><path d=\"M2.5 4.5h11v7h-11zM2.5 4.5L8 9l5.5-4.5\" stroke=\"currentColor\" stroke-width=\"1.6\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/></svg>\n            线下开会\n          </div>\n          <ol class=\"mt-flow\">\n            <li>确认会议时间对象后，<b>提前预约相应配置的会议室</b>（是否需要投屏、参会人数、是否需要饮用水等）</li>\n            <li><b>发送会议日程</b>（准确时间、会议室、会议简单信息）给参会者，设置提醒</li>\n            <li>会议开始前 <b>15-20 分钟</b>，组织者提前到场做好准备，检查投影设备等</li>\n            <li><b>会中把控节奏</b>，会后输出会议记录（会议备忘）</li>\n          </ol>\n        </div>\n      </div>\n    </div>\n\n    <div class=\"mail-sec\">\n      <div class=\"mail-sec-head\">\n        <span class=\"mnum\">3</span>\n        <h2>会议记录怎么写</h2>\n        <span class=\"msub\">三个部分，缺一不可</span>\n      </div>\n      <div class=\"mt-minutes\">\n        <div class=\"mt-min-part\">\n          <h4>一 · 会议相关信息</h4>\n          <p>会议<b>主题 / 时间 / 地点 / 形式</b>（如有会议链接）/ 主持人 / 与会人。</p>\n        </div>\n        <div class=\"mt-min-part\">\n          <h4>二 · 会议议题和目前结论</h4>\n          <div class=\"mt-min-topic\">\n            <span class=\"mt-topic-chip\">议题 1</span>\n            <span>结论 or 待解决问题</span>\n          </div>\n          <div class=\"mt-min-topic\">\n            <span class=\"mt-topic-chip\">议题 2</span>\n            <span>结论 or 待解决问题</span>\n          </div>\n          <p style=\"margin-top:8px;\">每个议题逐条记录，<b>结论优先</b>，问题跟上。</p>\n        </div>\n        <div class=\"mt-min-part\">\n          <h4>三 · 计划和安排</h4>\n          <p>· 具体每个事项的<b>下一步任务和计划</b>，@ 对应负责人，写明 DDL 时间</p>\n          <p>· 约定<b>定时更新时间</b>，或下一次进度碰头时间</p>\n        </div>\n      </div>\n    </div>\n\n    <div class=\"mail-sec\">\n      <div class=\"mail-sec-head\">\n        <span class=\"mnum\">4</span>\n        <h2>用企业微信把会开起来</h2>\n        <span class=\"msub\">从聊天里直接建会、建日程、建待办</span>\n      </div>\n      <p style=\"font-size:13.5px;color:var(--muted);line-height:1.75;margin:0 0 14px;\">讨论往往会从聊天窗口里产生，别让「回头我约个会」变成一句空话。在企业微信聊天输入框的工具栏里，点开日历图标，可以直接<b style=\"color:var(--fg);\">预定会议、新建日程、从已有日程中选择</b>，也可以发送「快速会议」；右侧还能把消息一键转为<b style=\"color:var(--fg);\">待办</b>。</p>\n      <div class=\"mt-case-figs\">\n        <figure class=\"inv-fig\" data-full=\"assets/meeting/wecom-meeting.png\" data-cap=\"企业微信聊天工具栏：预定会议 / 新建日程 / 从已有日程中选择\">\n          <img src=\"assets/meeting/wecom-meeting.png\" alt=\"企业微信聊天输入框工具栏的日历下拉菜单：预定会议、新建日程、从已有日程中选择\">\n          <span class=\"zoom-hint\">\n            <svg width=\"11\" height=\"11\" viewBox=\"0 0 16 16\" fill=\"none\" aria-hidden=\"true\"><circle cx=\"7\" cy=\"7\" r=\"4.5\" stroke=\"currentColor\" stroke-width=\"1.8\"/><path d=\"M10.5 10.5L14 14M5.2 7h3.6M7 5.2v3.6\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\"/></svg>\n            点击放大\n          </span>\n          <figcaption class=\"inv-cap\" style=\"margin:8px 4px 0;font-size:12.5px;color:var(--faint);\">聊天工具栏 → 日历图标：预定会议 / 新建日程 / 从已有日程中选择</figcaption>\n        </figure>\n        <figure class=\"inv-fig\" data-full=\"assets/meeting/wecom-todo.png\" data-cap=\"企业微信待办：写下待办事项，设置参与人、截止时间与描述\">\n          <img src=\"assets/meeting/wecom-todo.png\" alt=\"企业微信待办页面：输入待办事项，选择参与人、截止时间、描述\">\n          <span class=\"zoom-hint\">\n            <svg width=\"11\" height=\"11\" viewBox=\"0 0 16 16\" fill=\"none\" aria-hidden=\"true\"><circle cx=\"7\" cy=\"7\" r=\"4.5\" stroke=\"currentColor\" stroke-width=\"1.8\"/><path d=\"M10.5 10.5L14 14M5.2 7h3.6M7 5.2v3.6\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\"/></svg>\n            点击放大\n          </span>\n          <figcaption class=\"inv-cap\" style=\"margin:8px 4px 0;font-size:12.5px;color:var(--faint);\">待办：写下事项，设置参与人 / 截止时间 / 描述</figcaption>\n        </figure>\n      </div>\n    </div>"
-  },
-  {
-    "group": "职场沟通",
-    "t": "会议记录",
-    "html": "<div class=\"lesson-head\">\n      <p class=\"eyebrow\">职场沟通 / 会议记录</p>\n      <h1>会议记录不是流水账，是行动的开始。</h1>\n      <p class=\"lead\">一场会有没有价值，取决于会后是否留下「谁、做什么、什么时候交付」。好的记录让讨论落地，避免反复开会。</p>\n    </div>\n\n    <div class=\"mail-sec\">\n      <div class=\"mail-sec-head\">\n        <span class=\"mnum\">1</span>\n        <h2>会议记录的 3 个核心原则</h2>\n        <span class=\"msub\">结论优先，责任到人</span>\n      </div>\n      <div class=\"mt-minutes\">\n        <div class=\"mt-min-part\">\n          <h4>结论优先</h4>\n          <p>不要从「张三说…李四说…」开始写。先写<b>本次会议达成了什么结论</b>，再补充关键讨论过程。</p>\n        </div>\n        <div class=\"mt-min-part\">\n          <h4>责任到人</h4>\n          <p>每个行动项必须有<b>@ 负责人</b>，避免「会后大家一起做」变成没人做。</p>\n        </div>\n        <div class=\"mt-min-part\">\n          <h4>DDL 具体</h4>\n          <p>不写「尽快完成」，要写<b>明确的截止时间</b>。模糊的截止时间等于没有截止。</p>\n        </div>\n      </div>\n    </div>\n\n    <div class=\"mail-sec\">\n      <div class=\"mail-sec-head\">\n        <span class=\"mnum\">2</span>\n        <h2>会后 5 分钟整理清单</h2>\n        <span class=\"msub\">养成习惯，事半功倍</span>\n      </div>\n      <div class=\"mail-steps\">\n        <div class=\"mail-step\">\n          <span class=\"snum\">①</span>\n          <div>\n            <h4>补全会议信息</h4>\n            <p>主题、时间、地点/链接、主持人、参会人、请假人。这些信息在后续追溯时非常重要。</p>\n          </div>\n        </div>\n        <div class=\"mail-step\">\n          <span class=\"snum\">②</span>\n          <div>\n            <h4>梳理议题与结论</h4>\n            <p>按议题列出「结论 / 待解决问题」。没有结论的议题，也要写明下一步是什么。</p>\n          </div>\n        </div>\n        <div class=\"mail-step\">\n          <span class=\"snum\">③</span>\n          <div>\n            <h4>输出行动项</h4>\n            <p>每个行动项包含：<b>任务描述</b>、<b>负责人</b>、<b>截止时间</b>、<b>验收标准</b>。这是会议纪要最有价值的部分。</p>\n          </div>\n        </div>\n        <div class=\"mail-step\">\n          <span class=\"snum\">④</span>\n          <div>\n            <h4>24 小时内同步</h4>\n            <p>会议纪要在会后 <b>24 小时内</b>发出，趁热打铁，大家对讨论的记忆最清晰。</p>\n          </div>\n        </div>\n      </div>\n    </div>\n\n    <div class=\"mail-sec\">\n      <div class=\"mail-sec-head\">\n        <span class=\"mnum\">3</span>\n        <h2>AI 整理会议记录提示词</h2>\n        <span class=\"msub\">直接复制到 AI 对话框使用</span>\n      </div>\n      <div class=\"ai-prompts\">\n        <div class=\"ai-prompt\">\n          <div class=\"ai-prompt-head\">\n            <span class=\"ap-tag\">录音转纪要</span>\n            <button class=\"ap-copy\" type=\"button\" data-copy=\"zc-ap5\">复制提示词</button>\n          </div>\n          <h3 class=\"ap-title\">把录音/速记整理成结构化会议纪要</h3>\n          <pre class=\"ap-body\" id=\"zc-ap5\">请根据以下会议速记，整理成一份结构化的会议纪要。要求：\n1. 先写会议主题、时间、参会人；\n2. 按议题列出讨论结论；\n3. 每个结论后输出对应的行动项：任务、负责人、截止时间；\n4. 语言简洁专业，不要添加会议中没有的内容。\n\n会议速记如下：\n【粘贴你的速记/转录文本】</pre>\n        </div>\n        <div class=\"ai-prompt\">\n          <div class=\"ai-prompt-head\">\n            <span class=\"ap-tag\">讨论转待办</span>\n            <button class=\"ap-copy\" type=\"button\" data-copy=\"zc-ap6\">复制提示词</button>\n          </div>\n          <h3 class=\"ap-title\">把零散讨论整理成可执行待办清单</h3>\n          <pre class=\"ap-body\" id=\"zc-ap6\">请将以下会议讨论内容整理成待办清单。要求：\n1. 每个待办只包含一个具体动作；\n2. 标注负责人（@姓名）和截止时间；\n3. 区分「已完成共识」和「会后需推进」两类；\n4. 用表格输出：事项 | 负责人 | 截止时间 | 状态 | 备注。\n\n讨论内容如下：\n【粘贴讨论内容】</pre>\n        </div>\n      </div>\n    </div>\n\n    <div class=\"mail-sec\">\n      <div class=\"mail-sec-head\">\n        <span class=\"mnum\">4</span>\n        <h2>用企业微信「记录面聊」做会议记录</h2>\n        <span class=\"msub\">面对面沟通也能自动整理</span>\n      </div>\n      <p style=\"font-size:13.5px;color:var(--muted);line-height:1.75;margin:0 0 14px;\">开会、面谈、客户拜访时，除了手写笔记，还可以使用企业微信的<b>「记录面聊」</b>功能。它可将线下讨论<b>实时记录为文字</b>，自动<b>识别不同发言人</b>，分别展示各自的发言内容，方便会后共同回顾、整理成会议纪要，或同步给未到场的同事。</p>\n      <div class=\"mail-steps\">\n        <div class=\"mail-step\">\n          <span class=\"snum\">①</span>\n          <div>\n            <h4>打开「记录面聊」</h4>\n            <p>在企业微信<b>手机端消息页面</b>，点击右上角<b>「＋」号</b>，在弹出的菜单中选择<b>「记录面聊」</b>。</p>\n            <figure class=\"inv-fig\" style=\"margin:10px 0 0;\" data-full=\"assets/meeting/step1.png\" data-cap=\"步骤 1：消息页右上角 ＋ → 记录面聊\">\n              <img src=\"assets/meeting/step1.png\" alt=\"企业微信消息页右上角＋菜单，选择记录面聊\" style=\"max-width:300px;width:100%;border-radius:10px;border:1px solid var(--line);display:block;\">\n              <span class=\"zoom-hint\">\n                <svg width=\"11\" height=\"11\" viewBox=\"0 0 16 16\" fill=\"none\" aria-hidden=\"true\"><circle cx=\"7\" cy=\"7\" r=\"4.5\" stroke=\"currentColor\" stroke-width=\"1.8\"/><path d=\"M10.5 10.5L14 14M5.2 7h3.6M7 5.2v3.6\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\"/></svg>\n                点击放大\n              </span>\n              <figcaption class=\"inv-cap\" style=\"margin:8px 4px 0;font-size:12.5px;color:var(--faint);\">步骤 1 · 消息页 → 右上角 ＋ → 记录面聊</figcaption>\n            </figure>\n          </div>\n        </div>\n        <div class=\"mail-step\">\n          <span class=\"snum\">②</span>\n          <div>\n            <h4>添加声音信息（录入声纹）</h4>\n            <p>根据页面提醒，点击<b>添加声音信息</b>，屏幕会展示需要朗读的文字。点击<b>「开始」按钮</b>开始录入声纹，朗读结束后即添加成功。声纹用于在面聊中<b>识别你的发言人身份</b>，建议在安静环境下匀速朗读。</p>\n            <figure class=\"inv-fig\" style=\"margin:10px 0 0;\" data-full=\"assets/meeting/step2.png\" data-cap=\"步骤 2：工作台 → 记录面聊 → 开始记录 → 录入声纹\">\n              <img src=\"assets/meeting/step2.png\" alt=\"记录面聊发起页与添加声音信息页，点击开始录入声纹\" style=\"max-width:620px;width:100%;border-radius:10px;border:1px solid var(--line);display:block;\">\n              <span class=\"zoom-hint\">\n                <svg width=\"11\" height=\"11\" viewBox=\"0 0 16 16\" fill=\"none\" aria-hidden=\"true\"><circle cx=\"7\" cy=\"7\" r=\"4.5\" stroke=\"currentColor\" stroke-width=\"1.8\"/><path d=\"M10.5 10.5L14 14M5.2 7h3.6M7 5.2v3.6\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\"/></svg>\n                点击放大\n              </span>\n              <figcaption class=\"inv-cap\" style=\"margin:8px 4px 0;font-size:12.5px;color:var(--faint);\">步骤 2 · 添加声音信息 → 点击「开始」录入声纹</figcaption>\n            </figure>\n          </div>\n        </div>\n        <div class=\"mail-step\">\n          <span class=\"snum\">③</span>\n          <div>\n            <h4>发起面聊，自动转文字</h4>\n            <p>发起面聊后，页面开始<b>实时记录</b>，把面对面的聊天转为文字，并区分不同发言人。结束后点击<b>「结束」</b>，系统会生成面聊总结与待办事项；同时消息页面会出现一个<b>「xxx面聊」的会话窗口</b>，方便随时回看与转发。</p>\n            <figure class=\"inv-fig\" style=\"margin:10px 0 0;\" data-full=\"assets/meeting/step3.png\" data-cap=\"步骤 3：面聊中实时转文字，结束后生成总结与待办\">\n              <img src=\"assets/meeting/step3.png\" alt=\"面聊记录页与消息列表中的面聊会话窗口\" style=\"max-width:620px;width:100%;border-radius:10px;border:1px solid var(--line);display:block;\">\n              <span class=\"zoom-hint\">\n                <svg width=\"11\" height=\"11\" viewBox=\"0 0 16 16\" fill=\"none\" aria-hidden=\"true\"><circle cx=\"7\" cy=\"7\" r=\"4.5\" stroke=\"currentColor\" stroke-width=\"1.8\"/><path d=\"M10.5 10.5L14 14M5.2 7h3.6M7 5.2v3.6\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\"/></svg>\n                点击放大\n              </span>\n              <figcaption class=\"inv-cap\" style=\"margin:8px 4px 0;font-size:12.5px;color:var(--faint);\">步骤 3 · 面聊中自动转文字 → 结束后生成总结与待办</figcaption>\n            </figure>\n          </div>\n        </div>\n      </div>\n      <div class=\"callout\" style=\"max-width:none;margin-top:calc(var(--space)*1.5);\">\n        <span class=\"callout-tag\">建议</span>\n        <p>使用「记录面聊」时，<b>提前告知参会人正在记录</b>，既保护隐私，也是基本职场礼仪。会后把生成的面聊记录与会议纪要结合，补充结论和 DDL，再同步给相关人员。</p>\n      </div>\n    </div>"
-  },
-  {
-    "group": "职场道德",
-    "t": "信息保险箱",
-    "html": "<div class=\"zc-ethics\">\r\n    <div class=\"panel-head\">\r\n      <span class=\"tag\">🔐 模块 01</span>\r\n      <h2>做好信息保险箱</h2>\r\n      <p class=\"lead\">有些信息不是你的谈资，而是公司的藏宝图。</p>\r\n    </div>\r\n\r\n    <div class=\"card know-card\">\r\n      <div class=\"ico\">🗄️</div>\r\n      <h4>什么是保密信息？</h4>\r\n      <p>保密信息，是指「未公开，并且对公司具有重要价值的商业信息」。</p>\r\n      <div class=\"def-quote\">未公开 ＋ 对公司有重要价值 ＝ 需要保密的商业信息</div>\r\n      <div class=\"judge-cards\">\r\n        <div class=\"judge-card\">\r\n          <span class=\"no\">①</span>\r\n          <p>这条信息是否已经公开？</p>\r\n        </div>\r\n        <div class=\"judge-card\">\r\n          <span class=\"no\">②</span>\r\n          <p>泄露后，是否可能影响公司利益、客户利益或公司的竞争优势？</p>\r\n        </div>\r\n      </div>\r\n      <p class=\"judge-and\">两个条件同时满足时 → 应提高保密意识 🔒</p>\r\n    </div>\r\n\r\n    <h3 class=\"section-title mt24\" id=\"m1-why\">为什么需要保密？</h3>\r\n    <div class=\"grid g3\">\r\n      <div class=\"card trio-card\">\r\n        <div class=\"ico\">🤝</div>\r\n        <h4>客户信任</h4>\r\n        <p>客户将订单、业务和经营信息交给公司，是基于对公司的信任。</p>\r\n      </div>\r\n      <div class=\"card trio-card\">\r\n        <div class=\"ico\">🧱</div>\r\n        <h4>竞争壁垒</h4>\r\n        <p>公司的核心运力、渠道、价格等信息，是公司的重要竞争优势。</p>\r\n      </div>\r\n      <div class=\"card trio-card\">\r\n        <div class=\"ico\">🚀</div>\r\n        <h4>公司未来</h4>\r\n        <p>关键商业信息泄露，可能直接影响公司的市场竞争能力。</p>\r\n      </div>\r\n    </div>\r\n\r\n    <div class=\"challenge\" id=\"m1-challenge\">\r\n      <div class=\"challenge-head\">\r\n        <h3 class=\"eth-mcq-head\">🎯 保密信息判断挑战（练一练）</h3>\n  <p class=\"section-sub\">下面这些信息，请你判断它属于哪一类。点选后看解析。</p>\n  \n  </div>\n  <div class=\"eth-mcq-list\"><div class=\"eth-mcq-item\" data-cat=\"secret\">\n    <div class=\"eth-mcq-left\">\n      <div class=\"es-text\">全球快递渠道价格表</div>\n    <div class=\"opts\">\n      <button class=\"opt-btn eth-mcq-opt\" type=\"button\" data-c=\"secret\"><span class=\"opt-key\">🔒</span>属于保密信息</button>\n      <button class=\"opt-btn eth-mcq-opt\" type=\"button\" data-c=\"unsure\"><span class=\"opt-key\">❓</span>不确定 / 需要确认</button>\n      <button class=\"opt-btn eth-mcq-opt\" type=\"button\" data-c=\"public\"><span class=\"opt-key\">🌐</span>通常不属于核心保密信息</button>\n    </div>\n    </div>\n      <div class=\"feedback eth-mcq-fb\" style=\"display:none\">\n      <div class=\"fb-row\"><div class=\"k\">为什么</div><div class=\"v\">渠道价格是公司核心运力与定价能力的体现，未公开且直接影响竞争力，属于典型的商业秘密。</div></div>\n      <div class=\"fb-row\"><div class=\"k\">正确处理方式</div><div class=\"v\">属于保密信息，不得外传；仅在业务需要且经授权的范围内使用。</div></div>\n    </div>\n  </div><div class=\"eth-mcq-item\" data-cat=\"public\">\n    <div class=\"eth-mcq-left\">\n      <div class=\"es-text\">公司节假日放假通知</div>\n    <div class=\"opts\">\n      <button class=\"opt-btn eth-mcq-opt\" type=\"button\" data-c=\"secret\"><span class=\"opt-key\">🔒</span>属于保密信息</button>\n      <button class=\"opt-btn eth-mcq-opt\" type=\"button\" data-c=\"unsure\"><span class=\"opt-key\">❓</span>不确定 / 需要确认</button>\n      <button class=\"opt-btn eth-mcq-opt\" type=\"button\" data-c=\"public\"><span class=\"opt-key\">🌐</span>通常不属于核心保密信息</button>\n    </div>\n    </div>\n      <div class=\"feedback eth-mcq-fb\" style=\"display:none\">\n      <div class=\"fb-row\"><div class=\"k\">为什么</div><div class=\"v\">放假安排是面向全体员工、甚至对外公开的信息，不具备商业价值敏感性。</div></div>\n      <div class=\"fb-row\"><div class=\"k\">正确处理方式</div><div class=\"v\">属于公开信息，正常传达即可，无需特别保密。</div></div>\n    </div>\n  </div><div class=\"eth-mcq-item\" data-cat=\"secret\">\n    <div class=\"eth-mcq-left\">\n      <div class=\"es-text\">大客户近半年发往美国的货量、品类和月度波动</div>\n    <div class=\"opts\">\n      <button class=\"opt-btn eth-mcq-opt\" type=\"button\" data-c=\"secret\"><span class=\"opt-key\">🔒</span>属于保密信息</button>\n      <button class=\"opt-btn eth-mcq-opt\" type=\"button\" data-c=\"unsure\"><span class=\"opt-key\">❓</span>不确定 / 需要确认</button>\n      <button class=\"opt-btn eth-mcq-opt\" type=\"button\" data-c=\"public\"><span class=\"opt-key\">🌐</span>通常不属于核心保密信息</button>\n    </div>\n    </div>\n      <div class=\"feedback eth-mcq-fb\" style=\"display:none\">\n      <div class=\"fb-row\"><div class=\"k\">为什么</div><div class=\"v\">这是客户的核心经营数据，泄露会损害客户信任，也可能被竞争对手利用。</div></div>\n      <div class=\"fb-row\"><div class=\"k\">正确处理方式</div><div class=\"v\">属于保密信息，涉及客户商业秘密，严格限制知悉范围。</div></div>\n    </div>\n  </div><div class=\"eth-mcq-item\" data-cat=\"secret\">\n    <div class=\"eth-mcq-left\">\n      <div class=\"es-text\">新开发拉美专线的完整业务流程与清关方案</div>\n    <div class=\"opts\">\n      <button class=\"opt-btn eth-mcq-opt\" type=\"button\" data-c=\"secret\"><span class=\"opt-key\">🔒</span>属于保密信息</button>\n      <button class=\"opt-btn eth-mcq-opt\" type=\"button\" data-c=\"unsure\"><span class=\"opt-key\">❓</span>不确定 / 需要确认</button>\n      <button class=\"opt-btn eth-mcq-opt\" type=\"button\" data-c=\"public\"><span class=\"opt-key\">🌐</span>通常不属于核心保密信息</button>\n    </div>\n    </div>\n      <div class=\"feedback eth-mcq-fb\" style=\"display:none\">\n      <div class=\"fb-row\"><div class=\"k\">为什么</div><div class=\"v\">这是公司投入资源开发的差异化能力，属于核心商业秘密。</div></div>\n      <div class=\"fb-row\"><div class=\"k\">正确处理方式</div><div class=\"v\">属于保密信息，未经授权不得复制、外发或对外讨论。</div></div>\n    </div>\n  </div><div class=\"eth-mcq-item\" data-cat=\"secret\">\n    <div class=\"eth-mcq-left\">\n      <div class=\"es-text\">与航空公司签订的包机协议中的运力价格和折扣</div>\n    <div class=\"opts\">\n      <button class=\"opt-btn eth-mcq-opt\" type=\"button\" data-c=\"secret\"><span class=\"opt-key\">🔒</span>属于保密信息</button>\n      <button class=\"opt-btn eth-mcq-opt\" type=\"button\" data-c=\"unsure\"><span class=\"opt-key\">❓</span>不确定 / 需要确认</button>\n      <button class=\"opt-btn eth-mcq-opt\" type=\"button\" data-c=\"public\"><span class=\"opt-key\">🌐</span>通常不属于核心保密信息</button>\n    </div>\n    </div>\n      <div class=\"feedback eth-mcq-fb\" style=\"display:none\">\n      <div class=\"fb-row\"><div class=\"k\">为什么</div><div class=\"v\">采购价格与折扣是公司的成本与谈判筹码，公开会削弱议价能力。</div></div>\n      <div class=\"fb-row\"><div class=\"k\">正确处理方式</div><div class=\"v\">属于保密信息，严格按合同与制度管理。</div></div>\n    </div>\n  </div><div class=\"eth-mcq-item\" data-cat=\"secret\">\n    <div class=\"eth-mcq-left\">\n      <div class=\"es-text\">CEO未对外公布的明年战略方向</div>\n    <div class=\"opts\">\n      <button class=\"opt-btn eth-mcq-opt\" type=\"button\" data-c=\"secret\"><span class=\"opt-key\">🔒</span>属于保密信息</button>\n      <button class=\"opt-btn eth-mcq-opt\" type=\"button\" data-c=\"unsure\"><span class=\"opt-key\">❓</span>不确定 / 需要确认</button>\n      <button class=\"opt-btn eth-mcq-opt\" type=\"button\" data-c=\"public\"><span class=\"opt-key\">🌐</span>通常不属于核心保密信息</button>\n    </div>\n    </div>\n      <div class=\"feedback eth-mcq-fb\" style=\"display:none\">\n      <div class=\"fb-row\"><div class=\"k\">为什么</div><div class=\"v\">未公开的战略方向属于高度敏感信息，泄露会打乱公司布局。</div></div>\n      <div class=\"fb-row\"><div class=\"k\">正确处理方式</div><div class=\"v\">属于保密信息，绝不可外传，哪怕是「内幕消息」也不可议论。</div></div>\n    </div>\n  </div><div class=\"eth-mcq-item\" data-cat=\"secret\">\n    <div class=\"eth-mcq-left\">\n      <div class=\"es-text\">智能报价系统2.0测试版操作手册</div>\n    <div class=\"opts\">\n      <button class=\"opt-btn eth-mcq-opt\" type=\"button\" data-c=\"secret\"><span class=\"opt-key\">🔒</span>属于保密信息</button>\n      <button class=\"opt-btn eth-mcq-opt\" type=\"button\" data-c=\"unsure\"><span class=\"opt-key\">❓</span>不确定 / 需要确认</button>\n      <button class=\"opt-btn eth-mcq-opt\" type=\"button\" data-c=\"public\"><span class=\"opt-key\">🌐</span>通常不属于核心保密信息</button>\n    </div>\n    </div>\n      <div class=\"feedback eth-mcq-fb\" style=\"display:none\">\n      <div class=\"fb-row\"><div class=\"k\">为什么</div><div class=\"v\">系统与操作手册属于内部技术资产，测试版更是尚未对外。</div></div>\n      <div class=\"fb-row\"><div class=\"k\">正确处理方式</div><div class=\"v\">属于保密信息，内部系统资料不得外发或用于非授权用途。</div></div>\n    </div>\n  </div><div class=\"eth-mcq-item\" data-cat=\"secret\">\n    <div class=\"eth-mcq-left\">\n      <div class=\"es-text\">员工薪酬结构体系</div>\n    <div class=\"opts\">\n      <button class=\"opt-btn eth-mcq-opt\" type=\"button\" data-c=\"secret\"><span class=\"opt-key\">🔒</span>属于保密信息</button>\n      <button class=\"opt-btn eth-mcq-opt\" type=\"button\" data-c=\"unsure\"><span class=\"opt-key\">❓</span>不确定 / 需要确认</button>\n      <button class=\"opt-btn eth-mcq-opt\" type=\"button\" data-c=\"public\"><span class=\"opt-key\">🌐</span>通常不属于核心保密信息</button>\n    </div>\n    </div>\n      <div class=\"feedback eth-mcq-fb\" style=\"display:none\">\n      <div class=\"fb-row\"><div class=\"k\">为什么</div><div class=\"v\">薪酬体系属于公司内部敏感信息，涉及员工隐私与公司制度安排。</div></div>\n      <div class=\"fb-row\"><div class=\"k\">正确处理方式</div><div class=\"v\">属于内部敏感信息，不得对外讨论或传播；必要时按 HR 制度确认。</div></div>\n    </div>\n  </div><div class=\"eth-mcq-item\" data-cat=\"secret\">\n    <div class=\"eth-mcq-left\">\n      <div class=\"es-text\">包含客户名称、联系人、电话的销售线索名单</div>\n    <div class=\"opts\">\n      <button class=\"opt-btn eth-mcq-opt\" type=\"button\" data-c=\"secret\"><span class=\"opt-key\">🔒</span>属于保密信息</button>\n      <button class=\"opt-btn eth-mcq-opt\" type=\"button\" data-c=\"unsure\"><span class=\"opt-key\">❓</span>不确定 / 需要确认</button>\n      <button class=\"opt-btn eth-mcq-opt\" type=\"button\" data-c=\"public\"><span class=\"opt-key\">🌐</span>通常不属于核心保密信息</button>\n    </div>\n    </div>\n      <div class=\"feedback eth-mcq-fb\" style=\"display:none\">\n      <div class=\"fb-row\"><div class=\"k\">为什么</div><div class=\"v\">客户名单与联系方式是公司长期积累的核心商业资源。</div></div>\n      <div class=\"fb-row\"><div class=\"k\">正确处理方式</div><div class=\"v\">属于保密信息，不得私自拷贝或带走。</div></div>\n    </div>\n  </div><div class=\"eth-mcq-item\" data-cat=\"public\">\n    <div class=\"eth-mcq-left\">\n      <div class=\"es-text\">公司前台内线电话号码</div>\n    <div class=\"opts\">\n      <button class=\"opt-btn eth-mcq-opt\" type=\"button\" data-c=\"secret\"><span class=\"opt-key\">🔒</span>属于保密信息</button>\n      <button class=\"opt-btn eth-mcq-opt\" type=\"button\" data-c=\"unsure\"><span class=\"opt-key\">❓</span>不确定 / 需要确认</button>\n      <button class=\"opt-btn eth-mcq-opt\" type=\"button\" data-c=\"public\"><span class=\"opt-key\">🌐</span>通常不属于核心保密信息</button>\n    </div>\n    </div>\n      <div class=\"feedback eth-mcq-fb\" style=\"display:none\">\n      <div class=\"fb-row\"><div class=\"k\">为什么</div><div class=\"v\">前台电话是公司对外公开的接待联系方式，用于正常业务往来。</div></div>\n      <div class=\"fb-row\"><div class=\"k\">正确处理方式</div><div class=\"v\">属于公开信息，正常提供即可。</div></div>\n    </div>\n  </div></div>\n</div>"
-  },
-  {
-    "group": "职场道德",
-    "t": "职业边界",
-    "html": "<div class=\"zc-ethics\">\r\n    <div class=\"panel-head\">\r\n      <span class=\"tag\">🚧 模块 02</span>\r\n      <h2>好聚好散的护栏</h2>\r\n      <p class=\"lead\">竞业限制和离职后的职业边界，不只是公司风险问题，也关系员工自己的长期职业信誉。</p>\r\n    </div>\r\n\r\n    <div class=\"track\">\r\n      <div class=\"track-title\">🏁 职业赛道 + 护栏</div>\r\n      <div class=\"track-sub\">离职带走的应该是你的能力，而不是公司的商业秘密。</div>\r\n      <div class=\"track-lanes\">\r\n        <div class=\"track-rail\"><span>🚧 护栏</span></div>\r\n        <div class=\"lane green\">\r\n          <h5>✅ 真正属于你的</h5>\r\n          <ul>\r\n            <li>个人能力</li>\r\n            <li>工作经验</li>\r\n            <li>专业知识</li>\r\n            <li>解决问题的方法</li>\r\n            <li>个人成长</li>\r\n          </ul>\r\n        </div>\r\n        <div class=\"lane red\">\r\n          <h5>🚫 不能当成自己跳槽筹码的</h5>\r\n          <ul>\r\n            <li>客户名单</li>\r\n            <li>渠道策略</li>\r\n            <li>公司价格信息</li>\r\n            <li>内部经营数据</li>\r\n            <li>商业秘密</li>\r\n          </ul>\r\n        </div>\r\n      </div>\r\n      <div class=\"track-slogan\">「职业能力属于你，公司商业秘密不属于你。」</div>\r\n    </div>\r\n\r\n    <h3 class=\"section-title mt32\" id=\"m2-story\">📖 情景案例 · 小王跳槽</h3>\r\n    <div class=\"story-steps\" id=\"storySteps\">\r\n      <div class=\"story-step\" id=\"storyStep1\">\r\n        <div class=\"story-no\">1</div>\r\n        <div class=\"story-card\"><p>小王是一名公司的<strong>核心运营人员</strong>。</p></div>\r\n      </div>\r\n      <div class=\"story-step\" id=\"storyStep2\" style=\"display:none\">\r\n        <div class=\"story-no\">2</div>\r\n        <div class=\"story-card\"><p>离职以后，他立即加入<strong>竞争对手</strong>。</p></div>\r\n      </div>\r\n      <div class=\"story-step\" id=\"storyStep3\" style=\"display:none\">\r\n        <div class=\"story-no\">3</div>\r\n        <div class=\"story-card\"><p>为了体现自己的价值，小王将原公司的 <span class=\"hl\">「渠道策略 ＋ 客户名单」</span> 提供给新公司。</p></div>\r\n      </div>\r\n    </div>\r\n    <button class=\"btn btn-ghost mt16\" id=\"storyNext\">下一步 ➜</button>\r\n\r\n    <div class=\"story-q\" id=\"storyQ\">\n      <h4>🤔 小王真正的问题在哪里？</h4>\n      <div class=\"opts\">\n        <button class=\"opt-btn\" type=\"button\"><span class=\"opt-key\">A</span>不应该跳槽</button>\n        <button class=\"opt-btn\" type=\"button\"><span class=\"opt-key\">B</span>跳槽速度太快</button>\n        <button class=\"opt-btn correct\" type=\"button\"><span class=\"opt-key\">C</span>将原公司的商业秘密作为自己的跳槽筹码</button>\n        <button class=\"opt-btn\" type=\"button\"><span class=\"opt-key\">D</span>没有提前告诉同事</button>\n      </div>\n      <div class=\"feedback show\">\n        <span class=\"fb-badge good\">正确答案</span>\n        <div class=\"fb-row\"><div class=\"k\">解析</div><div class=\"v\">小王真正的问题，是把原公司的商业秘密（渠道策略＋客户名单）当成了自己的跳槽筹码。能力属于你，但公司的商业秘密不属于你。</div></div>\n      </div>\n    </div>\n    <div id=\"storyResult\" style=\"display:none\"></div>\r\n    <div id=\"m2Done\"></div>\r\n  </div>"
-  },
-  {
-    "group": "职场道德",
-    "t": "职业红线",
-    "html": "<div class=\"zc-ethics\">\r\n    <div class=\"panel-head\">\r\n      <span class=\"tag\">🛡️ 模块 03</span>\r\n      <h2>职业道德：比能力更重要的通行证</h2>\r\n      <p class=\"lead\">在物流行业，「靠谱」两个字，价值千金。</p>\r\n    </div>\r\n\r\n    <h3 class=\"section-title\" id=\"m3-principles\">📇 五项职业道德准则</h3>\r\n    <div class=\"grid g5\"><div class=\"card trio-card\"><div class=\"ico\">💼</div><h4>爱岗敬业</h4><p>专业、尽职，对自己的工作负责。</p></div><div class=\"card trio-card\"><div class=\"ico\">🤝</div><h4>诚实守信</h4><p>对公司保持诚信，维护企业信誉，保护公司信息。</p></div><div class=\"card trio-card\"><div class=\"ico\">🧭</div><h4>廉洁守法</h4><p>不因个人利益突破职业和规则底线。</p></div><div class=\"card trio-card\"><div class=\"ico\">🎯</div><h4>办事公道</h4><p>公私分明、公平公正。</p></div><div class=\"card trio-card\"><div class=\"ico\">👥</div><h4>团结互助</h4><p>尊重团队成员，积极协作。</p></div></div>\r\n\r\n    <div class=\"redzone\" id=\"m3-redlines\">\r\n      <div class=\"redzone-head\">\r\n        <div class=\"shield\">⛔</div>\r\n        <h3>这四条红线，绝对不能碰</h3>\r\n        <p>点击每条红线，展开「典型行为 · 为什么不能做 · 可能造成的影响」</p>\r\n      </div>\r\n      <div class=\"redline-list\"><details class=\"redline-card\">\n    <summary class=\"redline-top\">\n      <div class=\"num\">01</div>\n      <div class=\"t\"><h4>🔒 红线01 · 不监守自盗</h4><p>不能利用岗位、权限或者工作便利，侵占、拿走或者私自处置公司财物。</p></div>\n      <div class=\"expand\">＋</div>\n    </summary>\n    <div class=\"redline-body\"><div class=\"redline-body-inner\">\n      <div class=\"rl-item\"><div class=\"k\">典型行为</div><div class=\"v\">私自拿走公司物品；未经登记处置公司财物；占用公司资源用于个人。</div></div>\n      <div class=\"rl-item\"><div class=\"k\">为什么不能做</div><div class=\"v\">公司财物属于公司，不是「没人要」就可以拿；私自处置侵害了最基本的信任。</div></div>\n      <div class=\"rl-item\"><div class=\"k\">可能造成的影响</div><div class=\"v\">可能触犯法律与公司制度，丧失职业信誉，严重时被追责。</div></div>\n    </div></div>\n  </details><details class=\"redline-card\">\n    <summary class=\"redline-top\">\n      <div class=\"num\">02</div>\n      <div class=\"t\"><h4>💰 红线02 · 不收受贿赂</h4><p>不能因为工作关系接受可能影响正常商业判断的个人利益。例如：返点、佣金、购物卡、红包等。</p></div>\n      <div class=\"expand\">＋</div>\n    </summary>\n    <div class=\"redline-body\"><div class=\"redline-body-inner\">\n      <div class=\"rl-item\"><div class=\"k\">典型行为</div><div class=\"v\">收受供应商返点、佣金；收取购物卡、红包；接受可能影响判断的招待。</div></div>\n      <div class=\"rl-item\"><div class=\"k\">为什么不能做</div><div class=\"v\">利益会悄悄扭曲你的判断，让你做出损害公司、也损害自己的决定。</div></div>\n      <div class=\"rl-item\"><div class=\"k\">可能造成的影响</div><div class=\"v\">商业决策失公、公司利益受损，个人承担法律与职业风险。</div></div>\n    </div></div>\n  </details><details class=\"redline-card\">\n    <summary class=\"redline-top\">\n      <div class=\"num\">03</div>\n      <div class=\"t\"><h4>🎁 红线03 · 不拿供应商一针一线</h4><p>不能因为负责供应商、采购或者商务合作，就利用职务关系获取个人利益。</p></div>\n      <div class=\"expand\">＋</div>\n    </summary>\n    <div class=\"redline-body\"><div class=\"redline-body-inner\">\n      <div class=\"rl-item\"><div class=\"k\">典型行为</div><div class=\"v\">向供应商索要好处；接受供应商礼品、招待以换取业务便利。</div></div>\n      <div class=\"rl-item\"><div class=\"k\">为什么不能做</div><div class=\"v\">职务是公司授予的信任，不是谋取私利的工具；「一针一线」也不可贪。</div></div>\n      <div class=\"rl-item\"><div class=\"k\">可能造成的影响</div><div class=\"v\">采购与合作的公正性被破坏，滋生腐败，损害公司利益与个人声誉。</div></div>\n    </div></div>\n  </details><details class=\"redline-card\">\n    <summary class=\"redline-top\">\n      <div class=\"num\">04</div>\n      <div class=\"t\"><h4>🧩 红线04 · 不损害公司利益谋取私利</h4><p>不能使用公司的资源、信息、权限或者职务便利，为自己谋取不正当个人利益。</p></div>\n      <div class=\"expand\">＋</div>\n    </summary>\n    <div class=\"redline-body\"><div class=\"redline-body-inner\">\n      <div class=\"rl-item\"><div class=\"k\">典型行为</div><div class=\"v\">用公司资源接私活；用内部信息牟利；滥用权限为个人或他人谋利。</div></div>\n      <div class=\"rl-item\"><div class=\"k\">为什么不能做</div><div class=\"v\">公私不分，把公司平台变成了个人牟利的工具。</div></div>\n      <div class=\"rl-item\"><div class=\"k\">可能造成的影响</div><div class=\"v\">公司利益受损，个人触碰红线，严重时构成职务侵占。</div></div>\n    </div></div>\n  </details></div>\r\n      <div class=\"redzone-done\" id=\"m3Done\"></div>\r\n    </div>\r\n  </div>"
-  },
-  {
-    "group": "职场道德",
-    "t": "利益诱惑",
-    "html": "<div class=\"zc-ethics\">\r\n    <div class=\"panel-head\">\r\n      <span class=\"tag\">⚖️ 模块 04</span>\r\n      <h2>真正的考验，往往发生在没人监督的时候</h2>\r\n      <p class=\"lead\">先别急着看规则，把自己放进下面的真实职场情景，凭直觉做一次判断。</p>\r\n    </div>\r\n\r\n    \r\n    \r\n\r\n    <div class=\"divider\"></div>\r\n\r\n    <div class=\"panel-head\" style=\"margin-top:8px\" id=\"m4-temptations\">\r\n      <span class=\"tag\">🕳️ 识别利益诱惑</span>\r\n      <h2>很多违规，一开始都不会告诉你「这是违规」</h2>\r\n    </div>\r\n    <div class=\"grid g3\">\r\n      <div class=\"card trio-card\">\r\n        <div class=\"ico\">💰</div>\r\n        <h4>金钱利益</h4>\r\n        <ul><li>返点</li><li>佣金</li><li>提成</li></ul>\r\n      </div>\r\n      <div class=\"card trio-card\">\r\n        <div class=\"ico\">🎁</div>\r\n        <h4>其他利益</h4>\r\n        <ul><li>帮孩子安排学校</li><li>安排旅行</li><li>特殊抽奖或资源</li></ul>\r\n      </div>\r\n      <div class=\"card trio-card\">\r\n        <div class=\"ico\">🧧</div>\r\n        <h4>小恩小惠</h4>\r\n        <ul><li>贺金</li><li>春节红包</li><li>节日礼品</li></ul>\r\n      </div>\r\n    </div>\r\n\r\n    <div class=\"chat mt24\">\r\n      <div class=\"chat-head\">\r\n        <div class=\"chat-avatar\">供</div>\r\n        <div>\r\n          <div class=\"chat-name\">某供应商</div>\r\n          <div class=\"chat-role\">刚刚发来消息</div>\r\n        </div>\r\n      </div>\r\n      <div class=\"bubbles\">\r\n        <div class=\"bubble\">「这是行业惯例。」</div>\r\n        <div class=\"bubble\">「大家都是这么做的。」</div>\r\n        <div class=\"bubble\">「现金交易，没人知道。」</div>\r\n        <div class=\"bubble\">「这只是正常的商业交流。」</div>\r\n        <div class=\"bubble\">「又没有给你们公司造成损失。」</div>\r\n      </div>\r\n      <div class=\"chat-btn\">\r\n        <button class=\"btn btn-primary\" id=\"supplierBtn\">🔍 这些话听起来有什么问题？</button>\r\n      </div>\r\n      <div class=\"feedback show\"><span class=\"fb-badge mid\">🕳️ 为什么这些话要警惕</span>\n             <div class=\"fb-row\"><div class=\"k\">解析</div><div class=\"v\">供应商这些话，都在用「行业惯例」「大家都这么做」来模糊利益输送的本质。任何让你心里犯嘀咕的好处，先停下来：按公司制度确认或上报，比事后解释更安全。</div></div></div>\r\n    </div>\r\n\r\n    <div class=\"divider\"></div>\r\n\r\n    <div class=\"panel-head\" style=\"margin-top:8px\" id=\"m4-gifts\">\r\n      <span class=\"tag\">🎁 你会怎么判断？</span>\r\n      <h2>礼品与利益，先识别风险</h2>\r\n      <p class=\"lead\">不同形式的「好处」风险不同，统一原则是：识别风险，并按公司制度处理 / 申报。</p>\r\n    </div>\r\n    <div class=\"grid g3\"><div class=\"card gift-card\"><div class=\"ico\">🍫</div><h5>200 元以下小额礼品、食品</h5>\n    <span class=\"risk-tag risk-low\">低风险</span><p>留意来源与频率，按公司制度处理 / 申报</p></div><div class=\"card gift-card\"><div class=\"ico\">🎁</div><h5>200 元以上礼物或贵重特产</h5>\n    <span class=\"risk-tag risk-mid\">需关注</span><p>价值较高，按公司制度申报</p></div><div class=\"card gift-card\"><div class=\"ico\">🛠️</div><h5>定制性较强的礼物</h5>\n    <span class=\"risk-tag risk-mid\">需关注</span><p>定制意味着针对性，按公司制度申报</p></div><div class=\"card gift-card\"><div class=\"ico\">🍽️</div><h5>商务宴请</h5>\n    <span class=\"risk-tag risk-mid\">需确认</span><p>需按公司制度确认与申报</p></div><div class=\"card gift-card\"><div class=\"ico\">⭐</div><h5>积分</h5>\n    <span class=\"risk-tag risk-mid\">需关注</span><p>属于利益形式，需留意并申报</p></div><div class=\"card gift-card\"><div class=\"ico\">💸</div><h5>返点</h5>\n    <span class=\"risk-tag risk-high\">高风险</span><p>严禁收受，立即按制度上报</p></div><div class=\"card gift-card\"><div class=\"ico\">🎫</div><h5>现金券</h5>\n    <span class=\"risk-tag risk-high\">高风险</span><p>等同现金利益，按公司制度上报</p></div></div>\r\n    <p class=\"fb-note\" style=\"margin-top:16px\">📌 具体礼品、礼金和商务宴请处理标准，请以公司正式制度为准。</p>\r\n    <div id=\"m4Done\"></div>\r\n\r\n    <div class=\"divider\"></div>\r\n\r\n    <div class=\"panel-head\" style=\"margin-top:8px\">\r\n      <span class=\"tag\">🌟 我们守护的价值</span>\r\n      <h2>我们守护的，远不止货物</h2>\r\n      <p class=\"lead\">把前面学到的，沉淀成你自己的职业信念。</p>\r\n    </div>\r\n    <div class=\"grid g3\"><div class=\"card value-card\"><div class=\"v-no\">01</div><div class=\"ico\">🤝</div>\n    <h4>客户信任</h4><div class=\"quote\">「每一个包裹背后，都是客户把生意交给我们的信任。」</div>\n    <div class=\"kw\"><span>信任</span><span>责任</span><span>专业</span></div>\n    </div><div class=\"card value-card\"><div class=\"v-no\">02</div><div class=\"ico\">🏢</div>\n    <h4>公司资产</h4><div class=\"quote\">「保护公司的信息、资源、财产和商业利益，就是保护大家共同发展的基础。」</div>\n    <div class=\"kw\"><span>资源</span><span>竞争力</span><span>未来</span></div>\n    </div><div class=\"card value-card\"><div class=\"v-no\">03</div><div class=\"ico\">🏆</div>\n    <h4>个人声誉</h4><div class=\"quote\">「职业声誉是一个人长期积累的个人品牌。」</div>\n    <div class=\"kw\"><span>诚信</span><span>口碑</span><span>长期</span></div>\n    <div class=\"tip\">能力可以重新证明，但职业诚信一旦受到严重影响，很难重新建立。</div></div></div>\r\n    <div id=\"m5Done\"></div>\r\n  <div class=\"eth-quiz\"><div class=\"eth-quiz-head\">📝 情景判断 · 共 4 题（一题一题做，做完点「下一题」）</div>\n  <div class=\"eth-q-list\"><div class=\"eth-q\" data-q=\"0\">\n      <div class=\"s-tag\">🥮 情景 1 · 不收受贿赂</div>\n      <h4>月饼里的购物卡</h4>\n      <div class=\"scene\">供应商送来一盒月饼。你回到办公室打开以后发现：里面还有一张 500 元购物卡。</div>\n      <div class=\"ask\">你会怎么处理？</div>\n      <div class=\"opts\"><button class=\"opt-btn eth-opt\" type=\"button\" data-q=\"0\" data-j=\"0\" data-correct=\"0\">\n       <span class=\"opt-key\">A</span>收下购物卡，月饼分给大家吃</button><button class=\"opt-btn eth-opt\" type=\"button\" data-q=\"0\" data-j=\"1\" data-correct=\"1\">\n       <span class=\"opt-key\">B</span>退回购物卡，并主动向主管或合规渠道说明</button><button class=\"opt-btn eth-opt\" type=\"button\" data-q=\"0\" data-j=\"2\" data-correct=\"0\">\n       <span class=\"opt-key\">C</span>先收下，心里记着以后关照供应商</button><button class=\"opt-btn eth-opt\" type=\"button\" data-q=\"0\" data-j=\"3\" data-correct=\"0\">\n       <span class=\"opt-key\">D</span>只退回购物卡，月饼留下</button></div>\n      <div class=\"eth-fb\" data-fb=\"0\">\n        <span class=\"fb-badge good\">判断结果 · 推荐做法</span>\n        <div class=\"fb-row\"><div class=\"k\">核心要点</div><div class=\"v\">【不收受贿赂】</div></div>\n        <div class=\"fb-row\"><div class=\"k\">为什么</div><div class=\"v\">购物卡属于可能影响商业判断的个人利益，无论金额大小、是否过节，收受都会触碰红线；「过节收礼」是它最常见的伪装。</div></div>\n        <div class=\"fb-row\"><div class=\"k\">风险提示</div><div class=\"v\">一旦收下，你的职业判断就可能被这份利益牵动，公司利益与你的职业信誉都处于风险中。</div></div>\n        <div class=\"fb-row\"><div class=\"k\">正确做法</div><div class=\"v\">主动退回购物卡并说明情况；如已无法退回，按公司制度上交、登记、申报，保留记录。</div></div>\n      </div>\n      <div class=\"eth-q-nav\"><button class=\"btn btn-primary eth-next\" type=\"button\" data-next=\"0\">下一题 ➜</button></div>\n    </div><div class=\"eth-q\" data-q=\"1\" style=\"display:none\">\n      <div class=\"s-tag\">🖨️ 情景 2 · 公私分明</div>\n      <h4>公司的打印机</h4>\n      <div class=\"scene\">晚上你需要打印 10 页个人资料，公司的打印机就在旁边。</div>\n      <div class=\"ask\">你会直接使用吗？</div>\n      <div class=\"opts\"><button class=\"opt-btn eth-opt\" type=\"button\" data-q=\"1\" data-j=\"0\" data-correct=\"0\">\n       <span class=\"opt-key\">A</span>直接用，反正 10 页也没多少钱</button><button class=\"opt-btn eth-opt\" type=\"button\" data-q=\"1\" data-j=\"1\" data-correct=\"0\">\n       <span class=\"opt-key\">B</span>用公司的纸，但用自己的墨盒</button><button class=\"opt-btn eth-opt\" type=\"button\" data-q=\"1\" data-j=\"2\" data-correct=\"1\">\n       <span class=\"opt-key\">C</span>先确认公司是否允许私人使用，否则自费解决</button><button class=\"opt-btn eth-opt\" type=\"button\" data-q=\"1\" data-j=\"3\" data-correct=\"0\">\n       <span class=\"opt-key\">D</span>等大家都走了再偷偷用</button></div>\n      <div class=\"eth-fb\" data-fb=\"1\">\n        <span class=\"fb-badge good\">判断结果 · 推荐做法</span>\n        <div class=\"fb-row\"><div class=\"k\">核心要点</div><div class=\"v\">【公私分明】【不能利用公司资源谋取个人利益】</div></div>\n        <div class=\"fb-row\"><div class=\"k\">为什么</div><div class=\"v\">公司资源应用于工作，私自用于个人事务就是公私不分；「金额小」「没人看到」都不能改变这个性质。</div></div>\n        <div class=\"fb-row\"><div class=\"k\">风险提示</div><div class=\"v\">看似小事，却是在用自己的职业诚信为一点私利买单。</div></div>\n        <div class=\"fb-row\"><div class=\"k\">正确做法</div><div class=\"v\">私人打印需求先确认公司制度；不允许就自费或使用私人途径。</div></div>\n      </div>\n      <div class=\"eth-q-nav\"><button class=\"btn btn-primary eth-next\" type=\"button\" data-next=\"1\">下一题 ➜</button></div>\n    </div><div class=\"eth-q\" data-q=\"2\" style=\"display:none\">\n      <div class=\"s-tag\">📦 情景 3 · 不监守自盗</div>\n      <h4>仓库里的破损物品</h4>\n      <div class=\"scene\">你发现仓库中有一个轻微破损的小物品，觉得公司可能也不会继续使用，于是没有登记，准备直接拿走。</div>\n      <div class=\"ask\">这样可以吗？</div>\n      <div class=\"opts\"><button class=\"opt-btn eth-opt\" type=\"button\" data-q=\"2\" data-j=\"0\" data-correct=\"0\">\n       <span class=\"opt-key\">A</span>可以，反正公司不要了</button><button class=\"opt-btn eth-opt\" type=\"button\" data-q=\"2\" data-j=\"1\" data-correct=\"1\">\n       <span class=\"opt-key\">B</span>先登记申报，按公司规定处置</button><button class=\"opt-btn eth-opt\" type=\"button\" data-q=\"2\" data-j=\"2\" data-correct=\"0\">\n       <span class=\"opt-key\">C</span>拿走以后给公司补点钱</button><button class=\"opt-btn eth-opt\" type=\"button\" data-q=\"2\" data-j=\"3\" data-correct=\"0\">\n       <span class=\"opt-key\">D</span>问下同事，大家都说没事就拿走</button></div>\n      <div class=\"eth-fb\" data-fb=\"2\">\n        <span class=\"fb-badge good\">判断结果 · 推荐做法</span>\n        <div class=\"fb-row\"><div class=\"k\">核心要点</div><div class=\"v\">【不监守自盗】</div></div>\n        <div class=\"fb-row\"><div class=\"k\">为什么</div><div class=\"v\">是否有价值、金额大小，都不是可以擅自处置公司财产的理由；「没人要」只是自己的主观猜测。</div></div>\n        <div class=\"fb-row\"><div class=\"k\">风险提示</div><div class=\"v\">私自拿走公司财物就是监守自盗，哪怕物品很小。</div></div>\n        <div class=\"fb-row\"><div class=\"k\">正确做法</div><div class=\"v\">如实登记、上报，按公司资产处置制度办理。</div></div>\n      </div>\n      <div class=\"eth-q-nav\"><button class=\"btn btn-primary eth-next\" type=\"button\" data-next=\"2\">下一题 ➜</button></div>\n    </div><div class=\"eth-q\" data-q=\"3\" style=\"display:none\">\n      <div class=\"s-tag\">🔑 情景 4 · 信息安全</div>\n      <h4>借一下账号</h4>\n      <div class=\"scene\">同事着急找到你：「把你的系统账号密码给我一下，我就查一个数据，很快。」</div>\n      <div class=\"ask\">你会怎么做？</div>\n      <div class=\"opts\"><button class=\"opt-btn eth-opt\" type=\"button\" data-q=\"3\" data-j=\"0\" data-correct=\"0\">\n       <span class=\"opt-key\">A</span>把密码给他，同事之间要互相信任</button><button class=\"opt-btn eth-opt\" type=\"button\" data-q=\"3\" data-j=\"1\" data-correct=\"0\">\n       <span class=\"opt-key\">B</span>把密码发给他，让他用完立刻改</button><button class=\"opt-btn eth-opt\" type=\"button\" data-q=\"3\" data-j=\"2\" data-correct=\"1\">\n       <span class=\"opt-key\">C</span>说明账号不能外借，建议走正规授权流程</button><button class=\"opt-btn eth-opt\" type=\"button\" data-q=\"3\" data-j=\"3\" data-correct=\"0\">\n       <span class=\"opt-key\">D</span>替他登录查一下，不透露密码</button></div>\n      <div class=\"eth-fb\" data-fb=\"3\">\n        <span class=\"fb-badge good\">判断结果 · 推荐做法</span>\n        <div class=\"fb-row\"><div class=\"k\">核心要点</div><div class=\"v\">【信息安全】【账号权限】【保护公司利益】</div></div>\n        <div class=\"fb-row\"><div class=\"k\">为什么</div><div class=\"v\">账号密码绑定的是个人权限与安全责任，外借会破坏系统权限规则与操作可追溯性。关系好、事情急，都不能成为突破权限规则的理由。</div></div>\n        <div class=\"fb-row\"><div class=\"k\">风险提示</div><div class=\"v\">账号外借后，任何操作都记在你名下，一旦出问题责任难分，公司信息安全也受损。</div></div>\n        <div class=\"fb-row\"><div class=\"k\">正确做法</div><div class=\"v\">明确拒绝外借，建议对方走正规申请或授权流程。</div></div>\n      </div>\n      <div class=\"eth-q-nav\"><div class=\"eth-done-badge\">✅ 你已完成全部 4 题情景判断，职场考验通关！</div></div>\n    </div></div></div></div>"
-  }
-]</script>
+<script type="application/json" id="zcData">[{"group": "职场沟通", "t": "沟通预热选择题", "html": "<div class=\"lesson-head\">\n      <p class=\"eyebrow\">职场沟通 / 预热挑战</p>\n      <h1>先来一轮选择题，摸摸你的沟通底子。</h1>\n      <p class=\"lead\">正式学习前，先用几道情景选择题热热身</p>\n    </div>\n\n    <div class=\"warmup-wrap\">\n      <iframe class=\"warmup-frame\" src=\"assets/game/bird-quiz/bird-quiz.html\" title=\"沟通预热 · 小鸟送快递答题游戏\"></iframe>\n    </div>"}, {"group": "职场沟通", "t": "沟通技巧", "html": "<div class=\"lesson-head\">\n      <p class=\"eyebrow\">职场沟通 / 沟通技巧</p>\n      <h1>四个沟通场景，一套职场表达心法。</h1>\n      <p class=\"lead\">跨部门协作、向上汇报、向下带人，最容易踩的坑都在「怎么说」。上下滑动下方卡片，把模糊表达换成精准沟通。</p>\n    </div>\n\n    <div class=\"cm-carousel\">\n      <div class=\"cm-track\">\n\n        <!-- 卡片 1：跨部门 · 需求传递 -->\n        <article class=\"cm-card\">\n          <div class=\"cm-card-top\">\n            <span class=\"cm-cat\">跨部门沟通 · 需求传递</span>\n            <span class=\"cm-idx\">01 / 04</span>\n          </div>\n          <div>\n            <h3>从「模糊要求」到「精准指令」</h3>\n            <p class=\"cm-sub\">用 5W1H 模型传递需求，一次说清、减少返工。</p>\n          </div>\n          <div>\n            <p class=\"cm-block-label\">5W1H 模型</p>\n            <div class=\"cm-5w1h\">\n              <div><b>What</b><span>做什么？</span></div>\n              <div><b>Why</b><span>为什么做？</span></div>\n              <div><b>Who</b><span>谁来做？</span></div>\n              <div><b>When</b><span>何时完成？</span></div>\n              <div><b>Where</b><span>交付渠道？</span></div>\n              <div><b>How</b><span>标准是什么？</span></div>\n            </div>\n          </div>\n          <div class=\"cm-vs\">\n            <div>\n              <p class=\"cm-block-label\">案例对比</p>\n            </div>\n            <div class=\"cm-bad\">\n              <span class=\"vtag\">\n                <svg width=\"11\" height=\"11\" viewBox=\"0 0 16 16\" fill=\"none\" aria-hidden=\"true\"><path d=\"M4 4l8 8M12 4l-8 8\" stroke=\"currentColor\" stroke-width=\"2.2\" stroke-linecap=\"round\"/></svg>\n                模糊\n              </span>\n              「帮我做个物料」\n            </div>\n            <span class=\"cm-arrow-down\" aria-hidden=\"true\">\n              <svg width=\"16\" height=\"16\" viewBox=\"0 0 16 16\" fill=\"none\"><path d=\"M8 3v10M3.5 8.5L8 13l4.5-4.5\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/></svg>\n            </span>\n            <div class=\"cm-good\">\n              <span class=\"vtag\">\n                <svg width=\"11\" height=\"11\" viewBox=\"0 0 16 16\" fill=\"none\" aria-hidden=\"true\"><path d=\"M3 8.5l3.2 3.2L13 5\" stroke=\"currentColor\" stroke-width=\"2.2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/></svg>\n                精准\n              </span>\n              「请<b>设计部</b>在 <b>10 月 20 日前</b>出 <b>3 版</b>新品海报（尺寸 60×90cm，需突出「续航 20 小时」卖点），物料需同步至<b>销售部张哥</b>用于终端推广。」\n            </div>\n          </div>\n        </article>\n\n        <!-- 卡片 2：跨部门 · 冲突化解 -->\n        <article class=\"cm-card\">\n          <div class=\"cm-card-top\">\n            <span class=\"cm-cat\">跨部门沟通 · 冲突化解</span>\n            <span class=\"cm-idx\">02 / 04</span>\n          </div>\n          <div>\n            <h3>「对事不对人」的沟通公式</h3>\n            <p class=\"cm-sub\">指责只会激化对立，公式让对话回到问题本身。</p>\n          </div>\n          <div>\n            <p class=\"cm-block-label\">沟通公式</p>\n            <div class=\"cm-formula\">\n              <span class=\"fchip\">客观事实</span>\n              <span class=\"fplus\">+</span>\n              <span class=\"fchip\">影响分析</span>\n              <span class=\"fplus\">+</span>\n              <span class=\"fchip\">解决建议</span>\n            </div>\n          </div>\n          <div class=\"cm-vs\">\n            <div>\n              <p class=\"cm-block-label\">示例 · 面对采购部延迟交物料</p>\n            </div>\n            <div class=\"cm-bad\">\n              <span class=\"vtag\">\n                <svg width=\"11\" height=\"11\" viewBox=\"0 0 16 16\" fill=\"none\" aria-hidden=\"true\"><path d=\"M4 4l8 8M12 4l-8 8\" stroke=\"currentColor\" stroke-width=\"2.2\" stroke-linecap=\"round\"/></svg>\n                不要说\n              </span>\n              「你们又拖进度」\n            </div>\n            <span class=\"cm-arrow-down\" aria-hidden=\"true\">\n              <svg width=\"16\" height=\"16\" viewBox=\"0 0 16 16\" fill=\"none\"><path d=\"M8 3v10M3.5 8.5L8 13l4.5-4.5\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/></svg>\n            </span>\n            <div class=\"cm-good\">\n              <span class=\"vtag\">\n                <svg width=\"11\" height=\"11\" viewBox=\"0 0 16 16\" fill=\"none\" aria-hidden=\"true\"><path d=\"M3 8.5l3.2 3.2L13 5\" stroke=\"currentColor\" stroke-width=\"2.2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/></svg>\n                而是说\n              </span>\n              「目前设计部因未收到物料，已延误 <b>2 天</b>（事实），可能错过 <b>双 11 预热</b>（影响），能否<b>优先交付核心款物料</b>，剩余款明天补送（建议）？」\n            </div>\n          </div>\n        </article>\n\n        <!-- 卡片 3：对上沟通 -->\n        <article class=\"cm-card\">\n          <div class=\"cm-card-top\">\n            <span class=\"cm-cat\">对上沟通</span>\n            <span class=\"cm-idx\">03 / 04</span>\n          </div>\n          <div>\n            <h3>给选择题，而非问答题</h3>\n            <p class=\"cm-sub\">带着思考和方案去汇报，而不是把问题原样抛给上级。</p>\n          </div>\n          <ul class=\"cm-points\">\n            <li>\n              <span class=\"pnum\">1</span>\n              <div>\n                <b>汇报结构：用「三条总结」</b>\n                <small>核心结论 → 理由一句依据 → 下一步请求。</small>\n              </div>\n            </li>\n            <li>\n              <span class=\"pnum\">2</span>\n              <div>\n                <b>问题请示：提前准备 2–3 个解决方案</b>\n                <small>标注「优劣势 + 资源需求」。如「申请加派 1 名客服——<b>方案一</b>：从行政部借调；<b>方案二</b>：临时外包，月成本增加 5000 元」。</small>\n              </div>\n            </li>\n            <li>\n              <span class=\"pnum\">3</span>\n              <div>\n                <b>进度通报：主动同步</b>\n                <small>汇报「进展 + 卡点 + 需要支持」，避免「等追问才汇报」。</small>\n              </div>\n            </li>\n          </ul>\n        </article>\n\n        <!-- 卡片 4：对下沟通 -->\n        <article class=\"cm-card\">\n          <div class=\"cm-card-top\">\n            <span class=\"cm-cat\">对下沟通</span>\n            <span class=\"cm-idx\">04 / 04</span>\n          </div>\n          <div>\n            <h3>给指令，也要给思路</h3>\n            <p class=\"cm-sub\">下属执行不到位，往往不是能力问题，而是信息没给够。</p>\n          </div>\n          <ul class=\"cm-points\">\n            <li>\n              <span class=\"pnum\">1</span>\n              <div>\n                <b>指令明确</b>\n                <small>用「书面 + 口头」双重确认，要求下属<b>复述核心要求</b>。</small>\n              </div>\n            </li>\n            <li>\n              <span class=\"pnum\">2</span>\n              <div>\n                <b>反馈具体</b>\n                <small>批评时说「你这次会议记录<b>漏了 3 个行动的 DDL</b>」，而非「你记录得太马虎」。</small>\n              </div>\n            </li>\n            <li>\n              <span class=\"pnum\">3</span>\n              <div>\n                <b>支持到位</b>\n                <small>传递任务后同步「<b>资源对接人、参考案例、风险预案</b>」，减少下属盲目摸索。</small>\n              </div>\n            </li>\n          </ul>\n        </article>\n\n      </div>\n\n      </div>\n    </div>"}, {"group": "职场沟通", "t": "邮件写作要点", "html": "<div class=\"lesson-head\">\n      <p class=\"eyebrow\">职场沟通 / 邮件写作</p>\n      <h1>一封专业的邮件，从动笔前开始。</h1>\n      <p class=\"lead\">邮件是职场最正式的沟通载体。发送前想清楚目的与范围，发送时遵守格式规范，才能让信息高效流动。</p>\n    </div>\n\n    <div class=\"mail-sec\">\n      <div class=\"mail-sec-head\">\n        <span class=\"mnum\">1</span>\n        <h2>发送前，先明确邮件目的</h2>\n        <span class=\"msub\">目的不同，写法不同</span>\n      </div>\n      <div class=\"mail-chips\">\n        <span class=\"mail-chip\">\n          <svg width=\"15\" height=\"15\" viewBox=\"0 0 16 16\" fill=\"none\" aria-hidden=\"true\"><path d=\"M8 2v8M8 13.5v.5M2.8 4.8C4.4 3 6.1 2.2 8 2.2s3.6.8 5.2 2.6\" stroke=\"currentColor\" stroke-width=\"1.6\" stroke-linecap=\"round\"/></svg>\n          申请审批\n        </span>\n        <span class=\"mail-chip\">\n          <svg width=\"15\" height=\"15\" viewBox=\"0 0 16 16\" fill=\"none\" aria-hidden=\"true\"><path d=\"M2.5 3.5h11v9h-11zM2.5 4l5.5 4.5L13.5 4\" stroke=\"currentColor\" stroke-width=\"1.6\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/></svg>\n          通知知会\n        </span>\n        <span class=\"mail-chip\">\n          <svg width=\"15\" height=\"15\" viewBox=\"0 0 16 16\" fill=\"none\" aria-hidden=\"true\"><path d=\"M3 1.5h7.5L13 4v10.5H3zM10.5 1.5V4H13\" stroke=\"currentColor\" stroke-width=\"1.6\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/></svg>\n          提出指令\n        </span>\n        <span class=\"mail-chip\">\n          <svg width=\"15\" height=\"15\" viewBox=\"0 0 16 16\" fill=\"none\" aria-hidden=\"true\"><circle cx=\"6.5\" cy=\"6.5\" r=\"4\" stroke=\"currentColor\" stroke-width=\"1.6\"/><path d=\"M9.6 9.6L14 14\" stroke=\"currentColor\" stroke-width=\"1.6\" stroke-linecap=\"round\"/></svg>\n          信息分享\n        </span>\n      </div>\n    </div>\n\n    <div class=\"mail-sec\">\n      <div class=\"mail-sec-head\">\n        <span class=\"mnum\">2</span>\n        <h2>发送范围：收件人与抄送</h2>\n        <span class=\"msub\">谁该收到，谁只需知道</span>\n      </div>\n      <div class=\"mail-cols\">\n        <div class=\"mail-col\">\n          <div class=\"mrow\"><span class=\"mtag mtag-to\">TO</span><h3>收件人 · 具体办事的人</h3></div>\n          <p><b>第一对接人</b>或准确需要回复的人。收到邮件即意味着「这件事需要你行动或答复」。</p>\n        </div>\n        <div class=\"mail-col\">\n          <div class=\"mrow\"><span class=\"mtag mtag-cc\">CC</span><h3>抄送 · 需要知晓的人</h3></div>\n          <p><b>双方上级</b>或需要知晓该事项内容的人。抄送是知会，不要求必须回复。</p>\n        </div>\n      </div>\n    </div>\n\n    <div class=\"mail-sec\">\n      <div class=\"mail-sec-head\">\n        <span class=\"mnum\">3</span>\n        <h2>格式建议：五步写法</h2>\n        <span class=\"msub\">从标题到发送检查</span>\n      </div>\n      <div class=\"mail-steps\">\n        <div class=\"mail-step\">\n          <span class=\"snum\">①</span>\n          <div>\n            <h4>标题 · 开头使用【】</h4>\n            <p>例如 <span class=\"mail-kw\">【XX项目】</span><span class=\"mail-kw\">【请审阅】</span><span class=\"mail-kw\">【请协助】</span><span class=\"mail-kw\">【请回复】</span>，让对方一眼看清邮件性质。</p>\n          </div>\n        </div>\n        <div class=\"mail-step\">\n          <span class=\"snum\">②</span>\n          <div>\n            <h4>称呼 · 覆盖收件人范围</h4>\n            <p>邮件需要写称呼，并思考称呼能否涵盖收件人范围——<b>发给个人还是多人</b>，用词不同。</p>\n          </div>\n        </div>\n        <div class=\"mail-step\">\n          <span class=\"snum\">③</span>\n          <div>\n            <h4>正文 · 结构明确，突出重点</h4>\n            <p>结构清晰、格式规整；<b>同样的项目保持类似的邮件模板</b>，方便收件人阅读理解；插入的表格、图片注意格式显示正确，<b>适当标注重点</b>。</p>\n          </div>\n        </div>\n        <div class=\"mail-step\">\n          <span class=\"snum\">④</span>\n          <div>\n            <h4>签名 · 留下联系方式</h4>\n            <p>一定要有对应联系人或签名，<b>尤其是涉及外部的邮件</b>，方便对方私下沟通联系。</p>\n          </div>\n        </div>\n        <div class=\"mail-step\">\n          <span class=\"snum\">⑤</span>\n          <div>\n            <h4>反复检查 · 发送自测与他测</h4>\n            <p>重要邮件建议<b>发送自测和他测</b>（比如内容较多、带图表的）。重要邮件发送后应<b>告知对方请查收</b>，企微邮件可直接转发到聊天。</p>\n          </div>\n        </div>\n      </div>\n    </div>\n\n    <div class=\"mail-sec\">\n      <div class=\"mail-sec-head\">\n        <span class=\"mnum\">4</span>\n        <h2>进阶要点：收件人顺序与正文结构</h2>\n        <span class=\"msub\">来自实际案例的两个补充</span>\n      </div>\n      <div class=\"mail-cols\">\n        <div class=\"mail-col\">\n          <h3>邮件的收件人顺序</h3>\n          <p>根据事情的<b>紧密相关程度</b>排序，<b>越相关的越放前面</b>——最需要行动的人，应排在收件列表的首位。</p>\n        </div>\n        <div class=\"mail-col\">\n          <h3>邮件的正文结构 · 倒叙</h3>\n          <div class=\"pyr\">\n            <div class=\"pl pl-1\"><b>重点</b><span><b>倒叙结构</b>：正文先写结果 / 诉求目的 / 审批事由。</span></div>\n            <div class=\"pl pl-2\"><b>其次</b><span>补充相关过程说明，列举数据论据，可分点列；重点字眼可加粗或更换字体颜色。</span></div>\n            <div class=\"pl pl-3\"><b>最后</b><span>其他论据材料有序整理在附件中，附件不宜太大，多个附件可整理成压缩包。</span></div>\n          </div>\n        </div>\n      </div>\n\n    </div>"}, {"group": "职场沟通", "t": "邮件写作技巧", "html": "<div class=\"lesson-head\">\n      <p class=\"eyebrow\">职场沟通 / 邮件写作技巧</p>\n      <h1>让 AI 帮你写邮件，再学会两个加分技巧。</h1>\n      <p class=\"lead\">写不出、写不好时，把要求讲清楚交给 AI 起草；重要邮件用「定时发送」和「已读回执」把控节奏。下面是可直接套用的提示词与操作指引。</p>\n    </div>\n\n    <div class=\"mail-sec\">\n      <div class=\"mail-sec-head\">\n        <span class=\"mnum\">1</span>\n        <h2>用 AI 写邮件：把要求说清楚</h2>\n        <span class=\"msub\">提示词 = 背景 + 任务 + 要求 + 语气</span>\n      </div>\n      <p style=\"font-size:13.5px;color:var(--muted);line-height:1.75;margin:0 0 calc(var(--space)*1.5);\">想让 AI 写出能直接发送的邮件，关键是把「发给谁、为什么写、要求是什么、什么语气」一次讲明白。以下提示词可直接复制到 AI 对话框使用，把方括号内容替换成你的实际情况。</p>\n\n      <div class=\"ai-prompts\">\n        <div class=\"ai-prompt\">\n          <div class=\"ai-prompt-head\">\n            <span class=\"ap-tag\">请示审批</span>\n            <button class=\"ap-copy\" type=\"button\" data-copy=\"zc-ap1\">复制提示词</button>\n          </div>\n          <p class=\"ap-title\">向领导申请资源 / 审批</p>\n          <pre class=\"ap-body\" id=\"zc-ap1\">请帮我起草一封发给直属领导的请示邮件。\n背景：[项目/事项背景，1-2 句]\n诉求：[希望审批或申请的具体事项]\n我的初步方案：[方案一]（优势/成本）；[方案二]（优势/成本）\n要求：标题使用【请审阅】开头；正文先说结论，再给方案对比；语气正式简洁，控制在 200 字以内。</pre>\n        </div>\n\n        <div class=\"ai-prompt\">\n          <div class=\"ai-prompt-head\">\n            <span class=\"ap-tag\">催办协调</span>\n            <button class=\"ap-copy\" type=\"button\" data-copy=\"zc-ap2\">复制提示词</button>\n          </div>\n          <p class=\"ap-title\">跨部门催进度（对事不对人）</p>\n          <pre class=\"ap-body\" id=\"zc-ap2\">请帮我起草一封跨部门催办邮件。\n背景：我需要[部门]提供的[具体物料/数据]，[时间点]曾沟通过一次，目前尚未收到，已影响[具体影响，如：项目延期 2 天]。\n诉求：希望对方[最晚时间]前提供[核心内容]，其余部分可次日补齐。\n要求：对事不对人，先讲事实和影响，再给出建议方案；语气客气但明确，不带指责。</pre>\n        </div>\n\n        <div class=\"ai-prompt\">\n          <div class=\"ai-prompt-head\">\n            <span class=\"ap-tag\">通知知会</span>\n            <button class=\"ap-copy\" type=\"button\" data-copy=\"zc-ap3\">复制提示词</button>\n          </div>\n          <p class=\"ap-title\">项目进展 / 事项通知</p>\n          <pre class=\"ap-body\" id=\"zc-ap3\">请帮我起草一封项目进展通知邮件，收件人为项目相关同事。\n背景：[项目名称]目前进展：[已完成的里程碑]，当前卡点：[问题及影响]，下一步：[计划与时间]。\n要求：标题使用【XX项目】开头；正文倒叙，先结论后过程，关键时间点加粗；收件人为多人，称呼使用通用称呼；300 字以内。</pre>\n        </div>\n\n        <div class=\"ai-prompt\">\n          <div class=\"ai-prompt-head\">\n            <span class=\"ap-tag\">回复修改</span>\n            <button class=\"ap-copy\" type=\"button\" data-copy=\"zc-ap4\">复制提示词</button>\n          </div>\n          <p class=\"ap-title\">把草稿改得更专业</p>\n          <pre class=\"ap-body\" id=\"zc-ap4\">请帮我修改下面这封邮件草稿，使其更专业：\n[粘贴你的草稿]\n修改要求：1) 主题不明确的改为【标签】+ 事项标题；2) 正文调整为倒叙结构，先说结论/诉求；3) 长句拆分，可分点的分点；4) 语气礼貌但不卑微；5) 检查错别字和标点。</pre>\n        </div>\n      </div>\n\n      <div class=\"callout\" style=\"max-width:none;margin-top:calc(var(--space)*1.75);\">\n        <span class=\"callout-tag\">注意</span>\n        <p>AI 起草后<u>务必人工核对</u>：收件人称呼、公司口径、数据数字、敏感信息。涉及公司机密的内容，先确认能否输入 AI 工具，再决定是否使用。</p>\n      </div>\n    </div>\n\n    <div class=\"mail-sec\">\n      <div class=\"mail-sec-head\">\n        <span class=\"mnum\">2</span>\n        <h2>定时发送：让对方在对的时间收到</h2>\n        <span class=\"msub\">路径：发信设置 → 定时发送</span>\n      </div>\n      <div class=\"mail-case\">\n        <figure class=\"inv-fig\" data-full=\"assets/email/mail-tips-3.png\" data-cap=\"发信设置菜单：分别发送 / 定时发送 / 高优先级 / 已读回执\">\n          <img src=\"assets/email/mail-tips-3.png\" alt=\"邮件写信窗口：点击发信设置展开菜单，高亮定时发送选项\">\n          <span class=\"zoom-hint\">\n            <svg width=\"11\" height=\"11\" viewBox=\"0 0 16 16\" fill=\"none\" aria-hidden=\"true\"><circle cx=\"7\" cy=\"7\" r=\"4.5\" stroke=\"currentColor\" stroke-width=\"1.8\"/><path d=\"M10.5 10.5L14 14M5.2 7h3.6M7 5.2v3.6\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\"/></svg>\n            点击放大\n          </span>\n        </figure>\n        <div class=\"mail-case-note\">\n          <h4>怎么设置</h4>\n          <p>写好邮件后，点击工具栏「<b>发信设置</b>」，在下拉菜单中选择「<b>定时发送</b>」，设置日期与时间后点「确定」。邮件将在指定时间自动发出。</p>\n          <h4 style=\"margin-top:14px;\">什么时候用</h4>\n          <p>· 不想让对方深夜 / 周末收到邮件，设定到<b>工作日上午</b>发出<br>· 需要<b>踩时间节点</b>发出的通知（如活动预告、阶段性汇报）<br>· 提前写好、按节奏分批发送的多封邮件</p>\n        </div>\n      </div>\n      <figure class=\"inv-fig\" style=\"max-width:520px;\" data-full=\"assets/email/mail-tips-4.png\" data-cap=\"设置发送时间：选择日期与时间后确定\">\n        <img src=\"assets/email/mail-tips-4.png\" alt=\"设置发送时间弹窗：日期选择 9月1日 星期二，时间选择 下午 6:15\">\n        <span class=\"zoom-hint\">\n          <svg width=\"11\" height=\"11\" viewBox=\"0 0 16 16\" fill=\"none\" aria-hidden=\"true\"><circle cx=\"7\" cy=\"7\" r=\"4.5\" stroke=\"currentColor\" stroke-width=\"1.8\"/><path d=\"M10.5 10.5L14 14M5.2 7h3.6M7 5.2v3.6\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\"/></svg>\n          点击放大\n        </span>\n        <figcaption class=\"inv-cap\" style=\"margin:8px 4px 0;font-size:12.5px;color:var(--faint);\">「定时发送」弹窗：选择日期与时间后点击确定</figcaption>\n      </figure>\n    </div>\n\n    <div class=\"mail-sec\">\n      <div class=\"mail-sec-head\">\n        <span class=\"mnum\">3</span>\n        <h2>已读回执：确认对方已经看过</h2>\n        <span class=\"msub\">路径：发信设置 → 已读回执</span>\n      </div>\n      <div class=\"mail-case\">\n        <figure class=\"inv-fig\" data-full=\"assets/email/mail-tips-2.png\" data-cap=\"发信设置菜单：选择已读回执\">\n          <img src=\"assets/email/mail-tips-2.png\" alt=\"邮件写信窗口：发信设置菜单中高亮已读回执选项\">\n          <span class=\"zoom-hint\">\n            <svg width=\"11\" height=\"11\" viewBox=\"0 0 16 16\" fill=\"none\" aria-hidden=\"true\"><circle cx=\"7\" cy=\"7\" r=\"4.5\" stroke=\"currentColor\" stroke-width=\"1.8\"/><path d=\"M10.5 10.5L14 14M5.2 7h3.6M7 5.2v3.6\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\"/></svg>\n            点击放大\n          </span>\n        </figure>\n        <div class=\"mail-case-note\">\n          <h4>怎么设置</h4>\n          <p>写邮件时点击「<b>发信设置</b> → <b>已读回执</b>」，对方打开邮件后你会收到系统通知，确认邮件已被阅读。</p>\n          <h4 style=\"margin-top:14px;\">什么时候用</h4>\n          <p>· <b>有时效要求</b>的邮件：审批、确认类事项，需要对方在截止前处理<br>· <b>重要且紧急</b>的知会：避免「发了就当对方知道了」<br>· 对方常常<b>漏看邮件</b>时，用回执确认触达</p>\n          <h4 style=\"margin-top:14px;\">提醒</h4>\n          <p>已读回执只是确认「已读」，对方可能读了未回。重要事项仍建议<b>同步企微消息提醒对方查收</b>。</p>\n        </div>\n      </div>\n    </div>\n\n    <div class=\"mail-sec\">\n      <div class=\"mail-sec-head\">\n        <span class=\"mnum\">4</span>\n        <h2>认识写信窗口</h2>\n        <span class=\"msub\">发送 / 附件 / 发信设置都在顶部工具栏</span>\n      </div>\n      <figure class=\"inv-fig\" data-full=\"assets/email/mail-tips-1.png\" data-cap=\"邮件写信窗口总览：工具栏、收件人、格式与签名\">\n        <img src=\"assets/email/mail-tips-1.png\" alt=\"邮件写信窗口：顶部发送、保存、附件、发信设置按钮，收件人抄送主题栏，格式工具栏含智能润色\">\n        <span class=\"zoom-hint\">\n          <svg width=\"11\" height=\"11\" viewBox=\"0 0 16 16\" fill=\"none\" aria-hidden=\"true\"><circle cx=\"7\" cy=\"7\" r=\"4.5\" stroke=\"currentColor\" stroke-width=\"1.8\"/><path d=\"M10.5 10.5L14 14M5.2 7h3.6M7 5.2v3.6\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\"/></svg>\n          点击放大\n        </span>\n        <figcaption class=\"inv-cap\" style=\"margin:8px 4px 0;font-size:12.5px;color:var(--faint);\">写信窗口：① 顶部工具栏（发送 / 附件 / 发信设置）② 收件人、抄送与主题 ③ 格式工具栏（含「智能润色」）④ 自动签名</figcaption>\n      </figure>\n    </div>"}, {"group": "职场沟通", "t": "模拟回复邮件游戏", "html": "<div class=\"lesson-head\">\n      <p class=\"eyebrow\">职场沟通 / 模拟回复游戏</p>\n      <h1>换你来回这封邮件，你会怎么写？</h1>\n      <p class=\"lead\">你将扮演回复者，根据客户情绪，回复邮件</p>\n    </div>\n\n    <div class=\"warmup-wrap\">\n      <iframe class=\"warmup-frame\" src=\"assets/game/reply-game/reply-game.html?v=20260918a\" title=\"模拟回复 · 邮件谈判专家情景演练\"></iframe>\n    </div>"}, {"group": "职场沟通", "t": "如何开会", "html": "<div class=\"lesson-head\">\n      <p class=\"eyebrow\">职场沟通 / 如何开会</p>\n      <h1>开一场有结论、能落地的会。</h1>\n      <p class=\"lead\">会议不是例行公事。从「要不要开」到「怎么跟」，五个环节决定一场会是富有成效还是浪费时间。</p>\n    </div>\n\n    <div class=\"callout\" style=\"max-width:none;margin-bottom:calc(var(--space)*2);\">\n      <span class=\"callout-tag\">一句真话</span>\n      <p>任何会议都是<u>要么富有成效，要么纯粹浪费时间</u>，二者必居其一。</p>\n    </div>\n\n    <div class=\"mail-sec\">\n      <div class=\"mail-sec-head\">\n        <span class=\"mnum\">1</span>\n        <h2>高效开会的五个环节</h2>\n        <span class=\"msub\">每一步都有讲究</span>\n      </div>\n      <div class=\"mt-steps\">\n        <div class=\"mt-step\">\n          <div class=\"mt-step-main\">\n            <span class=\"mt-num\">01</span>\n            <b>确定真要开会</b>\n          </div>\n          <p>非开不可？如果能<b>当机立断、面对面沟通</b>的，应选择更优方式。</p>\n        </div>\n        <div class=\"mt-step\">\n          <div class=\"mt-step-main\">\n            <span class=\"mt-num\">02</span>\n            <b>找对必须参会的人</b>\n          </div>\n          <p>别「误伤」无辜：<b>慎用全员参与</b>，不凑热闹，密切相关方才参加。</p>\n        </div>\n        <div class=\"mt-step\">\n          <div class=\"mt-step-main\">\n            <span class=\"mt-num\">03</span>\n            <b>围绕主题、按照流程讨论</b>\n          </div>\n          <p>拒绝「跑题」和「发散」：严格按照<b>会前发出的会议主题方向</b>进行讨论，听从会议主持的节奏。</p>\n        </div>\n        <div class=\"mt-step\">\n          <div class=\"mt-step-main\">\n            <span class=\"mt-num\">04</span>\n            <b>得出结论</b>\n          </div>\n          <p>形成<b>会议纪要并全员确认</b>：记录结论 → 关键讨论过程 → 行动计划 / 分工安排。</p>\n        </div>\n        <div class=\"mt-step\">\n          <div class=\"mt-step-main\">\n            <span class=\"mt-num\">05</span>\n            <b>落地跟踪实施情况</b>\n          </div>\n          <p>按照会议记录的安排，<b>阶段性复盘</b>落地情况。</p>\n        </div>\n      </div>\n    </div>\n\n    <div class=\"mail-sec\">\n      <div class=\"mail-sec-head\">\n        <span class=\"mnum\">2</span>\n        <h2>线上会与线下会：各自的准备流程</h2>\n        <span class=\"msub\">会前准备决定会议质量</span>\n      </div>\n      <div class=\"mt-cols\">\n        <div class=\"mt-col\">\n          <div class=\"mt-col-head online\">\n            <svg width=\"15\" height=\"15\" viewBox=\"0 0 16 16\" fill=\"none\" aria-hidden=\"true\"><rect x=\"1.5\" y=\"3.5\" width=\"13\" height=\"9\" rx=\"1.5\" stroke=\"currentColor\" stroke-width=\"1.6\"/><path d=\"M6 12.5v1.5M10 12.5v1.5M4 14h8\" stroke=\"currentColor\" stroke-width=\"1.6\" stroke-linecap=\"round\"/></svg>\n            线上开会\n          </div>\n          <ol class=\"mt-flow\">\n            <li><b>提前做好会议链接</b>，发送给参会人 / 参会群聊</li>\n            <li><b>日程设置提醒</b>，避免忘记</li>\n            <li><b>提前 15 分钟入会</b>，测试麦克风和声音、画面是否同步；提前打开共享文件</li>\n            <li><b>准时进入会议</b>，根据是否需要互动关闭静音；做好会议备忘</li>\n          </ol>\n        </div>\n        <div class=\"mt-col\">\n          <div class=\"mt-col-head offline\">\n            <svg width=\"15\" height=\"15\" viewBox=\"0 0 16 16\" fill=\"none\" aria-hidden=\"true\"><path d=\"M2.5 4.5h11v7h-11zM2.5 4.5L8 9l5.5-4.5\" stroke=\"currentColor\" stroke-width=\"1.6\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/></svg>\n            线下开会\n          </div>\n          <ol class=\"mt-flow\">\n            <li>确认会议时间对象后，<b>提前预约相应配置的会议室</b>（是否需要投屏、参会人数、是否需要饮用水等）</li>\n            <li><b>发送会议日程</b>（准确时间、会议室、会议简单信息）给参会者，设置提醒</li>\n            <li>会议开始前 <b>15-20 分钟</b>，组织者提前到场做好准备，检查投影设备等</li>\n            <li><b>会中把控节奏</b>，会后输出会议记录（会议备忘）</li>\n          </ol>\n        </div>\n      </div>\n    </div>\n\n    <div class=\"mail-sec\">\n      <div class=\"mail-sec-head\">\n        <span class=\"mnum\">3</span>\n        <h2>会议记录怎么写</h2>\n        <span class=\"msub\">三个部分，缺一不可</span>\n      </div>\n      <div class=\"mt-minutes\">\n        <div class=\"mt-min-part\">\n          <h4>一 · 会议相关信息</h4>\n          <p>会议<b>主题 / 时间 / 地点 / 形式</b>（如有会议链接）/ 主持人 / 与会人。</p>\n        </div>\n        <div class=\"mt-min-part\">\n          <h4>二 · 会议议题和目前结论</h4>\n          <div class=\"mt-min-topic\">\n            <span class=\"mt-topic-chip\">议题 1</span>\n            <span>结论 or 待解决问题</span>\n          </div>\n          <div class=\"mt-min-topic\">\n            <span class=\"mt-topic-chip\">议题 2</span>\n            <span>结论 or 待解决问题</span>\n          </div>\n          <p style=\"margin-top:8px;\">每个议题逐条记录，<b>结论优先</b>，问题跟上。</p>\n        </div>\n        <div class=\"mt-min-part\">\n          <h4>三 · 计划和安排</h4>\n          <p>· 具体每个事项的<b>下一步任务和计划</b>，@ 对应负责人，写明 DDL 时间</p>\n          <p>· 约定<b>定时更新时间</b>，或下一次进度碰头时间</p>\n        </div>\n      </div>\n    </div>\n\n    <div class=\"mail-sec\">\n      <div class=\"mail-sec-head\">\n        <span class=\"mnum\">4</span>\n        <h2>用企业微信把会开起来</h2>\n        <span class=\"msub\">从聊天里直接建会、建日程、建待办</span>\n      </div>\n      <p style=\"font-size:13.5px;color:var(--muted);line-height:1.75;margin:0 0 14px;\">讨论往往会从聊天窗口里产生，别让「回头我约个会」变成一句空话。在企业微信聊天输入框的工具栏里，点开日历图标，可以直接<b style=\"color:var(--fg);\">预定会议、新建日程、从已有日程中选择</b>，也可以发送「快速会议」；右侧还能把消息一键转为<b style=\"color:var(--fg);\">待办</b>。</p>\n      <div class=\"mt-case-figs\">\n        <figure class=\"inv-fig\" data-full=\"assets/meeting/wecom-meeting.png\" data-cap=\"企业微信聊天工具栏：预定会议 / 新建日程 / 从已有日程中选择\">\n          <img src=\"assets/meeting/wecom-meeting.png\" alt=\"企业微信聊天输入框工具栏的日历下拉菜单：预定会议、新建日程、从已有日程中选择\">\n          <span class=\"zoom-hint\">\n            <svg width=\"11\" height=\"11\" viewBox=\"0 0 16 16\" fill=\"none\" aria-hidden=\"true\"><circle cx=\"7\" cy=\"7\" r=\"4.5\" stroke=\"currentColor\" stroke-width=\"1.8\"/><path d=\"M10.5 10.5L14 14M5.2 7h3.6M7 5.2v3.6\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\"/></svg>\n            点击放大\n          </span>\n          <figcaption class=\"inv-cap\" style=\"margin:8px 4px 0;font-size:12.5px;color:var(--faint);\">聊天工具栏 → 日历图标：预定会议 / 新建日程 / 从已有日程中选择</figcaption>\n        </figure>\n        <figure class=\"inv-fig\" data-full=\"assets/meeting/wecom-todo.png\" data-cap=\"企业微信待办：写下待办事项，设置参与人、截止时间与描述\">\n          <img src=\"assets/meeting/wecom-todo.png\" alt=\"企业微信待办页面：输入待办事项，选择参与人、截止时间、描述\">\n          <span class=\"zoom-hint\">\n            <svg width=\"11\" height=\"11\" viewBox=\"0 0 16 16\" fill=\"none\" aria-hidden=\"true\"><circle cx=\"7\" cy=\"7\" r=\"4.5\" stroke=\"currentColor\" stroke-width=\"1.8\"/><path d=\"M10.5 10.5L14 14M5.2 7h3.6M7 5.2v3.6\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\"/></svg>\n            点击放大\n          </span>\n          <figcaption class=\"inv-cap\" style=\"margin:8px 4px 0;font-size:12.5px;color:var(--faint);\">待办：写下事项，设置参与人 / 截止时间 / 描述</figcaption>\n        </figure>\n      </div>\n    </div>"}, {"group": "职场沟通", "t": "会议记录", "html": "<div class=\"lesson-head\">\n      <p class=\"eyebrow\">职场沟通 / 会议记录</p>\n      <h1>会议记录不是流水账，是行动的开始。</h1>\n      <p class=\"lead\">一场会有没有价值，取决于会后是否留下「谁、做什么、什么时候交付」。好的记录让讨论落地，避免反复开会。</p>\n    </div>\n\n    <div class=\"mail-sec\">\n      <div class=\"mail-sec-head\">\n        <span class=\"mnum\">1</span>\n        <h2>会议记录的 3 个核心原则</h2>\n        <span class=\"msub\">结论优先，责任到人</span>\n      </div>\n      <div class=\"mt-minutes\">\n        <div class=\"mt-min-part\">\n          <h4>结论优先</h4>\n          <p>不要从「张三说…李四说…」开始写。先写<b>本次会议达成了什么结论</b>，再补充关键讨论过程。</p>\n        </div>\n        <div class=\"mt-min-part\">\n          <h4>责任到人</h4>\n          <p>每个行动项必须有<b>@ 负责人</b>，避免「会后大家一起做」变成没人做。</p>\n        </div>\n        <div class=\"mt-min-part\">\n          <h4>DDL 具体</h4>\n          <p>不写「尽快完成」，要写<b>明确的截止时间</b>。模糊的截止时间等于没有截止。</p>\n        </div>\n      </div>\n    </div>\n\n    <div class=\"mail-sec\">\n      <div class=\"mail-sec-head\">\n        <span class=\"mnum\">2</span>\n        <h2>会后 5 分钟整理清单</h2>\n        <span class=\"msub\">养成习惯，事半功倍</span>\n      </div>\n      <div class=\"mail-steps\">\n        <div class=\"mail-step\">\n          <span class=\"snum\">①</span>\n          <div>\n            <h4>补全会议信息</h4>\n            <p>主题、时间、地点/链接、主持人、参会人、请假人。这些信息在后续追溯时非常重要。</p>\n          </div>\n        </div>\n        <div class=\"mail-step\">\n          <span class=\"snum\">②</span>\n          <div>\n            <h4>梳理议题与结论</h4>\n            <p>按议题列出「结论 / 待解决问题」。没有结论的议题，也要写明下一步是什么。</p>\n          </div>\n        </div>\n        <div class=\"mail-step\">\n          <span class=\"snum\">③</span>\n          <div>\n            <h4>输出行动项</h4>\n            <p>每个行动项包含：<b>任务描述</b>、<b>负责人</b>、<b>截止时间</b>、<b>验收标准</b>。这是会议纪要最有价值的部分。</p>\n          </div>\n        </div>\n        <div class=\"mail-step\">\n          <span class=\"snum\">④</span>\n          <div>\n            <h4>24 小时内同步</h4>\n            <p>会议纪要在会后 <b>24 小时内</b>发出，趁热打铁，大家对讨论的记忆最清晰。</p>\n          </div>\n        </div>\n      </div>\n    </div>\n\n    <div class=\"mail-sec\">\n      <div class=\"mail-sec-head\">\n        <span class=\"mnum\">3</span>\n        <h2>AI 整理会议记录提示词</h2>\n        <span class=\"msub\">直接复制到 AI 对话框使用</span>\n      </div>\n      <div class=\"ai-prompts\">\n        <div class=\"ai-prompt\">\n          <div class=\"ai-prompt-head\">\n            <span class=\"ap-tag\">录音转纪要</span>\n            <button class=\"ap-copy\" type=\"button\" data-copy=\"zc-ap5\">复制提示词</button>\n          </div>\n          <h3 class=\"ap-title\">把录音/速记整理成结构化会议纪要</h3>\n          <pre class=\"ap-body\" id=\"zc-ap5\">请根据以下会议速记，整理成一份结构化的会议纪要。要求：\n1. 先写会议主题、时间、参会人；\n2. 按议题列出讨论结论；\n3. 每个结论后输出对应的行动项：任务、负责人、截止时间；\n4. 语言简洁专业，不要添加会议中没有的内容。\n\n会议速记如下：\n【粘贴你的速记/转录文本】</pre>\n        </div>\n        <div class=\"ai-prompt\">\n          <div class=\"ai-prompt-head\">\n            <span class=\"ap-tag\">讨论转待办</span>\n            <button class=\"ap-copy\" type=\"button\" data-copy=\"zc-ap6\">复制提示词</button>\n          </div>\n          <h3 class=\"ap-title\">把零散讨论整理成可执行待办清单</h3>\n          <pre class=\"ap-body\" id=\"zc-ap6\">请将以下会议讨论内容整理成待办清单。要求：\n1. 每个待办只包含一个具体动作；\n2. 标注负责人（@姓名）和截止时间；\n3. 区分「已完成共识」和「会后需推进」两类；\n4. 用表格输出：事项 | 负责人 | 截止时间 | 状态 | 备注。\n\n讨论内容如下：\n【粘贴讨论内容】</pre>\n        </div>\n      </div>\n    </div>\n\n    <div class=\"mail-sec\">\n      <div class=\"mail-sec-head\">\n        <span class=\"mnum\">4</span>\n        <h2>用企业微信「记录面聊」做会议记录</h2>\n        <span class=\"msub\">面对面沟通也能自动整理</span>\n      </div>\n      <p style=\"font-size:13.5px;color:var(--muted);line-height:1.75;margin:0 0 14px;\">开会、面谈、客户拜访时，除了手写笔记，还可以使用企业微信的<b>「记录面聊」</b>功能。它可将线下讨论<b>实时记录为文字</b>，自动<b>识别不同发言人</b>，分别展示各自的发言内容，方便会后共同回顾、整理成会议纪要，或同步给未到场的同事。</p>\n      <div class=\"mail-steps\">\n        <div class=\"mail-step\">\n          <span class=\"snum\">①</span>\n          <div>\n            <h4>打开「记录面聊」</h4>\n            <p>在企业微信<b>手机端消息页面</b>，点击右上角<b>「＋」号</b>，在弹出的菜单中选择<b>「记录面聊」</b>。</p>\n            <figure class=\"inv-fig\" style=\"margin:10px 0 0;\" data-full=\"assets/meeting/step1.png\" data-cap=\"步骤 1：消息页右上角 ＋ → 记录面聊\">\n              <img src=\"assets/meeting/step1.png\" alt=\"企业微信消息页右上角＋菜单，选择记录面聊\" style=\"max-width:300px;width:100%;border-radius:10px;border:1px solid var(--line);display:block;\">\n              <span class=\"zoom-hint\">\n                <svg width=\"11\" height=\"11\" viewBox=\"0 0 16 16\" fill=\"none\" aria-hidden=\"true\"><circle cx=\"7\" cy=\"7\" r=\"4.5\" stroke=\"currentColor\" stroke-width=\"1.8\"/><path d=\"M10.5 10.5L14 14M5.2 7h3.6M7 5.2v3.6\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\"/></svg>\n                点击放大\n              </span>\n              <figcaption class=\"inv-cap\" style=\"margin:8px 4px 0;font-size:12.5px;color:var(--faint);\">步骤 1 · 消息页 → 右上角 ＋ → 记录面聊</figcaption>\n            </figure>\n          </div>\n        </div>\n        <div class=\"mail-step\">\n          <span class=\"snum\">②</span>\n          <div>\n            <h4>添加声音信息（录入声纹）</h4>\n            <p>根据页面提醒，点击<b>添加声音信息</b>，屏幕会展示需要朗读的文字。点击<b>「开始」按钮</b>开始录入声纹，朗读结束后即添加成功。声纹用于在面聊中<b>识别你的发言人身份</b>，建议在安静环境下匀速朗读。</p>\n            <figure class=\"inv-fig\" style=\"margin:10px 0 0;\" data-full=\"assets/meeting/step2.png\" data-cap=\"步骤 2：工作台 → 记录面聊 → 开始记录 → 录入声纹\">\n              <img src=\"assets/meeting/step2.png\" alt=\"记录面聊发起页与添加声音信息页，点击开始录入声纹\" style=\"max-width:620px;width:100%;border-radius:10px;border:1px solid var(--line);display:block;\">\n              <span class=\"zoom-hint\">\n                <svg width=\"11\" height=\"11\" viewBox=\"0 0 16 16\" fill=\"none\" aria-hidden=\"true\"><circle cx=\"7\" cy=\"7\" r=\"4.5\" stroke=\"currentColor\" stroke-width=\"1.8\"/><path d=\"M10.5 10.5L14 14M5.2 7h3.6M7 5.2v3.6\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\"/></svg>\n                点击放大\n              </span>\n              <figcaption class=\"inv-cap\" style=\"margin:8px 4px 0;font-size:12.5px;color:var(--faint);\">步骤 2 · 添加声音信息 → 点击「开始」录入声纹</figcaption>\n            </figure>\n          </div>\n        </div>\n        <div class=\"mail-step\">\n          <span class=\"snum\">③</span>\n          <div>\n            <h4>发起面聊，自动转文字</h4>\n            <p>发起面聊后，页面开始<b>实时记录</b>，把面对面的聊天转为文字，并区分不同发言人。结束后点击<b>「结束」</b>，系统会生成面聊总结与待办事项；同时消息页面会出现一个<b>「xxx面聊」的会话窗口</b>，方便随时回看与转发。</p>\n            <figure class=\"inv-fig\" style=\"margin:10px 0 0;\" data-full=\"assets/meeting/step3.png\" data-cap=\"步骤 3：面聊中实时转文字，结束后生成总结与待办\">\n              <img src=\"assets/meeting/step3.png\" alt=\"面聊记录页与消息列表中的面聊会话窗口\" style=\"max-width:620px;width:100%;border-radius:10px;border:1px solid var(--line);display:block;\">\n              <span class=\"zoom-hint\">\n                <svg width=\"11\" height=\"11\" viewBox=\"0 0 16 16\" fill=\"none\" aria-hidden=\"true\"><circle cx=\"7\" cy=\"7\" r=\"4.5\" stroke=\"currentColor\" stroke-width=\"1.8\"/><path d=\"M10.5 10.5L14 14M5.2 7h3.6M7 5.2v3.6\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\"/></svg>\n                点击放大\n              </span>\n              <figcaption class=\"inv-cap\" style=\"margin:8px 4px 0;font-size:12.5px;color:var(--faint);\">步骤 3 · 面聊中自动转文字 → 结束后生成总结与待办</figcaption>\n            </figure>\n          </div>\n        </div>\n      </div>\n      <div class=\"callout\" style=\"max-width:none;margin-top:calc(var(--space)*1.5);\">\n        <span class=\"callout-tag\">建议</span>\n        <p>使用「记录面聊」时，<b>提前告知参会人正在记录</b>，既保护隐私，也是基本职场礼仪。会后把生成的面聊记录与会议纪要结合，补充结论和 DDL，再同步给相关人员。</p>\n      </div>\n    </div>"}, {"group": "职场道德", "t": "信息保险箱", "html": "<div class=\"zc-ethics\">\r\n    <div class=\"panel-head\">\r\n      <span class=\"tag\">🔐 模块 01</span>\r\n      <h2>做好信息保险箱</h2>\r\n      <p class=\"lead\">有些信息不是你的谈资，而是公司的藏宝图。</p>\r\n    </div>\r\n\r\n    <div class=\"card know-card\">\r\n      <div class=\"ico\">🗄️</div>\r\n      <h4>什么是保密信息？</h4>\r\n      <p>保密信息，是指「未公开，并且对公司具有重要价值的商业信息」。</p>\r\n      <div class=\"def-quote\">未公开 ＋ 对公司有重要价值 ＝ 需要保密的商业信息</div>\r\n      <div class=\"judge-cards\">\r\n        <div class=\"judge-card\">\r\n          <span class=\"no\">①</span>\r\n          <p>这条信息是否已经公开？</p>\r\n        </div>\r\n        <div class=\"judge-card\">\r\n          <span class=\"no\">②</span>\r\n          <p>泄露后，是否可能影响公司利益、客户利益或公司的竞争优势？</p>\r\n        </div>\r\n      </div>\r\n      <p class=\"judge-and\">两个条件同时满足时 → 应提高保密意识 🔒</p>\r\n    </div>\r\n\r\n    <h3 class=\"section-title mt24\" id=\"m1-why\">为什么需要保密？</h3>\r\n    <div class=\"grid g3\">\r\n      <div class=\"card trio-card\">\r\n        <div class=\"ico\">🤝</div>\r\n        <h4>客户信任</h4>\r\n        <p>客户将订单、业务和经营信息交给公司，是基于对公司的信任。</p>\r\n      </div>\r\n      <div class=\"card trio-card\">\r\n        <div class=\"ico\">🧱</div>\r\n        <h4>竞争壁垒</h4>\r\n        <p>公司的核心运力、渠道、价格等信息，是公司的重要竞争优势。</p>\r\n      </div>\r\n      <div class=\"card trio-card\">\r\n        <div class=\"ico\">🚀</div>\r\n        <h4>公司未来</h4>\r\n        <p>关键商业信息泄露，可能直接影响公司的市场竞争能力。</p>\r\n      </div>\r\n    </div>\r\n\r\n    <div class=\"challenge\" id=\"m1-challenge\">\r\n      <div class=\"challenge-head\">\r\n        <h3 class=\"eth-mcq-head\">🎯 保密信息判断挑战（练一练）</h3>\n  <p class=\"section-sub\">下面这些信息，请你判断它属于哪一类。点选后看解析。</p>\n  \n  </div>\n  <div class=\"eth-mcq-list\"><div class=\"eth-mcq-item\" data-cat=\"secret\">\n    <div class=\"eth-mcq-left\">\n      <div class=\"es-text\">全球快递渠道价格表</div>\n    <div class=\"opts\">\n      <button class=\"opt-btn eth-mcq-opt\" type=\"button\" data-c=\"secret\"><span class=\"opt-key\">🔒</span>属于保密信息</button>\n      <button class=\"opt-btn eth-mcq-opt\" type=\"button\" data-c=\"unsure\"><span class=\"opt-key\">❓</span>不确定 / 需要确认</button>\n      <button class=\"opt-btn eth-mcq-opt\" type=\"button\" data-c=\"public\"><span class=\"opt-key\">🌐</span>通常不属于核心保密信息</button>\n    </div>\n    </div>\n      <div class=\"feedback eth-mcq-fb\" style=\"display:none\">\n      <div class=\"fb-row\"><div class=\"k\">为什么</div><div class=\"v\">渠道价格是公司核心运力与定价能力的体现，未公开且直接影响竞争力，属于典型的商业秘密。</div></div>\n      <div class=\"fb-row\"><div class=\"k\">正确处理方式</div><div class=\"v\">属于保密信息，不得外传；仅在业务需要且经授权的范围内使用。</div></div>\n    </div>\n  </div><div class=\"eth-mcq-item\" data-cat=\"public\">\n    <div class=\"eth-mcq-left\">\n      <div class=\"es-text\">公司节假日放假通知</div>\n    <div class=\"opts\">\n      <button class=\"opt-btn eth-mcq-opt\" type=\"button\" data-c=\"secret\"><span class=\"opt-key\">🔒</span>属于保密信息</button>\n      <button class=\"opt-btn eth-mcq-opt\" type=\"button\" data-c=\"unsure\"><span class=\"opt-key\">❓</span>不确定 / 需要确认</button>\n      <button class=\"opt-btn eth-mcq-opt\" type=\"button\" data-c=\"public\"><span class=\"opt-key\">🌐</span>通常不属于核心保密信息</button>\n    </div>\n    </div>\n      <div class=\"feedback eth-mcq-fb\" style=\"display:none\">\n      <div class=\"fb-row\"><div class=\"k\">为什么</div><div class=\"v\">放假安排是面向全体员工、甚至对外公开的信息，不具备商业价值敏感性。</div></div>\n      <div class=\"fb-row\"><div class=\"k\">正确处理方式</div><div class=\"v\">属于公开信息，正常传达即可，无需特别保密。</div></div>\n    </div>\n  </div><div class=\"eth-mcq-item\" data-cat=\"secret\">\n    <div class=\"eth-mcq-left\">\n      <div class=\"es-text\">大客户近半年发往美国的货量、品类和月度波动</div>\n    <div class=\"opts\">\n      <button class=\"opt-btn eth-mcq-opt\" type=\"button\" data-c=\"secret\"><span class=\"opt-key\">🔒</span>属于保密信息</button>\n      <button class=\"opt-btn eth-mcq-opt\" type=\"button\" data-c=\"unsure\"><span class=\"opt-key\">❓</span>不确定 / 需要确认</button>\n      <button class=\"opt-btn eth-mcq-opt\" type=\"button\" data-c=\"public\"><span class=\"opt-key\">🌐</span>通常不属于核心保密信息</button>\n    </div>\n    </div>\n      <div class=\"feedback eth-mcq-fb\" style=\"display:none\">\n      <div class=\"fb-row\"><div class=\"k\">为什么</div><div class=\"v\">这是客户的核心经营数据，泄露会损害客户信任，也可能被竞争对手利用。</div></div>\n      <div class=\"fb-row\"><div class=\"k\">正确处理方式</div><div class=\"v\">属于保密信息，涉及客户商业秘密，严格限制知悉范围。</div></div>\n    </div>\n  </div><div class=\"eth-mcq-item\" data-cat=\"secret\">\n    <div class=\"eth-mcq-left\">\n      <div class=\"es-text\">新开发拉美专线的完整业务流程与清关方案</div>\n    <div class=\"opts\">\n      <button class=\"opt-btn eth-mcq-opt\" type=\"button\" data-c=\"secret\"><span class=\"opt-key\">🔒</span>属于保密信息</button>\n      <button class=\"opt-btn eth-mcq-opt\" type=\"button\" data-c=\"unsure\"><span class=\"opt-key\">❓</span>不确定 / 需要确认</button>\n      <button class=\"opt-btn eth-mcq-opt\" type=\"button\" data-c=\"public\"><span class=\"opt-key\">🌐</span>通常不属于核心保密信息</button>\n    </div>\n    </div>\n      <div class=\"feedback eth-mcq-fb\" style=\"display:none\">\n      <div class=\"fb-row\"><div class=\"k\">为什么</div><div class=\"v\">这是公司投入资源开发的差异化能力，属于核心商业秘密。</div></div>\n      <div class=\"fb-row\"><div class=\"k\">正确处理方式</div><div class=\"v\">属于保密信息，未经授权不得复制、外发或对外讨论。</div></div>\n    </div>\n  </div><div class=\"eth-mcq-item\" data-cat=\"secret\">\n    <div class=\"eth-mcq-left\">\n      <div class=\"es-text\">与航空公司签订的包机协议中的运力价格和折扣</div>\n    <div class=\"opts\">\n      <button class=\"opt-btn eth-mcq-opt\" type=\"button\" data-c=\"secret\"><span class=\"opt-key\">🔒</span>属于保密信息</button>\n      <button class=\"opt-btn eth-mcq-opt\" type=\"button\" data-c=\"unsure\"><span class=\"opt-key\">❓</span>不确定 / 需要确认</button>\n      <button class=\"opt-btn eth-mcq-opt\" type=\"button\" data-c=\"public\"><span class=\"opt-key\">🌐</span>通常不属于核心保密信息</button>\n    </div>\n    </div>\n      <div class=\"feedback eth-mcq-fb\" style=\"display:none\">\n      <div class=\"fb-row\"><div class=\"k\">为什么</div><div class=\"v\">采购价格与折扣是公司的成本与谈判筹码，公开会削弱议价能力。</div></div>\n      <div class=\"fb-row\"><div class=\"k\">正确处理方式</div><div class=\"v\">属于保密信息，严格按合同与制度管理。</div></div>\n    </div>\n  </div><div class=\"eth-mcq-item\" data-cat=\"secret\">\n    <div class=\"eth-mcq-left\">\n      <div class=\"es-text\">CEO未对外公布的明年战略方向</div>\n    <div class=\"opts\">\n      <button class=\"opt-btn eth-mcq-opt\" type=\"button\" data-c=\"secret\"><span class=\"opt-key\">🔒</span>属于保密信息</button>\n      <button class=\"opt-btn eth-mcq-opt\" type=\"button\" data-c=\"unsure\"><span class=\"opt-key\">❓</span>不确定 / 需要确认</button>\n      <button class=\"opt-btn eth-mcq-opt\" type=\"button\" data-c=\"public\"><span class=\"opt-key\">🌐</span>通常不属于核心保密信息</button>\n    </div>\n    </div>\n      <div class=\"feedback eth-mcq-fb\" style=\"display:none\">\n      <div class=\"fb-row\"><div class=\"k\">为什么</div><div class=\"v\">未公开的战略方向属于高度敏感信息，泄露会打乱公司布局。</div></div>\n      <div class=\"fb-row\"><div class=\"k\">正确处理方式</div><div class=\"v\">属于保密信息，绝不可外传，哪怕是「内幕消息」也不可议论。</div></div>\n    </div>\n  </div><div class=\"eth-mcq-item\" data-cat=\"secret\">\n    <div class=\"eth-mcq-left\">\n      <div class=\"es-text\">智能报价系统2.0测试版操作手册</div>\n    <div class=\"opts\">\n      <button class=\"opt-btn eth-mcq-opt\" type=\"button\" data-c=\"secret\"><span class=\"opt-key\">🔒</span>属于保密信息</button>\n      <button class=\"opt-btn eth-mcq-opt\" type=\"button\" data-c=\"unsure\"><span class=\"opt-key\">❓</span>不确定 / 需要确认</button>\n      <button class=\"opt-btn eth-mcq-opt\" type=\"button\" data-c=\"public\"><span class=\"opt-key\">🌐</span>通常不属于核心保密信息</button>\n    </div>\n    </div>\n      <div class=\"feedback eth-mcq-fb\" style=\"display:none\">\n      <div class=\"fb-row\"><div class=\"k\">为什么</div><div class=\"v\">系统与操作手册属于内部技术资产，测试版更是尚未对外。</div></div>\n      <div class=\"fb-row\"><div class=\"k\">正确处理方式</div><div class=\"v\">属于保密信息，内部系统资料不得外发或用于非授权用途。</div></div>\n    </div>\n  </div><div class=\"eth-mcq-item\" data-cat=\"secret\">\n    <div class=\"eth-mcq-left\">\n      <div class=\"es-text\">员工薪酬结构体系</div>\n    <div class=\"opts\">\n      <button class=\"opt-btn eth-mcq-opt\" type=\"button\" data-c=\"secret\"><span class=\"opt-key\">🔒</span>属于保密信息</button>\n      <button class=\"opt-btn eth-mcq-opt\" type=\"button\" data-c=\"unsure\"><span class=\"opt-key\">❓</span>不确定 / 需要确认</button>\n      <button class=\"opt-btn eth-mcq-opt\" type=\"button\" data-c=\"public\"><span class=\"opt-key\">🌐</span>通常不属于核心保密信息</button>\n    </div>\n    </div>\n      <div class=\"feedback eth-mcq-fb\" style=\"display:none\">\n      <div class=\"fb-row\"><div class=\"k\">为什么</div><div class=\"v\">薪酬体系属于公司内部敏感信息，涉及员工隐私与公司制度安排。</div></div>\n      <div class=\"fb-row\"><div class=\"k\">正确处理方式</div><div class=\"v\">属于内部敏感信息，不得对外讨论或传播；必要时按 HR 制度确认。</div></div>\n    </div>\n  </div><div class=\"eth-mcq-item\" data-cat=\"secret\">\n    <div class=\"eth-mcq-left\">\n      <div class=\"es-text\">包含客户名称、联系人、电话的销售线索名单</div>\n    <div class=\"opts\">\n      <button class=\"opt-btn eth-mcq-opt\" type=\"button\" data-c=\"secret\"><span class=\"opt-key\">🔒</span>属于保密信息</button>\n      <button class=\"opt-btn eth-mcq-opt\" type=\"button\" data-c=\"unsure\"><span class=\"opt-key\">❓</span>不确定 / 需要确认</button>\n      <button class=\"opt-btn eth-mcq-opt\" type=\"button\" data-c=\"public\"><span class=\"opt-key\">🌐</span>通常不属于核心保密信息</button>\n    </div>\n    </div>\n      <div class=\"feedback eth-mcq-fb\" style=\"display:none\">\n      <div class=\"fb-row\"><div class=\"k\">为什么</div><div class=\"v\">客户名单与联系方式是公司长期积累的核心商业资源。</div></div>\n      <div class=\"fb-row\"><div class=\"k\">正确处理方式</div><div class=\"v\">属于保密信息，不得私自拷贝或带走。</div></div>\n    </div>\n  </div><div class=\"eth-mcq-item\" data-cat=\"public\">\n    <div class=\"eth-mcq-left\">\n      <div class=\"es-text\">公司前台内线电话号码</div>\n    <div class=\"opts\">\n      <button class=\"opt-btn eth-mcq-opt\" type=\"button\" data-c=\"secret\"><span class=\"opt-key\">🔒</span>属于保密信息</button>\n      <button class=\"opt-btn eth-mcq-opt\" type=\"button\" data-c=\"unsure\"><span class=\"opt-key\">❓</span>不确定 / 需要确认</button>\n      <button class=\"opt-btn eth-mcq-opt\" type=\"button\" data-c=\"public\"><span class=\"opt-key\">🌐</span>通常不属于核心保密信息</button>\n    </div>\n    </div>\n      <div class=\"feedback eth-mcq-fb\" style=\"display:none\">\n      <div class=\"fb-row\"><div class=\"k\">为什么</div><div class=\"v\">前台电话是公司对外公开的接待联系方式，用于正常业务往来。</div></div>\n      <div class=\"fb-row\"><div class=\"k\">正确处理方式</div><div class=\"v\">属于公开信息，正常提供即可。</div></div>\n    </div>\n  </div></div>\n</div>"}, {"group": "职场道德", "t": "职业边界", "html": "<div class=\"zc-ethics\">\r\n    <div class=\"panel-head\">\r\n      <span class=\"tag\">🚧 模块 02</span>\r\n      <h2>好聚好散的护栏</h2>\r\n      <p class=\"lead\">竞业限制和离职后的职业边界，不只是公司风险问题，也关系员工自己的长期职业信誉。</p>\r\n    </div>\r\n\r\n    <div class=\"track\">\r\n      <div class=\"track-title\">🏁 职业赛道 + 护栏</div>\r\n      <div class=\"track-sub\">离职带走的应该是你的能力，而不是公司的商业秘密。</div>\r\n      <div class=\"track-lanes\">\r\n        <div class=\"track-rail\"><span>🚧 护栏</span></div>\r\n        <div class=\"lane green\">\r\n          <h5>✅ 真正属于你的</h5>\r\n          <ul>\r\n            <li>个人能力</li>\r\n            <li>工作经验</li>\r\n            <li>专业知识</li>\r\n            <li>解决问题的方法</li>\r\n            <li>个人成长</li>\r\n          </ul>\r\n        </div>\r\n        <div class=\"lane red\">\r\n          <h5>🚫 不能当成自己跳槽筹码的</h5>\r\n          <ul>\r\n            <li>客户名单</li>\r\n            <li>渠道策略</li>\r\n            <li>公司价格信息</li>\r\n            <li>内部经营数据</li>\r\n            <li>商业秘密</li>\r\n          </ul>\r\n        </div>\r\n      </div>\r\n      <div class=\"track-slogan\">「职业能力属于你，公司商业秘密不属于你。」</div>\r\n    </div>\r\n\r\n    <h3 class=\"section-title mt32\" id=\"m2-story\">📖 情景案例 · 小王跳槽</h3>\r\n    <div class=\"story-steps\" id=\"storySteps\">\r\n      <div class=\"story-step\" id=\"storyStep1\">\r\n        <div class=\"story-no\">1</div>\r\n        <div class=\"story-card\"><p>小王是一名公司的<strong>核心运营人员</strong>。</p></div>\r\n      </div>\r\n      <div class=\"story-step\" id=\"storyStep2\" style=\"display:none\">\r\n        <div class=\"story-no\">2</div>\r\n        <div class=\"story-card\"><p>离职以后，他立即加入<strong>竞争对手</strong>。</p></div>\r\n      </div>\r\n      <div class=\"story-step\" id=\"storyStep3\" style=\"display:none\">\r\n        <div class=\"story-no\">3</div>\r\n        <div class=\"story-card\"><p>为了体现自己的价值，小王将原公司的 <span class=\"hl\">「渠道策略 ＋ 客户名单」</span> 提供给新公司。</p></div>\r\n      </div>\r\n    </div>\r\n    <button class=\"btn btn-ghost mt16\" id=\"storyNext\">下一步 ➜</button>\r\n\r\n    <div class=\"story-q eth-q\" id=\"storyQ\" data-q=\"0\" style=\"display:none\">\n      <h4>🤔 小王真正的问题在哪里？</h4>\n      <div class=\"opts\">\n        <button class=\"opt-btn eth-opt\" type=\"button\"><span class=\"opt-key\">A</span>不应该跳槽</button>\n        <button class=\"opt-btn eth-opt\" type=\"button\"><span class=\"opt-key\">B</span>跳槽速度太快</button>\n        <button class=\"opt-btn eth-opt\" type=\"button\" data-correct=\"1\"><span class=\"opt-key\">C</span>将原公司的商业秘密作为自己的跳槽筹码</button>\n        <button class=\"opt-btn eth-opt\" type=\"button\"><span class=\"opt-key\">D</span>没有提前告诉同事</button>\n      </div>\n      <div class=\"eth-fb\">\n        <span class=\"fb-badge good\">正确答案</span>\n        <div class=\"fb-row\"><div class=\"k\">解析</div><div class=\"v\">小王真正的问题，是把原公司的商业秘密（渠道策略＋客户名单）当成了自己的跳槽筹码。能力属于你，但公司的商业秘密不属于你。</div></div>\n      </div>\n    </div>\n    <div id=\"storyResult\" style=\"display:none\"></div>\r\n    <div id=\"m2Done\"></div>\r\n  </div>"}, {"group": "职场道德", "t": "职业红线", "html": "<div class=\"zc-ethics\">\r\n    <div class=\"panel-head\">\r\n      <span class=\"tag\">🛡️ 模块 03</span>\r\n      <h2>职业道德：比能力更重要的通行证</h2>\r\n      <p class=\"lead\">在物流行业，「靠谱」两个字，价值千金。</p>\r\n    </div>\r\n\r\n    <h3 class=\"section-title\" id=\"m3-principles\">📇 五项职业道德准则</h3>\r\n    <div class=\"grid g5\"><div class=\"card trio-card\"><div class=\"ico\">💼</div><h4>爱岗敬业</h4><p>专业、尽职，对自己的工作负责。</p></div><div class=\"card trio-card\"><div class=\"ico\">🤝</div><h4>诚实守信</h4><p>对公司保持诚信，维护企业信誉，保护公司信息。</p></div><div class=\"card trio-card\"><div class=\"ico\">🧭</div><h4>廉洁守法</h4><p>不因个人利益突破职业和规则底线。</p></div><div class=\"card trio-card\"><div class=\"ico\">🎯</div><h4>办事公道</h4><p>公私分明、公平公正。</p></div><div class=\"card trio-card\"><div class=\"ico\">👥</div><h4>团结互助</h4><p>尊重团队成员，积极协作。</p></div></div>\r\n\r\n    <div class=\"redzone\" id=\"m3-redlines\">\r\n      <div class=\"redzone-head\">\r\n        <div class=\"shield\">⛔</div>\r\n        <h3>这四条红线，绝对不能碰</h3>\r\n        <p>点击每条红线，展开「典型行为 · 为什么不能做 · 可能造成的影响」</p>\r\n      </div>\r\n      <div class=\"redline-list\"><details class=\"redline-card\">\n    <summary class=\"redline-top\">\n      <div class=\"num\">01</div>\n      <div class=\"t\"><h4>🔒 红线01 · 不监守自盗</h4><p>不能利用岗位、权限或者工作便利，侵占、拿走或者私自处置公司财物。</p></div>\n      <div class=\"expand\">＋</div>\n    </summary>\n    <div class=\"redline-body\"><div class=\"redline-body-inner\">\n      <div class=\"rl-item\"><div class=\"k\">典型行为</div><div class=\"v\">私自拿走公司物品；未经登记处置公司财物；占用公司资源用于个人。</div></div>\n      <div class=\"rl-item\"><div class=\"k\">为什么不能做</div><div class=\"v\">公司财物属于公司，不是「没人要」就可以拿；私自处置侵害了最基本的信任。</div></div>\n      <div class=\"rl-item\"><div class=\"k\">可能造成的影响</div><div class=\"v\">可能触犯法律与公司制度，丧失职业信誉，严重时被追责。</div></div>\n    </div></div>\n  </details><details class=\"redline-card\">\n    <summary class=\"redline-top\">\n      <div class=\"num\">02</div>\n      <div class=\"t\"><h4>💰 红线02 · 不收受贿赂</h4><p>不能因为工作关系接受可能影响正常商业判断的个人利益。例如：返点、佣金、购物卡、红包等。</p></div>\n      <div class=\"expand\">＋</div>\n    </summary>\n    <div class=\"redline-body\"><div class=\"redline-body-inner\">\n      <div class=\"rl-item\"><div class=\"k\">典型行为</div><div class=\"v\">收受供应商返点、佣金；收取购物卡、红包；接受可能影响判断的招待。</div></div>\n      <div class=\"rl-item\"><div class=\"k\">为什么不能做</div><div class=\"v\">利益会悄悄扭曲你的判断，让你做出损害公司、也损害自己的决定。</div></div>\n      <div class=\"rl-item\"><div class=\"k\">可能造成的影响</div><div class=\"v\">商业决策失公、公司利益受损，个人承担法律与职业风险。</div></div>\n    </div></div>\n  </details><details class=\"redline-card\">\n    <summary class=\"redline-top\">\n      <div class=\"num\">03</div>\n      <div class=\"t\"><h4>🎁 红线03 · 不拿供应商一针一线</h4><p>不能因为负责供应商、采购或者商务合作，就利用职务关系获取个人利益。</p></div>\n      <div class=\"expand\">＋</div>\n    </summary>\n    <div class=\"redline-body\"><div class=\"redline-body-inner\">\n      <div class=\"rl-item\"><div class=\"k\">典型行为</div><div class=\"v\">向供应商索要好处；接受供应商礼品、招待以换取业务便利。</div></div>\n      <div class=\"rl-item\"><div class=\"k\">为什么不能做</div><div class=\"v\">职务是公司授予的信任，不是谋取私利的工具；「一针一线」也不可贪。</div></div>\n      <div class=\"rl-item\"><div class=\"k\">可能造成的影响</div><div class=\"v\">采购与合作的公正性被破坏，滋生腐败，损害公司利益与个人声誉。</div></div>\n    </div></div>\n  </details><details class=\"redline-card\">\n    <summary class=\"redline-top\">\n      <div class=\"num\">04</div>\n      <div class=\"t\"><h4>🧩 红线04 · 不损害公司利益谋取私利</h4><p>不能使用公司的资源、信息、权限或者职务便利，为自己谋取不正当个人利益。</p></div>\n      <div class=\"expand\">＋</div>\n    </summary>\n    <div class=\"redline-body\"><div class=\"redline-body-inner\">\n      <div class=\"rl-item\"><div class=\"k\">典型行为</div><div class=\"v\">用公司资源接私活；用内部信息牟利；滥用权限为个人或他人谋利。</div></div>\n      <div class=\"rl-item\"><div class=\"k\">为什么不能做</div><div class=\"v\">公私不分，把公司平台变成了个人牟利的工具。</div></div>\n      <div class=\"rl-item\"><div class=\"k\">可能造成的影响</div><div class=\"v\">公司利益受损，个人触碰红线，严重时构成职务侵占。</div></div>\n    </div></div>\n  </details></div>\r\n      <div class=\"redzone-done\" id=\"m3Done\"></div>\r\n    </div>\r\n  </div>"}, {"group": "职场道德", "t": "利益诱惑", "html": "<div class=\"zc-ethics\">\r\n    <div class=\"panel-head\">\r\n      <span class=\"tag\">⚖️ 模块 04</span>\r\n      <h2>真正的考验，往往发生在没人监督的时候</h2>\r\n      <p class=\"lead\">先别急着看规则，把自己放进下面的真实职场情景，凭直觉做一次判断。</p>\r\n    </div>\r\n\r\n    \r\n    \r\n\r\n    <div class=\"divider\"></div>\r\n\r\n    <div class=\"panel-head\" style=\"margin-top:8px\" id=\"m4-temptations\">\r\n      <span class=\"tag\">🕳️ 识别利益诱惑</span>\r\n      <h2>很多违规，一开始都不会告诉你「这是违规」</h2>\r\n    </div>\r\n    <div class=\"grid g3\">\r\n      <div class=\"card trio-card\">\r\n        <div class=\"ico\">💰</div>\r\n        <h4>金钱利益</h4>\r\n        <ul><li>返点</li><li>佣金</li><li>提成</li></ul>\r\n      </div>\r\n      <div class=\"card trio-card\">\r\n        <div class=\"ico\">🎁</div>\r\n        <h4>其他利益</h4>\r\n        <ul><li>帮孩子安排学校</li><li>安排旅行</li><li>特殊抽奖或资源</li></ul>\r\n      </div>\r\n      <div class=\"card trio-card\">\r\n        <div class=\"ico\">🧧</div>\r\n        <h4>小恩小惠</h4>\r\n        <ul><li>贺金</li><li>春节红包</li><li>节日礼品</li></ul>\r\n      </div>\r\n    </div>\r\n\r\n    <div class=\"chat mt24\">\r\n      <div class=\"chat-head\">\r\n        <div class=\"chat-avatar\">供</div>\r\n        <div>\r\n          <div class=\"chat-name\">某供应商</div>\r\n          <div class=\"chat-role\">刚刚发来消息</div>\r\n        </div>\r\n      </div>\r\n      <div class=\"bubbles\">\r\n        <div class=\"bubble\">「这是行业惯例。」</div>\r\n        <div class=\"bubble\">「大家都是这么做的。」</div>\r\n        <div class=\"bubble\">「现金交易，没人知道。」</div>\r\n        <div class=\"bubble\">「这只是正常的商业交流。」</div>\r\n        <div class=\"bubble\">「又没有给你们公司造成损失。」</div>\r\n      </div>\r\n      <div class=\"chat-btn\">\r\n        <button class=\"btn btn-primary\" id=\"supplierBtn\">🔍 这些话听起来有什么问题？</button>\r\n      </div>\r\n      <div class=\"feedback show\"><span class=\"fb-badge mid\">🕳️ 为什么这些话要警惕</span>\n             <div class=\"fb-row\"><div class=\"k\">解析</div><div class=\"v\">供应商这些话，都在用「行业惯例」「大家都这么做」来模糊利益输送的本质。任何让你心里犯嘀咕的好处，先停下来：按公司制度确认或上报，比事后解释更安全。</div></div></div>\r\n    </div>\r\n\r\n    <div class=\"divider\"></div>\r\n\r\n    <div class=\"panel-head\" style=\"margin-top:8px\" id=\"m4-gifts\">\r\n      <span class=\"tag\">🎁 你会怎么判断？</span>\r\n      <h2>礼品与利益，先识别风险</h2>\r\n      <p class=\"lead\">不同形式的「好处」风险不同，统一原则是：识别风险，并按公司制度处理 / 申报。</p>\r\n    </div>\r\n    <div class=\"grid g3\"><div class=\"card gift-card\"><div class=\"ico\">🍫</div><h5>200 元以下小额礼品、食品</h5>\n    <span class=\"risk-tag risk-low\">低风险</span><p>留意来源与频率，按公司制度处理 / 申报</p></div><div class=\"card gift-card\"><div class=\"ico\">🎁</div><h5>200 元以上礼物或贵重特产</h5>\n    <span class=\"risk-tag risk-mid\">需关注</span><p>价值较高，按公司制度申报</p></div><div class=\"card gift-card\"><div class=\"ico\">🛠️</div><h5>定制性较强的礼物</h5>\n    <span class=\"risk-tag risk-mid\">需关注</span><p>定制意味着针对性，按公司制度申报</p></div><div class=\"card gift-card\"><div class=\"ico\">🍽️</div><h5>商务宴请</h5>\n    <span class=\"risk-tag risk-mid\">需确认</span><p>需按公司制度确认与申报</p></div><div class=\"card gift-card\"><div class=\"ico\">⭐</div><h5>积分</h5>\n    <span class=\"risk-tag risk-mid\">需关注</span><p>属于利益形式，需留意并申报</p></div><div class=\"card gift-card\"><div class=\"ico\">💸</div><h5>返点</h5>\n    <span class=\"risk-tag risk-high\">高风险</span><p>严禁收受，立即按制度上报</p></div><div class=\"card gift-card\"><div class=\"ico\">🎫</div><h5>现金券</h5>\n    <span class=\"risk-tag risk-high\">高风险</span><p>等同现金利益，按公司制度上报</p></div></div>\r\n    <p class=\"fb-note\" style=\"margin-top:16px\">📌 具体礼品、礼金和商务宴请处理标准，请以公司正式制度为准。</p>\r\n    <div id=\"m4Done\"></div>\r\n\r\n    <div class=\"divider\"></div>\r\n\r\n    <div class=\"panel-head\" style=\"margin-top:8px\">\r\n      <span class=\"tag\">🌟 我们守护的价值</span>\r\n      <h2>我们守护的，远不止货物</h2>\r\n      <p class=\"lead\">把前面学到的，沉淀成你自己的职业信念。</p>\r\n    </div>\r\n    <div class=\"grid g3\"><div class=\"card value-card\"><div class=\"v-no\">01</div><div class=\"ico\">🤝</div>\n    <h4>客户信任</h4><div class=\"quote\">「每一个包裹背后，都是客户把生意交给我们的信任。」</div>\n    <div class=\"kw\"><span>信任</span><span>责任</span><span>专业</span></div>\n    </div><div class=\"card value-card\"><div class=\"v-no\">02</div><div class=\"ico\">🏢</div>\n    <h4>公司资产</h4><div class=\"quote\">「保护公司的信息、资源、财产和商业利益，就是保护大家共同发展的基础。」</div>\n    <div class=\"kw\"><span>资源</span><span>竞争力</span><span>未来</span></div>\n    </div><div class=\"card value-card\"><div class=\"v-no\">03</div><div class=\"ico\">🏆</div>\n    <h4>个人声誉</h4><div class=\"quote\">「职业声誉是一个人长期积累的个人品牌。」</div>\n    <div class=\"kw\"><span>诚信</span><span>口碑</span><span>长期</span></div>\n    <div class=\"tip\">能力可以重新证明，但职业诚信一旦受到严重影响，很难重新建立。</div></div></div>\r\n    <div id=\"m5Done\"></div>\r\n  <div class=\"eth-quiz\"><div class=\"eth-quiz-head\">📝 情景判断 · 共 4 题（一题一题做，做完点「下一题」）</div>\n  <div class=\"eth-q-list\"><div class=\"eth-q\" data-q=\"0\">\n      <div class=\"s-tag\">🥮 情景 1 · 不收受贿赂</div>\n      <h4>月饼里的购物卡</h4>\n      <div class=\"scene\">供应商送来一盒月饼。你回到办公室打开以后发现：里面还有一张 500 元购物卡。</div>\n      <div class=\"ask\">你会怎么处理？</div>\n      <div class=\"opts\"><button class=\"opt-btn eth-opt\" type=\"button\" data-q=\"0\" data-j=\"0\" data-correct=\"0\">\n       <span class=\"opt-key\">A</span>收下购物卡，月饼分给大家吃</button><button class=\"opt-btn eth-opt\" type=\"button\" data-q=\"0\" data-j=\"1\" data-correct=\"1\">\n       <span class=\"opt-key\">B</span>退回购物卡，并主动向主管或合规渠道说明</button><button class=\"opt-btn eth-opt\" type=\"button\" data-q=\"0\" data-j=\"2\" data-correct=\"0\">\n       <span class=\"opt-key\">C</span>先收下，心里记着以后关照供应商</button><button class=\"opt-btn eth-opt\" type=\"button\" data-q=\"0\" data-j=\"3\" data-correct=\"0\">\n       <span class=\"opt-key\">D</span>只退回购物卡，月饼留下</button></div>\n      <div class=\"eth-fb\" data-fb=\"0\">\n        <span class=\"fb-badge good\">判断结果 · 推荐做法</span>\n        <div class=\"fb-row\"><div class=\"k\">核心要点</div><div class=\"v\">【不收受贿赂】</div></div>\n        <div class=\"fb-row\"><div class=\"k\">为什么</div><div class=\"v\">购物卡属于可能影响商业判断的个人利益，无论金额大小、是否过节，收受都会触碰红线；「过节收礼」是它最常见的伪装。</div></div>\n        <div class=\"fb-row\"><div class=\"k\">风险提示</div><div class=\"v\">一旦收下，你的职业判断就可能被这份利益牵动，公司利益与你的职业信誉都处于风险中。</div></div>\n        <div class=\"fb-row\"><div class=\"k\">正确做法</div><div class=\"v\">主动退回购物卡并说明情况；如已无法退回，按公司制度上交、登记、申报，保留记录。</div></div>\n      </div>\n      <div class=\"eth-q-nav\"><button class=\"btn btn-primary eth-next\" type=\"button\" data-next=\"0\">下一题 ➜</button></div>\n    </div><div class=\"eth-q\" data-q=\"1\" style=\"display:none\">\n      <div class=\"s-tag\">🖨️ 情景 2 · 公私分明</div>\n      <h4>公司的打印机</h4>\n      <div class=\"scene\">晚上你需要打印 10 页个人资料，公司的打印机就在旁边。</div>\n      <div class=\"ask\">你会直接使用吗？</div>\n      <div class=\"opts\"><button class=\"opt-btn eth-opt\" type=\"button\" data-q=\"1\" data-j=\"0\" data-correct=\"0\">\n       <span class=\"opt-key\">A</span>直接用，反正 10 页也没多少钱</button><button class=\"opt-btn eth-opt\" type=\"button\" data-q=\"1\" data-j=\"1\" data-correct=\"0\">\n       <span class=\"opt-key\">B</span>用公司的纸，但用自己的墨盒</button><button class=\"opt-btn eth-opt\" type=\"button\" data-q=\"1\" data-j=\"2\" data-correct=\"1\">\n       <span class=\"opt-key\">C</span>先确认公司是否允许私人使用，否则自费解决</button><button class=\"opt-btn eth-opt\" type=\"button\" data-q=\"1\" data-j=\"3\" data-correct=\"0\">\n       <span class=\"opt-key\">D</span>等大家都走了再偷偷用</button></div>\n      <div class=\"eth-fb\" data-fb=\"1\">\n        <span class=\"fb-badge good\">判断结果 · 推荐做法</span>\n        <div class=\"fb-row\"><div class=\"k\">核心要点</div><div class=\"v\">【公私分明】【不能利用公司资源谋取个人利益】</div></div>\n        <div class=\"fb-row\"><div class=\"k\">为什么</div><div class=\"v\">公司资源应用于工作，私自用于个人事务就是公私不分；「金额小」「没人看到」都不能改变这个性质。</div></div>\n        <div class=\"fb-row\"><div class=\"k\">风险提示</div><div class=\"v\">看似小事，却是在用自己的职业诚信为一点私利买单。</div></div>\n        <div class=\"fb-row\"><div class=\"k\">正确做法</div><div class=\"v\">私人打印需求先确认公司制度；不允许就自费或使用私人途径。</div></div>\n      </div>\n      <div class=\"eth-q-nav\"><button class=\"btn btn-primary eth-next\" type=\"button\" data-next=\"1\">下一题 ➜</button></div>\n    </div><div class=\"eth-q\" data-q=\"2\" style=\"display:none\">\n      <div class=\"s-tag\">📦 情景 3 · 不监守自盗</div>\n      <h4>仓库里的破损物品</h4>\n      <div class=\"scene\">你发现仓库中有一个轻微破损的小物品，觉得公司可能也不会继续使用，于是没有登记，准备直接拿走。</div>\n      <div class=\"ask\">这样可以吗？</div>\n      <div class=\"opts\"><button class=\"opt-btn eth-opt\" type=\"button\" data-q=\"2\" data-j=\"0\" data-correct=\"0\">\n       <span class=\"opt-key\">A</span>可以，反正公司不要了</button><button class=\"opt-btn eth-opt\" type=\"button\" data-q=\"2\" data-j=\"1\" data-correct=\"1\">\n       <span class=\"opt-key\">B</span>先登记申报，按公司规定处置</button><button class=\"opt-btn eth-opt\" type=\"button\" data-q=\"2\" data-j=\"2\" data-correct=\"0\">\n       <span class=\"opt-key\">C</span>拿走以后给公司补点钱</button><button class=\"opt-btn eth-opt\" type=\"button\" data-q=\"2\" data-j=\"3\" data-correct=\"0\">\n       <span class=\"opt-key\">D</span>问下同事，大家都说没事就拿走</button></div>\n      <div class=\"eth-fb\" data-fb=\"2\">\n        <span class=\"fb-badge good\">判断结果 · 推荐做法</span>\n        <div class=\"fb-row\"><div class=\"k\">核心要点</div><div class=\"v\">【不监守自盗】</div></div>\n        <div class=\"fb-row\"><div class=\"k\">为什么</div><div class=\"v\">是否有价值、金额大小，都不是可以擅自处置公司财产的理由；「没人要」只是自己的主观猜测。</div></div>\n        <div class=\"fb-row\"><div class=\"k\">风险提示</div><div class=\"v\">私自拿走公司财物就是监守自盗，哪怕物品很小。</div></div>\n        <div class=\"fb-row\"><div class=\"k\">正确做法</div><div class=\"v\">如实登记、上报，按公司资产处置制度办理。</div></div>\n      </div>\n      <div class=\"eth-q-nav\"><button class=\"btn btn-primary eth-next\" type=\"button\" data-next=\"2\">下一题 ➜</button></div>\n    </div><div class=\"eth-q\" data-q=\"3\" style=\"display:none\">\n      <div class=\"s-tag\">🔑 情景 4 · 信息安全</div>\n      <h4>借一下账号</h4>\n      <div class=\"scene\">同事着急找到你：「把你的系统账号密码给我一下，我就查一个数据，很快。」</div>\n      <div class=\"ask\">你会怎么做？</div>\n      <div class=\"opts\"><button class=\"opt-btn eth-opt\" type=\"button\" data-q=\"3\" data-j=\"0\" data-correct=\"0\">\n       <span class=\"opt-key\">A</span>把密码给他，同事之间要互相信任</button><button class=\"opt-btn eth-opt\" type=\"button\" data-q=\"3\" data-j=\"1\" data-correct=\"0\">\n       <span class=\"opt-key\">B</span>把密码发给他，让他用完立刻改</button><button class=\"opt-btn eth-opt\" type=\"button\" data-q=\"3\" data-j=\"2\" data-correct=\"1\">\n       <span class=\"opt-key\">C</span>说明账号不能外借，建议走正规授权流程</button><button class=\"opt-btn eth-opt\" type=\"button\" data-q=\"3\" data-j=\"3\" data-correct=\"0\">\n       <span class=\"opt-key\">D</span>替他登录查一下，不透露密码</button></div>\n      <div class=\"eth-fb\" data-fb=\"3\">\n        <span class=\"fb-badge good\">判断结果 · 推荐做法</span>\n        <div class=\"fb-row\"><div class=\"k\">核心要点</div><div class=\"v\">【信息安全】【账号权限】【保护公司利益】</div></div>\n        <div class=\"fb-row\"><div class=\"k\">为什么</div><div class=\"v\">账号密码绑定的是个人权限与安全责任，外借会破坏系统权限规则与操作可追溯性。关系好、事情急，都不能成为突破权限规则的理由。</div></div>\n        <div class=\"fb-row\"><div class=\"k\">风险提示</div><div class=\"v\">账号外借后，任何操作都记在你名下，一旦出问题责任难分，公司信息安全也受损。</div></div>\n        <div class=\"fb-row\"><div class=\"k\">正确做法</div><div class=\"v\">明确拒绝外借，建议对方走正规申请或授权流程。</div></div>\n      </div>\n      <div class=\"eth-q-nav\"><div class=\"eth-done-badge\">✅ 你已完成全部 4 题情景判断，职场考验通关！</div></div>\n    </div></div></div></div>"}]</script>
 <script>
 /* ================= 新版框架：视图切换 / 模块 tab / 小节分页 ================= */
 (function () {
@@ -15093,32 +15042,36 @@ init();
   }
 
   /* ================= 学习进度子系统（localStorage 持久化 / 幂等 / 同步首页） ================= */
-  var PROG_KEY = 'nw_progress_v1';
+  /* 进度/成绩按登录用户隔离：存储 key 带用户名后缀；未登录用基础 key（空） */
+  function nwUserName(){ try { return localStorage.getItem('nw_user_name') || ''; } catch (e) { return ''; } }
+  function progKey(){ var u = nwUserName(); return 'nw_progress_v1' + (u ? '_' + u : ''); }
+  function scoreKey(){ var u = nwUserName(); return 'nw_quiz_score_v1' + (u ? '_' + u : ''); }
+  function passKey(){ var u = nwUserName(); return 'nw_quiz_pass_v1' + (u ? '_' + u : ''); }   /* 首页「培训测验」通过状态，按用户隔离 */
   var ST_REQUIRE_ALL_TABS = true;  /* 指令/行动/沟通/汇报：true=点遍全部规则tab才算完成；false=看末tab即可 */
   var progress = loadProgress();
 
   function loadProgress(){
-    try { var raw = localStorage.getItem(PROG_KEY); if (!raw) return {}; var o = JSON.parse(raw); return (o && typeof o === 'object') ? o : {}; }
+    try { var raw = localStorage.getItem(progKey()); if (!raw) return {}; var o = JSON.parse(raw); return (o && typeof o === 'object') ? o : {}; }
     catch (e) { return {}; }
   }
-  function saveProgress(){ try { localStorage.setItem(PROG_KEY, JSON.stringify(progress)); } catch (e) {} }
+  function saveProgress(){ try { localStorage.setItem(progKey(), JSON.stringify(progress)); } catch (e) {} }
   function isCompleted(mod, sec){ return !!(progress[mod] && progress[mod].indexOf(sec) !== -1); }
 
   function refreshSnavPct(){
     var list = SECS[curMod];
     if (!list || !snavPct) { if (snavPct) snavPct.textContent = '0%'; return; }
     var total = 0, done = 0;
-    list.forEach(function (s, k) { if (s.disabled) return; total++; if (isCompleted(curMod, k)) done++; });
+    list.forEach(function (s, k) { if (s.disabled || s.hidden) return; total++; if (isCompleted(curMod, k)) done++; });
     snavPct.textContent = (total ? Math.round(done / total * 100) : 0) + '%';
   }
   function refreshHomeProgress(){
+    /* 子页面计数仅用于下方"已完成 X / Y 个子页面"文案；总进度百分比用 totalLearnPct()（=5 个学习模块进度平均，与上报表格 f9VJqf 同口径，避免首页 11% / 表格 10% 这类偏差） */
     var total = 0, done = 0;
     MODS.forEach(function (mm) {
-      if (mm.key === 'hy') return;   /* hy 暂未定义完成标准，不计入总进度 */
       var list = SECS[mm.key]; if (!list) return;
-      list.forEach(function (s, k) { if (s.disabled) return; total++; if (isCompleted(mm.key, k)) done++; });
+      list.forEach(function (s, k) { if (s.disabled || s.hidden) return; total++; if (isCompleted(mm.key, k)) done++; });
     });
-    var pct = total ? Math.round(done / total * 100) : 0;
+    var pct = totalLearnPct();
     var tEl = document.getElementById('homeProgressText');
     if (tEl) tEl.innerHTML = '学习进度：已完成 <b>' + done + '</b> / ' + total + ' 个子页面';
     var bar = document.getElementById('homeProgressBar');
@@ -15133,8 +15086,16 @@ init();
   function modPct(modKey){
     var list = SECS[modKey]; if (!list) return 0;
     var t = 0, d = 0;
-    list.forEach(function (s, k) { if (s.disabled) return; t++; if (isCompleted(modKey, k)) d++; });
+    list.forEach(function (s, k) { if (s.disabled || s.hidden) return; t++; if (isCompleted(modKey, k)) d++; });
     return t ? Math.round(d / t * 100) : 0;
+  }
+  /* 总学习进度 = 5 个学习模块进度的平均值（与上报企微表格 f9VJqf 同口径）。
+     先各模块取整(modPct)再平均，单轮取整。首页 #nwPc 与 buildSheetValues 必须共用此函数，
+     否则会出现「首页 11% / 表格 10%」这类口径不一致（之前首页用全部子页面加权算）。 */
+  function totalLearnPct(){
+    if (!SHEET_MODS || !SHEET_MODS.length) return 0;
+    var s = 0; SHEET_MODS.forEach(function (mk) { s += modPct(mk); });
+    return Math.round(s / SHEET_MODS.length);
   }
   function refreshHomePlist(){
     var rows = document.querySelectorAll('.nw-plist .nw-prow[data-pmod]');
@@ -15142,10 +15103,8 @@ init();
       var key = row.getAttribute('data-pmod');
       var p;
       if (key === 'quiz') {
-        /* 培训测验：按各模块解锁/通过情况统计（暂无则 0） */
-        p = 0;
-      } else if (key === 'hy') {
-        p = 0;   /* hy 无完成标准，固定 0 */
+        /* 培训测验：已通过模块数 / 可考模块数（见 quizProgressPct） */
+        p = quizProgressPct();
       } else {
         p = modPct(key);
       }
@@ -15172,15 +15131,15 @@ init();
     var list = SECS[mod];
     if (list) {
       var avail = 0, d = 0;
-      list.forEach(function (s, k) { if (s.disabled) return; avail++; if (isCompleted(mod, k)) d++; });
-      if (avail > 0 && d >= avail) showModuleDone(mod);
+      list.forEach(function (s, k) { if (s.disabled || s.hidden) return; avail++; if (isCompleted(mod, k)) d++; });
+      if (avail > 0 && d >= avail) { showModuleDone(mod); reportModule(mod); }   /* 模块全部学完 → 弹完成 + 上报智能表格 */
     }
   }
 
   /* ---- 各模块完成触发 ---- */
   function setupCompletion(mod, sec, root){
     if (!root) return;
-    if (mod === 'hy') return;            /* hy 暂不判定完成 */
+    if (mod === 'hy') { attachScrollComplete(root, mod, sec); return; }  /* hy：滚动到底判定完成（用于解锁测验；全部小节学完弹「完成模块」） */
     if (mod === 'zz') { attachScrollComplete(root, mod, sec); return; }
     if (mod === 'xt') { attachScrollComplete(root, mod, sec); return; }
     if (mod === 'st') {
@@ -15192,7 +15151,7 @@ init();
     if (mod === 'zc') {
       if (sec === 0) return;            /* 沟通预热 bird-quiz：postMessage 触发 */
       if (sec === 4) return;            /* 模拟回复 reply-game：postMessage 触发 */
-      if (sec === 8) { attachClickComplete(root, mod, sec, '#storyNext, .opt-btn'); return; } /* 职业边界：点情景「下一步」或答末题即完成 */
+      if (sec === 8) { bindZcStory(root); attachClickComplete(root, mod, sec, '.opt-btn'); return; } /* 职业边界：复刻旧版「下一步」翻页；答末题即完成 */
       if (sec === 9) { attachDetailsComplete(root, mod, sec); return; } /* 职业红线：展开任一条红线即完成 */
       if (root.querySelector('.eth-mcq-list') || root.querySelector('.eth-q')) return; /* 含答题：答完即完成 */
       attachScrollComplete(root, mod, sec);   /* 其他 zc 页：滚到底 */
@@ -15214,6 +15173,27 @@ init();
     root.addEventListener('click', function (e) {
       if (e.target.closest && e.target.closest(sel)) markComplete(mod, sec);
     }, true);
+  }
+  function bindZcStory(root){
+    /* 职业边界情景案例：复刻旧版 bindStory 的「下一步」翻页（新框架不调用旧 view-23 的 bindStory）。
+       step1→点「下一步」→step2→再点→step3 并显示问题、隐藏按钮；问题作答即标记完成。 */
+    var btn = root.querySelector('#storyNext');
+    if (!btn) return;
+    var s2 = root.querySelector('#storyStep2'), s3 = root.querySelector('#storyStep3'), q = root.querySelector('#storyQ');
+    if (s2) s2.style.display = 'none';
+    if (s3) s3.style.display = 'none';
+    if (q) q.style.display = 'none';
+    btn.style.display = '';
+    var step = 1;
+    btn.addEventListener('click', function () {
+      step++;
+      if (step === 2) { if (s2) s2.style.display = 'flex'; }
+      else if (step === 3) {
+        if (s3) s3.style.display = 'flex';
+        if (q) q.style.display = 'block';
+        btn.style.display = 'none';
+      }
+    });
   }
   function attachDetailsComplete(root, mod, sec){
     var ds = root.querySelectorAll('.redline-card');
@@ -15364,7 +15344,7 @@ init();
   /* ---- UI：toast / 模块完成弹窗 / 礼花 / 清空按钮 ---- */
   var nwCss = document.createElement('style');
   nwCss.textContent = [
-    '.nw-sitem.done{position:relative}',
+    '.nw-sitem.done{position:relative;padding-right:32px}',
     '.nw-sitem.done::after{content:"✓";position:absolute;right:12px;top:50%;transform:translateY(-50%);color:#2F9C7F;font-weight:800;font-size:13px}',
     '.eth-mcq-prog{font-size:13px;color:#8A94A6;margin-bottom:10px;font-weight:700}',
     '.eth-mcq-next{margin-top:16px;padding:9px 20px;border:none;border-radius:10px;background:#2F6CFF;color:#fff;font-weight:700;cursor:pointer;font-size:14px}',
@@ -15387,7 +15367,7 @@ init();
     'body.nw-host-fullscreen .warmup-frame{position:fixed;inset:0;z-index:2147483647;width:100vw!important;height:100vh!important;max-width:none!important;margin:0!important;border-radius:0!important;box-shadow:none!important}',
     'body.nw-host-fullscreen .lesson-head,body.nw-host-fullscreen .nw-actions,body.nw-host-fullscreen .nw-snav,body.nw-host-fullscreen .nw-rail{display:none!important}',
     '@keyframes confetti-fall{0%{transform:translateY(-12px) rotate(0);opacity:1}100%{transform:translateY(360px) rotate(540deg);opacity:0}}',
-    '.nw-clearbtn{position:fixed;left:16px;bottom:16px;z-index:60;padding:8px 14px;border:1px solid rgba(255,255,255,.55);border-radius:20px;background:rgba(31,41,55,.8);color:#fff;font-size:12.5px;cursor:pointer;font-family:inherit}',
+    '.nw-clearbtn{position:fixed;left:16px;bottom:84px;z-index:60;padding:8px 14px;border:1px solid rgba(255,255,255,.55);border-radius:20px;background:rgba(31,41,55,.8);color:#fff;font-size:12.5px;cursor:pointer;font-family:inherit}',
     '.nw-clearbtn:hover{background:rgba(31,41,55,.96)}',
     '.nw-qscene{display:block;margin:0 0 14px;padding:12px 14px;border-left:3px solid var(--mc,#2F6FD0);background:#F6F9FE;border-radius:10px;font-size:14px;color:#44506A;line-height:1.75}',
     '.nw-qseal{display:inline-flex;align-items:center;justify-content:center;width:62px;height:62px;border-radius:50%;font-weight:800;font-size:16px;letter-spacing:1px;transform:rotate(-14deg);border:3px solid;flex:none;line-height:1}',
@@ -15411,19 +15391,42 @@ init();
     toastEl._t = setTimeout(function () { toastEl.classList.remove('show'); }, 1800);
   }
 
+  /* 学习模块固定顺序（用于"完成模块后去学习下一个模块"导航）；测验(培训测验)不是学习模块，不计入 */
+  var LEARN_ORDER = ['hy', 'zz', 'xt', 'st', 'zc'];
+  /* 完成 doneKey 后，返回固定顺序里下一个"尚未学完(进度<100)"的模块；都学完则返回 null（提示回首页） */
+  function nextLearnMod(doneKey){
+    var idx = LEARN_ORDER.indexOf(doneKey);
+    for (var i = idx + 1; i < LEARN_ORDER.length; i++) { if (modPct(LEARN_ORDER[i]) < 100) return LEARN_ORDER[i]; }
+    for (var j = 0; j <= idx; j++) { if (modPct(LEARN_ORDER[j]) < 100) return LEARN_ORDER[j]; }
+    return null;
+  }
+
   var modalEl = null;
   function showModuleDone(mod){
     if (!modalEl) {
       modalEl = document.createElement('div'); modalEl.className = 'nw-modaldone-mask';
-      modalEl.innerHTML = '<div class="nw-modaldone"><h3></h3><p></p><button type="button" class="md-close">去测验 →</button></div>';
+      modalEl.innerHTML = '<div class="nw-modaldone"><h3></h3><p></p><button type="button" class="md-close">去学习下一个模块 →</button></div>';
       document.body.appendChild(modalEl);
-      modalEl.querySelector('.md-close').addEventListener('click', function () { modalEl.classList.remove('show'); selectQuizMod(modalEl._mod || curQMod); setView('quiz'); });
+      modalEl.querySelector('.md-close').addEventListener('click', function () {
+        modalEl.classList.remove('show');
+        if (modalEl._next) { selectMod(modalEl._next); setView('learn'); }   /* 还有下一个未学完模块 → 去学习 */
+        else { setView('home'); }                                            /* 全部学完 → 回首页 */
+      });
       modalEl.addEventListener('click', function (e) { if (e.target === modalEl) modalEl.classList.remove('show'); });
     }
     var name = (MODS.filter(function (x) { return x.key === mod; })[0] || {}).name || '';
-    modalEl.querySelector('h3').textContent = '恭喜你完成该模块的学习🎉';
-    modalEl.querySelector('p').textContent = '「' + name + '」全部小节已学完，继续保持！';
+    var nx = nextLearnMod(mod);
     modalEl._mod = mod;
+    modalEl._next = nx;
+    modalEl.querySelector('h3').textContent = '恭喜你完成该模块的学习🎉';
+    var btn = modalEl.querySelector('.md-close');
+    if (nx) {
+      modalEl.querySelector('p').textContent = '「' + name + '」全部小节已学完，继续学习下一个模块吧！';
+      btn.textContent = '去学习下一个模块 →';
+    } else {
+      modalEl.querySelector('p').textContent = '「' + name + '」已完成，且所有模块均已学完，太棒了！返回首页查看总进度。';
+      btn.textContent = '返回首页 →';
+    }
     modalEl.classList.add('show');
     burstConfetti(modalEl);
   }
@@ -15440,6 +15443,20 @@ init();
     }
   }
 
+  /* 首页手动提交进度：把当前学习进度/测验结果上报智能表格（仅登录后）。
+     注意：Worker 端会按用户取历史最大值，低进度不会覆盖表格里已记录的高进度（见 Worker /report + D1 sheet_max）。 */
+  function submitProgress(){
+    if (!localStorage.getItem('nw_user_name')) { showToast('请先登录后再提交进度'); return; }
+    reportSheet(buildSheetValues());
+    showToast('进度已提交');
+    var stEl = document.getElementById('wecomSyncStatus'); if (stEl) stEl.textContent = '已提交 ' + sheetNow();
+  }
+  /* 用事件委托绑定，避免首页 DOM 重渲染后监听器丢失 */
+  document.addEventListener('click', function (e) {
+    var t = e.target.closest && e.target.closest('.nw-prog .nw-submit, #wecomSyncBtn');
+    if (t) { e.preventDefault(); submitProgress(); }
+  });
+
   var clearBtn = document.createElement('button');
   clearBtn.type = 'button'; clearBtn.className = 'nw-clearbtn'; clearBtn.textContent = '清空学习进度';
   /* 清空时复位 zc 交互态：新框架的 zc 小节由 renderSec 重新渲染天然清空，
@@ -15451,12 +15468,14 @@ init();
        这里兜底复位所有「答题/已展开」交互态（含遗留 view-ethics）。 */
     document.querySelectorAll('.opt-btn').forEach(function (b) { b.disabled = false; b.classList.remove('correct', 'wrong', 'chosen', 'on'); });
     document.querySelectorAll('.eth-mcq-opt, .eth-opt').forEach(function (b) { b.disabled = false; b.classList.remove('correct', 'wrong', 'chosen', 'on'); });
+    /* 职业边界情景题（.eth-q / .eth-fb，与利益诱惑同款）：清 data-answered 与反馈 */
+    document.querySelectorAll('.eth-q').forEach(function (q) { q.removeAttribute('data-answered'); var f = q.querySelector('.eth-fb'); if (f) { f.className = 'eth-fb'; f.innerHTML = ''; } });
     document.querySelectorAll('.redline-card').forEach(function (c) { if (c.tagName === 'DETAILS') c.open = false; c.classList.remove('rl-todo', 'open'); });
     document.querySelectorAll('.feedback.show').forEach(function (f) { f.className = 'feedback'; });
   }
   clearBtn.addEventListener('click', function () {
     progress = {}; saveProgress();
-    try { localStorage.removeItem('ethics-training-state'); } catch (e) {}
+    try { var _ek = (window.__ethicsKey ? window.__ethicsKey() : 'ethics-training-state'); localStorage.removeItem(_ek); } catch (e) {}   /* 清空当前用户的职业道德培训状态（按用户隔离） */
     try { resetZcRuntime(); } catch (e) {}
     refreshSnavPct(); refreshHomeProgress();
     renderSec(curSec);
@@ -16284,7 +16303,452 @@ init();
 };
   /* ===== ZC_BANK_END ===== */
 
-  /* ================= 测验页子系统（5 大模块 · 学完解锁 · 右侧计时器 + 答题卡） =================
+  /* ===== HY_BANK_START ===== */
+  var HY_BANK = [
+  {
+    "qid": "Q01",
+    "cat": "行业认知",
+    "sub": "行业认知",
+    "kind": "单项选择",
+    "q": "这份培训里说的“跨境电商”，主要指哪一种？",
+    "opts": [
+      "把海外商品进口到中国、卖给国内消费者",
+      "中国卖家通过互联网把商品卖给海外买家",
+      "中国线下批发市场对海外商人批量供货",
+      "国内电商跨省快递配送"
+    ],
+    "optScores": [
+      0,
+      10,
+      0,
+      0
+    ],
+    "best": 1,
+    "a": 1,
+    "ana": "本培训专指“出口”——中国卖家把货卖给海外买家。"
+  },
+  {
+    "qid": "Q02",
+    "cat": "行业认知",
+    "sub": "行业认知",
+    "kind": "单项选择",
+    "q": "跨境电商和国内电商（淘宝、京东）最本质的不同是？",
+    "opts": [
+      "必须用手机下单",
+      "货物要跨国运输，并经过中国出口和海外进口两道海关",
+      "只能卖服装和小商品",
+      "全程只能用英语交流"
+    ],
+    "optScores": [
+      0,
+      10,
+      0,
+      0
+    ],
+    "best": 1,
+    "a": 1,
+    "ana": "跨境要过两国海关、跨国运输，这是和国内电商最大的不同。"
+  },
+  {
+    "qid": "Q03",
+    "cat": "行业认知",
+    "sub": "行业认知",
+    "kind": "单项选择",
+    "q": "术语“B2C”指的是？",
+    "opts": [
+      "卖给海外的普通消费者个人",
+      "卖给海外的小商家、小批发商",
+      "企业之间的大额批发",
+      "品牌自己开的专卖店"
+    ],
+    "optScores": [
+      10,
+      0,
+      0,
+      0
+    ],
+    "best": 0,
+    "a": 0,
+    "ana": "B2C 卖给个人消费者；B2B 才是卖给商家。"
+  },
+  {
+    "qid": "Q04",
+    "cat": "公司业务",
+    "sub": "公司业务",
+    "kind": "单项选择",
+    "q": "在一条跨境电商产业链上，出口易（我们公司）主要负责哪一段？",
+    "opts": [
+      "帮卖家在海外打广告、引流",
+      "帮卖家收海外买家的货款",
+      "把货物跨国运输并送到海外买家手上",
+      "帮卖家在网上建店铺"
+    ],
+    "optScores": [
+      0,
+      0,
+      10,
+      0
+    ],
+    "best": 2,
+    "a": 2,
+    "ana": "我们在产业链最后一段“把货送到”，即跨境物流。"
+  },
+  {
+    "qid": "Q05",
+    "cat": "行业认知",
+    "sub": "行业认知",
+    "kind": "单项选择",
+    "q": "下面哪个属于“交易平台”，而不是物流公司？",
+    "opts": [
+      "DHL",
+      "递四方",
+      "亚马逊",
+      "中国邮政"
+    ],
+    "optScores": [
+      0,
+      0,
+      10,
+      0
+    ],
+    "best": 2,
+    "a": 2,
+    "ana": "亚马逊是交易平台；其余三项都是物流/快递公司。"
+  },
+  {
+    "qid": "Q06",
+    "cat": "行业认知",
+    "sub": "行业认知",
+    "kind": "单项选择",
+    "q": "“海外仓”发货的核心特点是？",
+    "opts": [
+      "买家下单后，货才从中国寄出",
+      "货物提前批量囤在海外当地仓库，买家下单后本地发货",
+      "只能发送轻小件",
+      "运费一定比中国直发便宜"
+    ],
+    "optScores": [
+      0,
+      10,
+      0,
+      0
+    ],
+    "best": 1,
+    "a": 1,
+    "ana": "海外仓就是提前把货囤到海外当地，本地发货。"
+  },
+  {
+    "qid": "Q07",
+    "cat": "行业认知",
+    "sub": "行业认知",
+    "kind": "单项选择",
+    "q": "哪种卖家更适合用“中国直发（直邮）”？",
+    "opts": [
+      "销量很大、客单价很高的成熟品牌",
+      "刚起步、想少压资金、先测几款产品的卖家",
+      "又大又重的家具家电卖家",
+      "要求买家当天收到货的本地卖家"
+    ],
+    "optScores": [
+      0,
+      10,
+      0,
+      0
+    ],
+    "best": 1,
+    "a": 1,
+    "ana": "直邮不用提前囤货、压资金少，适合刚起步测款的卖家。"
+  },
+  {
+    "qid": "Q08",
+    "cat": "行业认知",
+    "sub": "行业认知",
+    "kind": "单项选择",
+    "q": "和中国直发相比，海外仓的主要优势是？",
+    "opts": [
+      "完全不用占用资金",
+      "本地发货时效快、可本地退换货、大件重货也能发",
+      "不需要提前把货运到国外",
+      "永远不会出现卖不动的库存"
+    ],
+    "optScores": [
+      0,
+      10,
+      0,
+      0
+    ],
+    "best": 1,
+    "a": 1,
+    "ana": "本地发货快、稳，能退换、能发大件，代价是要先囤货。"
+  },
+  {
+    "qid": "Q09",
+    "cat": "行业认知",
+    "sub": "行业认知",
+    "kind": "单项选择",
+    "q": "用海外仓备货，卖家最担心的风险是？",
+    "opts": [
+      "货物提前囤在海外、卖不动，压成库存",
+      "买家没法退换货",
+      "运费比商品还贵",
+      "平台不让卖货"
+    ],
+    "optScores": [
+      10,
+      0,
+      0,
+      0
+    ],
+    "best": 0,
+    "a": 0,
+    "ana": "海外仓最大风险就是货囤过去卖不动、变成库存。"
+  },
+  {
+    "qid": "Q10",
+    "cat": "行业认知",
+    "sub": "行业认知",
+    "kind": "单项选择",
+    "q": "跨境物流里说的“头程”指的是？",
+    "opts": [
+      "包裹最后一公里送到买家手上",
+      "把大批量货从中国运到海外仓或海外平台仓这一段",
+      "买家第一次下单",
+      "国内城市之间的快递"
+    ],
+    "optScores": [
+      0,
+      10,
+      0,
+      0
+    ],
+    "best": 1,
+    "a": 1,
+    "ana": "头程是“从中国运到海外仓/平台仓”这一段长途；尾程才是最后一公里。"
+  },
+  {
+    "qid": "Q11",
+    "cat": "行业认知",
+    "sub": "行业认知",
+    "kind": "单项选择",
+    "q": "eBay、亚马逊上买家评价里反复出现“FAST SHIPPING（送货快）”，这说明？",
+    "opts": [
+      "买家只在乎价格",
+      "物流快不快，直接影响买家好评和复购",
+      "平台强制要求包邮",
+      "包装必须很结实"
+    ],
+    "optScores": [
+      0,
+      10,
+      0,
+      0
+    ],
+    "best": 1,
+    "a": 1,
+    "ana": "买家评价里全是“送货快”，说明物流体验直接决定好评和复购。"
+  },
+  {
+    "qid": "Q12",
+    "cat": "企业文化",
+    "sub": "企业文化",
+    "kind": "单项选择",
+    "q": "公司推崇的“企业家精神”，对新人最核心的要求是？",
+    "opts": [
+      "严格按流程走，只要程序做了就算完成",
+      "对结果负责，而不只是对过程负责",
+      "只管好自己手头的事，不用关心最终结果",
+      "多提意见、少做实事就行"
+    ],
+    "optScores": [
+      0,
+      10,
+      0,
+      0
+    ],
+    "best": 1,
+    "a": 1,
+    "ana": "按流程做了却没做成不等于完成；公司推崇对结果负责，而不只是对过程负责。"
+  },
+  {
+    "qid": "Q13",
+    "cat": "公司业务",
+    "sub": "公司业务",
+    "kind": "单项选择",
+    "q": "公司名“贝法易（BFE）”取自哪三个英文单词？",
+    "opts": [
+      "Better、Faster、Easier",
+      "创始人姓名的首字母",
+      "公司注册城市的缩写",
+      "Buy From Everywhere"
+    ],
+    "optScores": [
+      10,
+      0,
+      0,
+      0
+    ],
+    "best": 0,
+    "a": 0,
+    "ana": "BFE = Better、Faster、Easier。"
+  },
+  {
+    "qid": "Q14",
+    "cat": "公司业务",
+    "sub": "公司业务",
+    "kind": "单项选择",
+    "q": "关于“贝法易”和“出口易”的关系，下面哪句说法正确？",
+    "opts": [
+      "它们是两家没有关系的竞争对手",
+      "出口易是贝法易旗下的跨境物流品牌",
+      "贝法易是出口易旗下的一个仓库",
+      "两者只是同一家公司的两个中文名，没有区别"
+    ],
+    "optScores": [
+      0,
+      10,
+      0,
+      0
+    ],
+    "best": 1,
+    "a": 1,
+    "ana": "贝法易（BFE）是集团，出口易是其旗下的跨境物流品牌，海外仓库外墙上挂的就是 Chukou1。"
+  },
+  {
+    "qid": "Q15",
+    "cat": "公司业务",
+    "sub": "公司业务",
+    "kind": "单项选择",
+    "q": "一个卖家要把一大票货运到亚马逊 FBA 仓补货，最对口的业务是？",
+    "opts": [
+      "国际头程",
+      "国际专线",
+      "收款换汇",
+      "网红带货"
+    ],
+    "optScores": [
+      10,
+      0,
+      0,
+      0
+    ],
+    "best": 0,
+    "a": 0,
+    "ana": "大批量补货进 FBA 仓走的是国际头程。"
+  },
+  {
+    "qid": "Q16",
+    "cat": "公司业务",
+    "sub": "公司业务",
+    "kind": "单项选择",
+    "q": "一个客单价较低、从中国直接寄包裹到海外的铺货型卖家，最常用我们哪项服务？",
+    "opts": [
+      "国际专线",
+      "海外仓大批量长期备货",
+      "在亚马逊开店",
+      "注册商标"
+    ],
+    "optScores": [
+      10,
+      0,
+      0,
+      0
+    ],
+    "best": 0,
+    "a": 0,
+    "ana": "低客单、从中国直邮的铺货卖家，最常用国际专线。"
+  },
+  {
+    "qid": "Q17",
+    "cat": "行业认知",
+    "sub": "行业认知",
+    "kind": "单项选择",
+    "q": "一票中国直邮包裹的正确流程顺序是？",
+    "opts": [
+      "出口报关→国内揽收→空运→目的国清关→尾程派送",
+      "国内揽收集货→出口报关→空运/海运→目的国清关→尾程派送并签收",
+      "先坐飞机→再国内运输→再出口报关→最后派送",
+      "尾程派送→清关→空运→国内揽收"
+    ],
+    "optScores": [
+      0,
+      10,
+      0,
+      0
+    ],
+    "best": 1,
+    "a": 1,
+    "ana": "先国内揽收，再出口报关、跨国运输、目的国清关，最后尾程派送签收。"
+  },
+  {
+    "qid": "Q18",
+    "cat": "行业认知",
+    "sub": "行业认知",
+    "kind": "单项选择",
+    "q": "“尾程派送”指的是？",
+    "opts": [
+      "从中国工厂把货拉到口岸",
+      "货物到海外后，最后一公里把包裹送到买家手上",
+      "货物在仓库里上架",
+      "平台从销售额里抽成"
+    ],
+    "optScores": [
+      0,
+      10,
+      0,
+      0
+    ],
+    "best": 1,
+    "a": 1,
+    "ana": "尾程就是到海外后“最后一公里”送到买家手上。"
+  },
+  {
+    "qid": "Q19",
+    "cat": "公司业务",
+    "sub": "公司业务",
+    "kind": "单项选择",
+    "q": "下面哪一项是我们海外仓和系统的真实能力？",
+    "opts": [
+      "替卖家生产商品",
+      "用 WMS/OMS 系统管理库存和订单，并能和平台、ERP 对接",
+      "直接给海外买家发广告",
+      "替卖家决定卖什么产品"
+    ],
+    "optScores": [
+      0,
+      10,
+      0,
+      0
+    ],
+    "best": 1,
+    "a": 1,
+    "ana": "WMS/OMS 管库存订单、可与平台和 ERP 对接，是我们的系统能力。"
+  },
+  {
+    "qid": "Q20",
+    "cat": "企业文化",
+    "sub": "企业文化",
+    "kind": "单项选择",
+    "q": "我们公司的使命是？",
+    "opts": [
+      "做中国最大的电商交易平台",
+      "做值得信赖的跨境物流伙伴，追求全体员工物质与精神幸福",
+      "只做欧美市场",
+      "尽快上市融资"
+    ],
+    "optScores": [
+      0,
+      10,
+      0,
+      0
+    ],
+    "best": 1,
+    "a": 1,
+    "ana": "使命：做值得信赖的跨境物流伙伴，追求全体员工物质与精神幸福。"
+  }
+];
+  /* ===== HY_BANK_END ===== */
+
+  /* ================= 测验页子系统（4 大模块 · 学完解锁 · 右侧计时器 + 答题卡；系统与工具指南 xt 无测验，已隐藏其 tab） =================
      题库：当前为占位数据（QUIZ_BANK），结构 { sub, kind, q, opts[4], a }；
      真实题库接入时只需替换 buildQuizBank() 的返回值，其余版式/交互无需改动。 */
   var qTabbar = document.getElementById('nwQTabbar');
@@ -16346,9 +16810,30 @@ init();
     QUIZ_BANK['zc'] = all;
     return all;
   }
+  /* ---- 行业及公司介绍：从 HY_BANK（20 题）随机抽取 10 题；每次新作答重新抽取 ---- */
+  var hyDraw = null;
+  function drawHySet(force) {
+    if (!force && hyDraw) return hyDraw;
+    var pool = (HY_BANK || []).slice();
+    for (var i = pool.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)); var t = pool[i]; pool[i] = pool[j]; pool[j] = t; }
+    hyDraw = pool.slice(0, 10).map(function (q) { return JSON.parse(JSON.stringify(q)); });
+    QUIZ_BANK['hy'] = hyDraw;
+    return hyDraw;
+  }
   var curQMod = 'hy', curQQ = 0;
   var qzState = {};                      /* { mod: { answers:{i:选中的选项下标}, marks:{i:true} } } */
   var qzResult = {};                     /* { mod: { score, raw, full, timeMs, detail:[{pick,score}], at } } 交卷后的成绩（仅内存） */
+  var qzPassSet = loadQuizPass();        /* 持久化的各模块测验通过状态 { mod:true }，按用户隔离，用于首页「培训测验」进度同步 */
+  function loadQuizPass(){ try { return JSON.parse(localStorage.getItem(passKey()) || '{}'); } catch (e) { return {}; } }
+  function saveQuizPass(){ try { localStorage.setItem(passKey(), JSON.stringify(qzPassSet)); } catch (e) {} }
+  var qzScoreSet = loadQuizScore();      /* 持久化各模块测验成绩 { mod:{score,pass,at} }，按用户隔离，用于上报智能表格 */
+  function loadQuizScore(){ try { return JSON.parse(localStorage.getItem(scoreKey()) || '{}'); } catch (e) { return {}; } }
+  function saveQuizScore(){ try { localStorage.setItem(scoreKey(), JSON.stringify(qzScoreSet)); } catch (e) {} }
+  function quizProgressPct(){
+    var mods = MODS.filter(function (m) { return m.key !== 'xt'; }), total = mods.length, done = 0;
+    mods.forEach(function (m) { if (qzPassSet[m.key]) done++; });
+    return total ? Math.round(done / total * 100) : 0;
+  }
   var qzPreviewOpen = false;             /* ?qres=1 预览用：跳过解锁限制直接看结果页 */
   var qzPreviewMod = null;               /* ?qres=1 仅对预览的那个模块跳过锁，避免泄漏到其他模块 */
   var QZ_BAD = '#D93A3A';
@@ -16358,7 +16843,7 @@ init();
 
   function buildQuizBank(){
     var meta = {
-      hy: { sub:'行业及公司介绍 · 公司概况',   kind:'AI结果核查' },
+      hy: { sub:'行业及公司介绍',   kind:'单项选择' },
       zz: { sub:'组织架构 · 部门职能',         kind:'归属判断' },
       xt: { sub:'系统与工具指南 · 平台操作',   kind:'操作流程' },
       st: { sub:'十二条令 · 情景判断',         kind:'情景决策' },
@@ -16366,7 +16851,7 @@ init();
     };
     var out = {};
     MODS.forEach(function (m) {
-      if (m.key === 'st' || m.key === 'zc') { out[m.key] = []; return; }   /* 十二条令 / 职场沟通与职业道德：真实题运行时随机抽取，见 drawStSet() / drawZcSet() */
+      if (m.key === 'st' || m.key === 'zc' || m.key === 'hy') { out[m.key] = []; return; }   /* 十二条令 / 职场沟通与职业道德 / 行业及公司介绍：真实题运行时随机抽取，见 drawStSet()/drawZcSet()/drawHySet() */
       var cfg = meta[m.key] || { sub: m.name, kind: '综合' };
       out[m.key] = [];
       for (var i = 1; i <= QUIZ_QN; i++) {
@@ -16385,12 +16870,12 @@ init();
   /* 模块统计：完成度 + 是否解锁（学完该模块全部子页面 = 100%） */
   function moduleStat(mod) {
     var list = SECS[mod], total = 0, done = 0;
-    if (list) list.forEach(function (s, k) { if (s.disabled) return; total++; if (isCompleted(mod, k)) done++; });
+    if (list) list.forEach(function (s, k) { if (s.disabled || s.hidden) return; total++; if (isCompleted(mod, k)) done++; });
     return { total: total, done: done, pct: total ? Math.round(done / total * 100) : 0, unlocked: total > 0 && done >= total };
   }
   function qIndexOf(key) { var i = 0; MODS.forEach(function (m, k) { if (m.key === key) i = k; }); return i; }
   function qModOf(key) { return MODS.filter(function (x) { return x.key === key; })[0] || MODS[0]; }
-  function qQuestions() { if (curQMod === 'st') drawStSet(false); else if (curQMod === 'zc') drawZcSet(false); return QUIZ_BANK[curQMod] || []; }
+  function qQuestions() { if (curQMod === 'st') drawStSet(false); else if (curQMod === 'zc') drawZcSet(false); else if (curQMod === 'hy') drawHySet(false); return QUIZ_BANK[curQMod] || []; }
   function qzOf(mod) { if (!qzState[mod]) qzState[mod] = { answers: {}, marks: {} }; return qzState[mod]; }
   /* ?qres=1 预览只放行「当时预览的那个模块」，其余模块的锁照常生效，不泄漏 */
   function qzPreviewBypass() { return qzPreviewOpen && qzPreviewMod === curQMod; }
@@ -16419,6 +16904,7 @@ init();
       });
       return raw >= 80 && okEth;
     }
+    if (mod === 'hy') return raw >= 80;   /* 行业及公司介绍：20 题抽 10，每题 10 分，≥80 合格（答对≥8 题） */
     return raw >= 72;
   }
   function qzBuildResult(mod) {
@@ -16435,6 +16921,8 @@ init();
       score: raw, raw: raw, full: full, right: rightN, qn: qs.length,
       timeMs: qzElapsed(), detail: detail, at: Date.now(), pass: qzPass(mod, raw, detail)
     };
+    if (qzResult[mod].pass && !qzPreviewOpen) { qzPassSet[mod] = true; saveQuizPass(); refreshHomeProgress(); }  /* 通过即持久化并同步首页「培训测验」进度 */
+    qzScoreSet[mod] = { score: raw, pass: qzResult[mod].pass, timeMs: qzResult[mod].timeMs, at: Date.now() }; saveQuizScore();   /* 持久化成绩（含用时），供上报智能表格 */
     return qzResult[mod];
   }
   function qzScoreClass(v) { return v <= 0 ? 'bad' : 'ok'; }
@@ -16443,6 +16931,7 @@ init();
   function qzAutoPreview(mod) {
     if (mod === 'st') drawStSet(true);
     else if (mod === 'zc') drawZcSet(true);
+    else if (mod === 'hy') drawHySet(true);
     var qs = QUIZ_BANK[mod] || [], s = qzOf(mod);
     var plan = { 2: 0, 6: 3, 10: 1 };   /* 第 3 题得 0 分、第 7 题得 -10 分、第 11 题得 -5 分，其余答对 */
     qzTimerReset();
@@ -16456,6 +16945,7 @@ init();
 
   /* 测验 tab（与学习页同款，可复用 MODS 配色） */
   MODS.forEach(function (m, i) {
+    if (m.key === 'xt') return;              /* 系统与工具指南不需要测验，隐藏其 tab */
     var t = document.createElement('div');
     t.className = 'nw-tab' + (i === 0 ? ' on' : '');
     t.setAttribute('data-mod', m.key);
@@ -16471,13 +16961,16 @@ init();
     qTabInd.style.width = t.offsetWidth + 'px';
     qTabInd.style.transform = 'translateX(' + t.offsetLeft + 'px)';
   }
+  /* qTabs 已剔除 xt，其下标 ≠ MODS 序号（qIndexOf），故用 data-mod 在 qTabs 内定位 */
+  function qTabIndexOf(key) { var r = -1; qTabs.forEach(function (t, i) { if (t.getAttribute('data-mod') === key) r = i; }); return r; }
   function selectQuizMod(key) {
     var changed = (key !== curQMod);
     qzAutoNextCancel();
     curQMod = key; curQQ = 0;
     if (changed) qzTimerReset();
-    qTabs.forEach(function (t, i) { t.classList.toggle('on', i === qIndexOf(key)); });
-    moveIndQ(qIndexOf(key));
+    var ti = qTabIndexOf(key);
+    qTabs.forEach(function (t, i) { t.classList.toggle('on', i === ti); });
+    moveIndQ(ti);
     renderQuiz();
   }
 
@@ -16554,7 +17047,7 @@ init();
       '<div class="nw-qhead">' +
         '<div class="nw-qhead-l"><h1>' + m.name + ' · 测验</h1>' +
           '<p>本模块共 ' + res.qn + ' 题 · 答对 ' + res.right + ' 题 · ' +
-            (m.key === 'zc'
+            (m.key === 'zc' || m.key === 'hy'
               ? '每题满分 ' + QZ_FULL + ' 分，按所选选项实际分值累加（满分 ' + res.full + ' 分）'
               : '每题满分 ' + QZ_FULL + ' 分，答错按严重程度得 0 / -5 / -10 分') + '</p></div>' +
         '<div class="nw-qhead-r">' +
@@ -16681,6 +17174,7 @@ init();
     curQQ = 0;
     if (curQMod === 'st') drawStSet(true);   /* 重新随机抽取 */
     else if (curQMod === 'zc') drawZcSet(true);   /* 重新随机抽取 */
+    else if (curQMod === 'hy') drawHySet(true);   /* 重新随机抽取 */
     qzTimerReset();
     renderQuiz();
   }
@@ -16735,6 +17229,110 @@ init();
     });
   }
 
+  /* ---- 上报学习进度 / 测验结果到企业微信智能表格（仅登录后） ---- */
+  var _sheetW = new URLSearchParams(location.search).get('worker');
+  var SHEET_REPORT = (_sheetW ? _sheetW : 'https://bitter-sun-5ef1.anna1755670972.workers.dev') + '/report';
+  var SHEET_FIELDS = {
+    user: 'f04Gwj', updated: 'ftQMc5',
+    total: 'f9VJqf',   /* 总学习进度 = 5 个模块学习进度的平均值（整数 0~100） */
+    prog: { hy: 'ftk5Tx', zz: 'ffFwIh', xt: 'fn8TJd', st: 'fl3KKQ', zc: 'fAqjoj' },
+    quiz: { hy: 'fMwkQa', zz: 'fMcOyv', st: 'fbMLvo', zc: 'fHxIM6' }
+  };
+  var SHEET_MODS = ['hy', 'zz', 'xt', 'st', 'zc'];
+  var SHEET_QMODS = ['hy', 'zz', 'st', 'zc'];   /* 仅这 4 个模块有测验（系统与工具指南 xt 无测验列） */
+  function sheetNow(){ var d = new Date(); function p(n){ return (n < 10 ? '0' : '') + n; } return d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate()) + ' ' + p(d.getHours()) + ':' + p(d.getMinutes()) + ':' + p(d.getSeconds()); }
+  function buildSheetValues(){
+    var name = localStorage.getItem('nw_user_name') || '用户';
+    var v = {};
+    v[SHEET_FIELDS.user] = name;
+    v[SHEET_FIELDS.updated] = sheetNow();
+    SHEET_MODS.forEach(function (k) { v[SHEET_FIELDS.prog[k]] = modPct(k); });   /* 学习进度整数百分数 0~100（企微智能表格 webhook 百分比字段按整数解释，1.0 会显示成 1%） */
+    v[SHEET_FIELDS.total] = totalLearnPct();   /* 总学习进度 = 5 个学习模块进度平均（与首页 #nwPc 共用 totalLearnPct，必一致） */
+    SHEET_QMODS.forEach(function (k) {
+      var sc = qzScoreSet[k];
+      v[SHEET_FIELDS.quiz[k]] = sc ? (sc.score + '分+' + (sc.pass ? '合格' : '不合格') + '+' + qzClock(sc.timeMs || 0)) : '';   /* 同一单元格写「得分+是否合格+用时」 */
+    });
+    return v;
+  }
+  function reportSheet(values){
+    var name = localStorage.getItem('nw_user_name');
+    if (!name) return;                       /* 未登录不记录 */
+    var ridKey = 'nw_sheet_rid_' + name;
+    var rid = localStorage.getItem(ridKey) || '';
+    fetch(SHEET_REPORT, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ values: values, record_id: rid })
+    }).then(function (r) { return r.json(); }).then(function (d) {
+      if (d && d._newRid) localStorage.setItem(ridKey, d._newRid);   /* 首次新增拿到 record_id，缓存以便后续更新同一行 */
+    }).catch(function (e) { console.warn('[sheet] 上报失败', e); });
+  }
+  function reportModule(mod){ reportSheet(buildSheetValues()); }    /* 完成一个模块 → 上报（含全模块最新进度快照） */
+  function reportQuiz(mod){ reportSheet(buildSheetValues()); }      /* 完成一个模块的测验 → 上报（含成绩+合格） */
+
+  /* 登录时从 D1 拉取该用户"最大进度快照"回填本地（与本地取并集），换浏览器/清缓存也能恢复。
+     需 Worker 绑定 D1 且已上报过（D1 才有该用户数据）；未部署 D1 / MOCK 时 /pull 返回空，静默跳过。 */
+  function sheetBase(){ return SHEET_REPORT.replace(/\/report$/, ''); }
+  async function fetchPull(name){
+    try {
+      /* GET 不带 body，不必发 content-type 头——否则会变成"非简单请求"触发 CORS 预检；
+         跨域部署(GitHub Pages 等)时若服务端 allow-methods 未含 GET 会被浏览器拦截。 */
+      var r = await fetch(sheetBase() + '/pull?user=' + encodeURIComponent(name || ''), { method: 'GET' });
+      if (!r.ok) return false;
+      var j = await r.json();
+      if (!j || !j.values || !Object.keys(j.values).length) return false;
+      restoreFromSheet(j.values);
+      return true;
+    } catch (e) { return false; }
+  }
+  function restoreFromSheet(values){
+    /* 学习进度：percent → 近似标记前 N% 小节完成（与本地已有取并集）。注：表格只存百分比，无法精确到具体哪几节，故取"前 N% 节"，属近似恢复 */
+    SHEET_MODS.forEach(function (mod) {
+      var pct = values[SHEET_FIELDS.prog[mod]];
+      if (typeof pct !== 'number' || pct <= 0) return;
+      var list = SECS[mod] || [], total = 0;
+      list.forEach(function (s) { if (!s.disabled && !s.hidden) total++; });
+      if (!total) return;
+      var done = Math.round(pct / 100 * total), cur = (progress[mod] || []).slice();
+      for (var i = 0; i < done; i++) { if (cur.indexOf(i) === -1) cur.push(i); }
+      progress[mod] = cur; saveProgress();
+    });
+    /* 测验成绩：解析「得分分+合格/不合格+MM:SS」 */
+    SHEET_QMODS.forEach(function (mod) {
+      var t = values[SHEET_FIELDS.quiz[mod]];
+      if (!t) return;
+      var m = /^(\d+)分\+(合格|不合格)\+(\d{1,2}):(\d{2})$/.exec(t);
+      if (!m) return;
+      var score = Number(m[1]), pass = (m[2] === '合格'), timeMs = (Number(m[3]) * 60 + Number(m[4])) * 1000;
+      var prev = qzScoreSet[mod];
+      if (!prev || score > (prev.score || 0)) { qzScoreSet[mod] = { score: score, pass: pass, timeMs: timeMs, at: Date.now() }; saveQuizScore(); }
+      if (pass) { qzPassSet[mod] = true; saveQuizPass(); }
+    });
+  }
+  function applyPullThenReload(name){
+    fetchPull(name).then(function () { location.reload(); }).catch(function () { location.reload(); });
+  }
+
+  /* 仅供自动化验证：?sheettest=1 时把内部上报函数挂到 window，便于无头脚本断言（正常功能零影响） */
+  if (/[?&]sheettest=1/.test(location.search)) {
+    window.__nwSheet = {
+      buildSheetValues: buildSheetValues,
+      reportModule: reportModule,
+      reportQuiz: reportQuiz,
+      setScore: function (mod, score, pass, timeMs) { qzScoreSet[mod] = { score: score, pass: pass, timeMs: timeMs || 0, at: Date.now() }; saveQuizScore(); },
+      setPass: function (mod) { qzPassSet[mod] = true; saveQuizPass(); },
+      setProgress: function (mod, idxs) { progress[mod] = idxs; saveProgress(); },
+      clearScore: function (mod) { delete qzScoreSet[mod]; saveQuizScore(); },
+      enabledSecs: function (mod) { var list = SECS[mod], out = []; if (list) list.forEach(function (s, k) { if (!s.disabled && !s.hidden) out.push(k); }); return out; },
+      nextLearnMod: nextLearnMod,
+      showModuleDone: function (mod) { showModuleDone(mod); return { next: (modalEl && modalEl._next) || null, btn: (modalEl && modalEl.querySelector('.md-close') && modalEl.querySelector('.md-close').textContent) || '' }; },
+      getRid: function (name) { return localStorage.getItem('nw_sheet_rid_' + (name || '用户')); },
+      pullValues: function (name) { return fetchPull(name); },   /* 仅拉取并写回本地(不刷新)，供测试 */
+      restore: function (values) { restoreFromSheet(values); },  /* 直接合并给定 values，供测试 */
+      applyPull: function (name) { return applyPullThenReload(name); }
+    };
+  }
+
   function submitQuiz() {
     if (qzResult[curQMod]) return;
     var qs = qQuestions(), s = qzOf(curQMod), miss = 0;
@@ -16743,6 +17341,7 @@ init();
     qzTimerStop();
     var m = qModOf(curQMod);
     var res = qzBuildResult(curQMod);
+    if (!qzPreviewOpen) reportQuiz(curQMod);   /* 交卷即上报测验结果（预览模式 ?qres=1 不上报） */
     var mask = document.createElement('div');
     mask.className = 'nw-modaldone-mask show';
     var pass = res.pass;
@@ -16756,7 +17355,9 @@ init();
         ? '<p class="md-note">合格标准：总分≥100 分，且不得出现 -10 分选项、-5 分选项最多 1 次。</p>'
         : curQMod === 'zc'
           ? '<p class="md-note">合格标准：完成全部 10 题、总分≥80 分，且职业道德题未选择负分选项。</p>'
-          : '') +
+          : curQMod === 'hy'
+            ? '<p class="md-note">合格标准：从 20 题中随机抽取 10 题，每题 10 分，总分≥80 分（答对至少 8 题）为合格。</p>'
+            : '') +
       '<div class="md-row"><button type="button" class="md-btn" data-act="res" style="background:' + m.mtx + '">查看题目解析</button></div></div>';
     document.body.appendChild(mask);
     mask.addEventListener('click', function (e) {
@@ -17022,7 +17623,7 @@ init();
     if (v === 'learn' || v === 'quiz') document.body.classList.add('learn-on');
     else document.body.classList.remove('learn-on');
     if (v === 'learn') { applyColors(qModOf(curMod)); setTimeout(function () { moveInd(currentTabIndex()); }, 60); }
-    if (v === 'quiz') { renderQuiz(); setTimeout(function () { moveIndQ(qIndexOf(curQMod)); }, 60); qzTimerStart(); }
+    if (v === 'quiz') { renderQuiz(); setTimeout(function () { moveIndQ(qTabIndexOf(curQMod)); }, 60); qzTimerStart(); }
     else { qzTimerStop(); }
     navs.forEach(function (n) { n.classList.toggle('on', n.getAttribute('data-view') === v); });
   }
@@ -17069,6 +17670,125 @@ init();
     });
   }
   refreshHomeProgress();
+})();
+</script>
+
+<!-- 企业微信扫码登录 弹窗（阶段1：mock 可跑通；阶段2 填企微凭证切真实） -->
+<div class="nw-login-mask" id="nwLoginMask" hidden>
+  <div class="nw-login-pop" role="dialog" aria-modal="true" aria-label="企业微信扫码登录">
+    <div class="nw-login-hd">
+      <span class="nw-login-title">企业微信扫码登录</span>
+      <button class="nw-login-x" id="nwLoginClose" type="button" aria-label="关闭">×</button>
+    </div>
+    <div class="nw-login-body">
+      <iframe id="nwLoginFrame" class="nw-login-frame" title="企业微信扫码" frameborder="0" scrolling="no"></iframe>
+    </div>
+    <div class="nw-login-tip" id="nwLoginTip">请用企业微信 App 扫描上方二维码完成登录</div>
+  </div>
+</div>
+<style id="nwLoginStyle">
+.nw-login-mask{position:fixed;inset:0;background:rgba(20,28,40,.42);display:flex;align-items:center;justify-content:center;z-index:9999}
+.nw-login-pop{width:340px;max-width:92vw;background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 18px 50px rgba(20,28,40,.28)}
+.nw-login-hd{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid var(--line)}
+.nw-login-title{font-size:15px;font-weight:800}
+.nw-login-x{border:0;background:transparent;font-size:20px;line-height:1;color:var(--muted);cursor:pointer;padding:0 4px}
+.nw-login-body{padding:14px;background:#f6f8fb;display:flex;justify-content:center}
+.nw-login-frame{width:300px;height:360px;border:0;background:#fff;border-radius:10px}
+.nw-login-tip{font-size:12px;color:var(--muted);text-align:center;padding:0 16px 16px}
+.nw-login-btn{margin-left:auto;border:1px solid var(--brand);background:var(--brand);color:#fff;font-size:12.5px;font-weight:700;padding:5px 14px;border-radius:8px;cursor:pointer}
+.nw-login-btn:active{transform:translateY(1px)}
+.nw-logout{border:0;background:transparent;margin-left:auto;font-size:12px;color:var(--muted);cursor:pointer}
+/* 登录后全屏淡水印：固定视口、不随滚动、不挡点击；层级 800 在内容(≤220)之上、弹窗(9999)之下 */
+#nwWatermark{position:fixed;inset:0;z-index:800;pointer-events:none;display:none;background-repeat:repeat;background-position:0 0}
+</style>
+<script>
+(function(){
+  var MOCK = true; /* 阶段1：mock 模式；拿到企微 corpid/agentid/corpsecret 后改 false */
+  var MOCK_SRC = 'assets/wecom-mock.html';                 /* 纯前端 mock：不经 Worker，离线可用 */
+  var REMOTE_MOCK = true;                                  /* 阶段1 测“已部署的 Worker”：mock 扫码页跳你云端 Worker（MOCK=1 下返回张三） */
+  var WORKER_BASE = 'https://bitter-sun-5ef1.anna1755670972.workers.dev'; /* 你的 Cloudflare Worker 域名 */
+  /* 允许用 ?worker=http://... 临时覆盖域名（本地仿真验证用）；正式交付用上面硬编码值 */
+  var _w = new URLSearchParams(location.search).get('worker'); if (_w) WORKER_BASE = _w;
+  var MOCK_REMOTE_SRC = 'assets/wecom-mock-remote.html';
+  /* 阶段2 真实地址：把 CORPID/AGENTID 换成你的，redirect_uri 换成你的 Worker 回调域 */
+  var REAL_SRC = 'https://open.work.weixin.qq.com/wwopen/sso/qrConnect?appid=CORPID&agentid=AGENTID&redirect_uri='
+    + encodeURIComponent(WORKER_BASE + '/callback') + '&state=nw&login_type=chrome';
+  var KEY_NAME = 'nw_user_name', KEY_ID = 'nw_user_id';
+  var mask = document.getElementById('nwLoginMask');
+  var frame = document.getElementById('nwLoginFrame');
+  var btn = document.getElementById('nwLoginBtn');
+  var out = document.getElementById('nwLogoutBtn');
+  var foot = document.getElementById('nwFoot');
+  var avatar = document.getElementById('nwAvatar');
+  var uname = document.getElementById('nwUname');
+  var uid = document.getElementById('nwUid');
+  var hi = document.getElementById('nwHomeHi');
+  /* 登录后全屏淡水印：斜向网格铺满，内容为用户名；固定视口、不随滚动、不挡点击 */
+  var wm = document.getElementById('nwWatermark');
+  if(!wm){ wm = document.createElement('div'); wm.id = 'nwWatermark'; document.body.appendChild(wm); }
+  function escapeXml(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+  function buildWatermark(name){
+    var t = name || '用户';
+    var W = 150, H = 96, fs = 15;             /* 较密：瓦片缩小→斜向网格更密；透明度0.07 */
+    var svg = "<svg xmlns='http://www.w3.org/2000/svg' width='"+W+"' height='"+H+"'>"
+      + "<text x='50%' y='50%' font-family='sans-serif' font-size='"+fs+"' fill='#6b7280' fill-opacity='0.07' "
+      + "text-anchor='middle' dominant-baseline='middle' transform='rotate(-22 "+(W/2)+" "+(H/2)+")'>"+escapeXml(t)+"</text></svg>";
+    return "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svg);
+  }
+  function applyWatermark(n){
+    if(n){ wm.style.backgroundImage = "url(\"" + buildWatermark(n) + "\")"; wm.style.display = 'block'; }
+    else { wm.style.display = 'none'; }
+  }
+  function render(){
+    var n = localStorage.getItem(KEY_NAME);
+    if(n){
+      uname.textContent = n;
+      uid.textContent = '已登录';
+      if(avatar) avatar.textContent = n.charAt(0);
+      if(btn) btn.hidden = true;
+      if(out) out.hidden = false;
+      if(hi) hi.textContent = n;
+    } else {
+      uname.textContent = '未登录';
+      uid.textContent = '点击登录记录学习进度';
+      if(avatar) avatar.textContent = '?';
+      if(btn) btn.hidden = false;
+      if(out) out.hidden = true;
+      if(hi) hi.textContent = '新同学';
+    }
+    applyWatermark(n);
+  }
+  function openLogin(){
+    frame.style.height = ''; /* 复位为默认高度，等 mock 页上报真实高度后自适应 */
+    if (!MOCK) { frame.src = REAL_SRC; }
+    else if (REMOTE_MOCK) { frame.src = MOCK_REMOTE_SRC + '?cb=' + encodeURIComponent(WORKER_BASE + '/callback?code=mock'); }
+    else { frame.src = MOCK_SRC; }
+    mask.hidden = false;
+  }
+  function closeLogin(){ mask.hidden = true; frame.src = 'about:blank'; }
+  window.addEventListener('message', function(e){
+    var d = e.data;
+    /* mock 扫码页上报自身高度 → 弹窗 iframe 自适应，避免按钮被裁掉 */
+    if(d && d.type === 'nw_login_height' && d.h){
+      var h = Math.max(300, Math.min(560, parseInt(d.h, 10) || 0));
+      if(h) frame.style.height = h + 'px';
+      return;
+    }
+    if(d && d.type === 'nw_login' && d.name){
+      localStorage.setItem(KEY_NAME, d.name);
+      if(d.userid) localStorage.setItem(KEY_ID, d.userid);
+      closeLogin();
+      applyPullThenReload(d.name);   /* 登录后先尝试从 D1 拉取该用户最大进度回填本地，再整页刷新重建 UI（拉取失败也照常刷新） */
+    }
+  });
+  if(btn) btn.addEventListener('click', openLogin);
+  if(foot) foot.addEventListener('click', function(ev){ if(ev.target !== out && !localStorage.getItem(KEY_NAME)) openLogin(); });
+  if(out) out.addEventListener('click', function(ev){ ev.stopPropagation(); localStorage.removeItem(KEY_NAME); localStorage.removeItem(KEY_ID); location.reload(); });   /* 退出整页刷新，清除上一用户残留 */
+  var closeX = document.getElementById('nwLoginClose');
+  if(closeX) closeX.addEventListener('click', closeLogin);
+  if(mask) mask.addEventListener('click', function(ev){ if(ev.target === mask) closeLogin(); });
+  document.addEventListener('keydown', function(ev){ if(ev.key === 'Escape' && mask && !mask.hidden) closeLogin(); });
+  render();
 })();
 </script>
 </body>
