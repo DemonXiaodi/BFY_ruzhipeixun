@@ -17710,9 +17710,13 @@ init();
   /* 允许用 ?worker=http://... 临时覆盖域名（本地仿真验证用）；正式交付用上面硬编码值 */
   var _w = new URLSearchParams(location.search).get('worker'); if (_w) WORKER_BASE = _w;
   var MOCK_REMOTE_SRC = 'assets/wecom-mock-remote.html';
-  /* 阶段2 真实地址：把 CORPID/AGENTID 换成你的，redirect_uri 换成你的 Worker 回调域 */
+  /* 当前页"干净地址"（去掉可能残留的登录参数），用作 REAL 扫码后 worker 302 回跳目标 */
+  var _ret = location.origin + location.pathname
+    + location.search.replace(/[?&]nw_login=1/g, '').replace(/[?&]name=[^&]*/g, '').replace(/[?&]userid=[^&]*/g, '')
+        .replace(/\?&/, '?').replace(/[?&]$/, '');
+  /* 阶段2 真实地址：把 CORPID/AGENTID 换成你的；redirect_uri 指向 Worker 回调，并带上 ret=当前页（扫码后 worker 302 跳回此页 ?nw_login=1&name=...） */
   var REAL_SRC = 'https://open.work.weixin.qq.com/wwopen/sso/qrConnect?appid=CORPID&agentid=AGENTID&redirect_uri='
-    + encodeURIComponent(WORKER_BASE + '/callback') + '&state=nw&login_type=chrome';
+    + encodeURIComponent(WORKER_BASE + '/callback?ret=' + encodeURIComponent(_ret)) + '&state=nw&login_type=chrome';
   var KEY_NAME = 'nw_user_name', KEY_ID = 'nw_user_id';
   var mask = document.getElementById('nwLoginMask');
   var frame = document.getElementById('nwLoginFrame');
@@ -17775,9 +17779,11 @@ init();
       return;
     }
     if(d && d.type === 'nw_login' && d.name){
+      console.log('[nw-login] 收到登录消息:', d.name);
       localStorage.setItem(KEY_NAME, d.name);
       if(d.userid) localStorage.setItem(KEY_ID, d.userid);
       closeLogin();
+      render();   /* 立即刷新登录态显示，不依赖整页 reload（跨域部署下更稳） */
       applyPullThenReload(d.name);   /* 登录后先尝试从 D1 拉取该用户最大进度回填本地，再整页刷新重建 UI（拉取失败也照常刷新） */
     }
   });
@@ -17788,7 +17794,38 @@ init();
   if(closeX) closeX.addEventListener('click', closeLogin);
   if(mask) mask.addEventListener('click', function(ev){ if(ev.target === mask) closeLogin(); });
   document.addEventListener('keydown', function(ev){ if(ev.key === 'Escape' && mask && !mask.hidden) closeLogin(); });
+
+  /* GitHub Pages 等跨域部署：REAL 扫码经 worker 302 回跳本页 ?nw_login=1&name=...&userid=...；
+     在此自检参数写登录态（不依赖跨域 postMessage），并清理 URL 防刷新循环。 */
+  function cleanUrlNoLogin(){
+    var s = location.search.replace(/[?&]nw_login=1/g, '').replace(/[?&]name=[^&]*/g, '').replace(/[?&]userid=[^&]*/g, '');
+    s = s.replace(/\?&/, '?').replace(/[?&]$/, '');
+    return location.origin + location.pathname + s;
+  }
+  var _paramLogin = false;
+  (function(){
+    var p = new URLSearchParams(location.search);
+    if(p.get('nw_login') === '1'){
+      var nm = p.get('name'), uv = p.get('userid');
+      if(nm){
+        localStorage.setItem(KEY_NAME, nm);
+        if(uv) localStorage.setItem(KEY_ID, uv);
+        var clean = cleanUrlNoLogin();
+        if(window.self !== window.top){
+          /* 我们在 iframe 内（worker 302 落到此）：把登录参数交给顶层父窗口，由父窗口写登录态 */
+          window.top.location.href = clean + (clean.indexOf('?') > -1 ? '&' : '?')
+            + 'nw_login=1&name=' + encodeURIComponent(nm) + (uv ? '&userid=' + encodeURIComponent(uv) : '');
+          return; /* 本 iframe 实例不再渲染登录态 */
+        }
+        /* 顶层：清理 URL 防刷新循环，并标记待拉取进度 */
+        history.replaceState(null, '', clean);
+        _paramLogin = true;
+      }
+    }
+  })();
+
   render();
+  if(_paramLogin){ applyPullThenReload(localStorage.getItem(KEY_NAME)); }   /* REAL 回调落页：写登录态后立即从 D1 拉取该用户最大进度 */
 })();
 </script>
 </body>
