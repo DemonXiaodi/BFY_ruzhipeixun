@@ -51,11 +51,12 @@
       document.getElementById('mockConfirm').style.display = 'none';
       document.getElementById('ok').style.display = 'block';
       reportHeight();
-      /* 把测试用户名带进回调 URL；Worker（MOCK=1）读 ?name= 回传该名字 */
       var nm = (document.getElementById('nameInput').value || '张三').trim() || '张三';
+      /* ① 同域直接回传父窗口：最可靠，跨域部署(GitHub Pages 等)也不依赖 Worker 跨域回传 */
+      try { window.parent.postMessage({ type: 'nw_login', name: nm, userid: 'mock' }, '*'); } catch (e) {}
+      /* ② 顺带通知 Worker 写 logins 审计表（fire-and-forget，不导航 iframe；失败也不影响登录） */
       var sep = cb.indexOf('?') > -1 ? '&' : '?';
-      /* iframe 跳到 Worker 回调；Worker 返回页会 postMessage 回父窗口（跨域允许） */
-      window.location.href = cb + sep + 'name=' + encodeURIComponent(nm);
+      try { fetch(cb + sep + 'name=' + encodeURIComponent(nm), { method: 'GET', mode: 'no-cors' }).catch(function () {}); } catch (e) {}
     });
   })();
 </script>

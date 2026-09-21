@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="canvas:width" content="1440">
 <meta name="canvas:height" content="900">
+<meta name="nw-build" content="2026-09-21-REAL">
 <title>出口易新人培训平台 · 财务报销与合同审批 · 基础知识</title>
 <style>
   :root{
@@ -17779,7 +17780,7 @@ init();
       return;
     }
     if(d && d.type === 'nw_login' && d.name){
-      console.log('[nw-login] 收到登录消息:', d.name);
+      console.log('[nw-login] 收到登录消息:', d.name, '| build', (document.querySelector('meta[name=nw-build]')||{}).content);
       localStorage.setItem(KEY_NAME, d.name);
       if(d.userid) localStorage.setItem(KEY_ID, d.userid);
       closeLogin();

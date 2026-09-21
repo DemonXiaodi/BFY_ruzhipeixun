@@ -32,8 +32,8 @@ async function getUserName(userid, token) {
 
 function loginHtml(name, userid) {
   return '<!doctype html><html><head><meta charset="utf-8"></head><body>'
-    + '<script>window.parent.postMessage({type:"nw_login",name:' + JSON.stringify(name)
-    + ',userid:' + JSON.stringify(userid) + '},"*");document.cookie="nw_user="'
+    + '<script>var m={type:"nw_login",name:' + JSON.stringify(name)
+    + ',userid:' + JSON.stringify(userid) + '};try{window.parent.postMessage(m,"*");}catch(e){}try{window.top.postMessage(m,"*");}catch(e){}console.log("[nw-login] 回传登录:",' + JSON.stringify(name) + ');document.cookie="nw_user="'
     + '+encodeURIComponent(' + JSON.stringify(name) + ')+";path=/;max-age=86400;SameSite=Lax";<\/script>'
     + '<p style="font-family:sans-serif;padding:24px">登录成功，正在返回…</p>'
     + '</body></html>';
@@ -193,6 +193,15 @@ export default {
         } catch (e) { /* 表未建时忽略；正式上线前先建表 */ }
       }
 
+      // 若携带 ret（前端当前页地址），则 302 把 iframe 重定向回该页 ?nw_login=1&name=...；
+      // 该页与父窗口同域，初始化时自检参数即可写登录态——跨域部署(GitHub Pages)下比 postMessage 稳。
+      // 无 ret 时兜底用 postMessage（兼容老前端/同域部署）。
+      const ret = url.searchParams.get('ret');
+      if (ret && /^https?:\/\//.test(ret)) {
+        const sep = ret.indexOf('?') > -1 ? '&' : '?';
+        const dest = ret + sep + 'nw_login=1&name=' + encodeURIComponent(name) + '&userid=' + encodeURIComponent(userid);
+        return new Response(null, { status: 302, headers: { 'location': dest } });
+      }
       return new Response(loginHtml(name, userid), {
         headers: {
           'content-type': 'text/html; charset=utf-8',
