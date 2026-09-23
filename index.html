@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="canvas:width" content="1440">
 <meta name="canvas:height" content="900">
-<meta name="nw-build" content="2026-09-21-REAL">
+<meta name="nw-build" content="2026-09-15-zz-galaxy-tex">
 <title>出口易新人培训平台 · 财务报销与合同审批 · 基础知识</title>
 <style>
   :root{
@@ -3055,7 +3055,7 @@
     margin-bottom:calc(var(--space)*1.5);
   }
 
-  /* 顶部工具栏：路径面包屑 + 返回上级 + 自动公转 */
+  /* 顶部工具栏：仅保留「自动公转」开关（面包屑与返回按钮已按需求移除） */
   .orgexp-bar{
     display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px;
   }
@@ -3083,6 +3083,8 @@
   .orgexp-back{display:none;font-weight:600;color:var(--primary);}
   .orgexp-back.show{display:inline-flex;}
   .orgexp-back:hover{background:color-mix(in srgb,var(--primary) 10%,transparent);}
+  /* 需求：移除「集团」面包屑与「返回上级」按钮，仅保留自动公转 */
+  .orgexp-path, .orgexp-back{display:none !important;}
   .orgexp-toggle input{cursor:pointer;accent-color:var(--primary);margin:0;}
 
   /* 主体：单张深色卡片 —— 抽屉式组织层级 + 等比画布，两者并排不重叠 */
@@ -3220,6 +3222,14 @@
     background:rgba(120,150,220,.14);border:1px solid rgba(255,255,255,.08);
   }
   #orgexp-panel .orgexp-chip-empty{background:transparent;border-style:dashed;color:#93a1c4;}
+  #orgexp-panel .orgexp-enter{
+    margin-top:12px;align-self:flex-start;
+    appearance:none;font-family:inherit;font-size:13px;font-weight:700;color:#fff;cursor:pointer;
+    padding:8px 14px;background:linear-gradient(180deg,var(--primary),color-mix(in srgb,var(--primary) 78%,#000));
+    border:1px solid color-mix(in srgb,var(--primary) 60%,#000);border-radius:999px;
+    box-shadow:0 4px 14px color-mix(in srgb,var(--primary) 40%,transparent);transition:transform .15s,filter .15s;
+  }
+  #orgexp-panel .orgexp-enter:hover{filter:brightness(1.08);transform:translateY(-1px);}
 
   /* ---- 财务模块 · 认清主体：主体识别三步图解 ---- */
   .fin-flow{
@@ -5140,6 +5150,57 @@ a.nw-card{text-decoration:none;color:inherit;cursor:pointer}
 .zz-terms dt{font-size:14.5px;font-weight:800;color:var(--mc);margin-bottom:5px}
 .zz-terms dd{margin:0;font-size:13px;line-height:1.7;color:var(--ink-2)}
 @media(max-width:680px){ .zz-terms{grid-template-columns:1fr} }
+/* 组织架构图（层级树） */
+.zz-org{margin-top:22px;overflow-x:auto;padding:2px 2px 8px}
+.zz-org ul{list-style:none;margin:0;padding:18px 0 0;display:flex;justify-content:center}
+.zz-org li{position:relative;padding:18px 9px 0;display:flex;flex-direction:column;align-items:center;list-style:none}
+.zz-org li::before,.zz-org li::after{content:'';position:absolute;top:0;right:50%;width:50%;height:18px;border-top:2px solid #C9D6E6}
+.zz-org li::after{right:auto;left:50%;border-left:2px solid #C9D6E6}
+.zz-org li:only-child::before,.zz-org li:only-child::after{display:none}
+.zz-org li:only-child{padding-top:0}
+.zz-org li:first-child::before,.zz-org li:last-child::after{border:0}
+.zz-org li:first-child::after{border-radius:6px 0 0 6px}
+.zz-org li:last-child::before{border-right:2px solid #C9D6E6;border-radius:0 6px 0 0}
+.zz-org ul ul::before{content:'';position:absolute;top:0;left:50%;width:0;height:18px;border-left:2px solid #C9D6E6}
+.zz-org .oc-node{background:#fff;border:1.5px solid #C9D6E6;border-radius:12px;padding:9px 14px;font-size:14px;font-weight:800;color:#1F3A5F;white-space:nowrap}
+.zz-org .oc-root{background:#2F6FD0;color:#fff;border-color:#2F6FD0}
+.zz-org .oc-func{border-color:#2F6FD0;color:#2F6FD0}
+.zz-org .oc-biz{border-color:#1D9E75;color:#0F6E56}
+.zz-org .oc-biz2{border-color:#1D9E75;color:#0F6E56}
+.zz-org .oc-tech{border-color:#534AB7;color:#3C3489}
+/* 部门职责：职能域分组 */
+.zz-dom{margin-top:22px}
+.zz-dom-h{display:flex;align-items:center;gap:10px;margin:4px 0 0;font-size:15px;font-weight:800;color:var(--mtx)}
+.zz-dom-h::before{content:'';width:5px;height:18px;border-radius:3px;background:var(--mc)}
+.zz-dom .zz-depts{margin-top:12px}
+/* 部门卡末尾图片（点击放大） */
+.zz-dep-fig{margin-top:2px;padding-top:14px;border-top:1px dashed var(--line)}
+.zz-shot{position:relative;display:block;width:100%;margin:0;padding:0;border:1px solid var(--line);border-radius:14px;background:#F7F8FA;cursor:zoom-in;overflow:hidden;box-shadow:0 2px 10px rgba(16,24,40,.05);transition:box-shadow .18s ease,transform .18s ease}
+.zz-shot:hover{box-shadow:0 12px 28px rgba(16,24,40,.14);transform:translateY(-2px)}
+.zz-shot:focus-visible{outline:3px solid var(--mc);outline-offset:2px}
+.zz-shot img{display:block;width:100%;height:auto}
+.zz-shot .zc{position:absolute;right:8px;bottom:8px;padding:3px 9px;border-radius:999px;background:rgba(18,26,40,.72);color:#fff;font-size:11.5px;font-weight:700;letter-spacing:.02em;opacity:.72;transition:opacity .18s ease}
+.zz-shot:hover .zc{opacity:1}
+.zz-shot-cap{margin:9px 0 0;font-size:12.5px;line-height:1.6;color:var(--ink-2);text-align:center}
+/* 整体概览末尾：组织星图 */
+#orgexpSlot{margin-top:24px}
+/* 组织星图（星球视图）迁入新版内容区：补齐旧版遗留 token —— 新版作用域内未定义它们，
+   不补的话工具栏的底/边/文字色会取不到值（变透明、无边）。 */
+.orgexp{
+  --surface:#ffffff;
+  --border:color-mix(in srgb, var(--mtx,#4A8BE0) 22%, #e3e8f0);
+  --shadow:0 1px 2px rgba(15,28,51,.05),0 10px 30px rgba(15,28,51,.07);
+  --primary:var(--mtx,#4A8BE0);
+  --muted:#7a8699;
+  --m-root:#2E4FC0;
+  --space:1rem;
+  margin:30px 0 8px;
+}
+/* 新版内容区宽度有限（左侧还要让出 236px 层级树），若沿用旧版 920/560 的卡片比例，
+   画布会变成「宽度受限」→ 上下留出大片纯深色空白、星球显小。
+   按 (920+236):560 = 1156:560 给卡片定比例，画布即可基本填满卡片。 */
+.zz-scope .orgexp-card{aspect-ratio:1156/560}
+@media(max-width:760px){ .zz-scope .orgexp-card{aspect-ratio:1110/560} }
 /* 入职第一周 */
 .zz-week{display:flex;flex-direction:column;gap:12px;margin-top:18px}
 .zz-wk{display:flex;gap:14px;align-items:flex-start;background:#fff;border:1px solid var(--line);border-radius:16px;padding:16px 18px}
@@ -9750,41 +9811,9 @@ if (/(\?|&)old=1/.test(location.search)) {
       <p class="lead">这是一张可以「钻进去」的组织星图：中心的恒星是集团创始人，环绕它公转的是七大一级部门。点击任意部门星球，就进入它的内部、看到它的下级团队；左侧的组织层级树可以随时跳转。</p>
     </div>
 
-    <div class="orgexp" id="orgexp" data-component="org-explorer">
-      <div class="orgexp-bar">
-        <div class="orgexp-path" id="orgexp-path"></div>
-        <button class="orgexp-back" id="orgexp-back" type="button">← 返回上级</button>
-        <label class="orgexp-toggle">
-          <input type="checkbox" id="orgexp-autorot" checked>
-          自动公转
-        </label>
-      </div>
-
-      <div class="orgexp-card">
-        <aside class="orgexp-side" id="orgexp-side">
-          <div class="orgexp-brand">
-            <div class="orgexp-brand-row">
-              <span class="orgexp-logo">🪐</span>
-              <div>
-                <div class="orgexp-brand-t">组织层级</div>
-                <div class="orgexp-brand-s">点击部门查看下级</div>
-              </div>
-            </div>
-            <button class="orgexp-collapse" id="orgexp-collapse" type="button" aria-label="收起导航">⟨</button>
-          </div>
-          <nav class="orgexp-nav" id="orgexp-nav"></nav>
-        </aside>
-
-        <div class="orgexp-view" id="orgexp-view">
-          <canvas class="orgexp-canvas" id="orgexp-canvas" width="920" height="560"></canvas>
-          <button class="orgexp-open" id="orgexp-open" type="button" aria-label="展开导航">☰ 组织层级</button>
-        </div>
-      </div>
-
-      <div class="orgexp-hint">💡 星球缓慢自动公转 · <b>在轨道上左右滑动</b>可快速旋转 · <b>点击部门星球</b>进入它的下级 · <b>点击主星</b>查看详情</div>
-    </div>
-
-    <div id="orgexp-panel" role="dialog" aria-label="部门详情"></div>
+    <!-- 星球视图已移至新版「组织架构 / 整体概览」页末尾（节点常驻 #orgexpHolder）。
+         此处仅保留旧版（?old=1）挂载点，gotoView(33) 时会把节点搬回来。 -->
+    <div id="orgexpLegacySlot"></div>
 
     <!-- ===== CEO 人物介绍 ===== -->
     <div class="ceo-section" data-component="ceo-profile">
@@ -9813,10 +9842,6 @@ if (/(\?|&)old=1/.test(location.search)) {
               <span><span class="ceo-school">中欧国际工商学院</span> · <span class="ceo-major">高级管理人员工商管理硕士 EMBA</span></span>
             </li>
           </ul>
-
-          <p class="ceo-bio">
-            行业经验超 <em>20 年</em>，自 <em>2003 年</em>起成为 eBay 等平台卖家，曾是该领域的知名大卖；<em>2008 年底</em>创立出口易，正式转型为跨境电商服务商，成为行业<em>首个 10 亿级营收</em>的跨境电商仓储物流综合服务商，并孵化出首批亿级大卖家。其领导的贝法易集团专注于跨境电商全产业链服务，发展速度迅猛，是目前中国该领域的领头羊。
-          </p>
 
           <div class="ceo-milestones">
             <div class="ceo-ms"><b>2003</b><span>以卖家身份入局跨境电商</span></div>
@@ -9906,6 +9931,69 @@ if (/(\?|&)old=1/.test(location.search)) {
   内部培训资料 · 仅限公司内部使用
 </footer>
 
+<!-- 组织星图（星球视图）：常驻 DOM 宿主。
+     新版「组织架构 / 整体概览」页末尾需要它，但内容区每次切小节都会 innerHTML 重建，
+     会连带销毁 canvas 与动画循环；故节点常驻此处，由 renderSec() 搬进目标小节的
+     #orgexpSlot，切走时再搬回本宿主（display:none → 动画自动暂停）。
+     信息浮窗 #orgexp-panel 定位为 position:fixed，必须处在 display:none 祖先之外。 -->
+<div id="orgexpHolder" style="display:none">
+  <div class="orgexp" id="orgexp" data-component="org-explorer">
+    <div class="orgexp-bar">
+      <div class="orgexp-path" id="orgexp-path"></div>
+      <button class="orgexp-back" id="orgexp-back" type="button">← 返回上级</button>
+      <label class="orgexp-toggle">
+        <input type="checkbox" id="orgexp-autorot" checked>
+        自动公转
+      </label>
+    </div>
+
+    <div class="orgexp-card">
+      <aside class="orgexp-side" id="orgexp-side">
+        <div class="orgexp-brand">
+          <div class="orgexp-brand-row">
+            <span class="orgexp-logo">🪐</span>
+            <div>
+              <div class="orgexp-brand-t">组织层级</div>
+              <div class="orgexp-brand-s">点击部门查看下级</div>
+            </div>
+          </div>
+          <button class="orgexp-collapse" id="orgexp-collapse" type="button" aria-label="收起导航">⟨</button>
+        </div>
+        <nav class="orgexp-nav" id="orgexp-nav"></nav>
+      </aside>
+
+      <div class="orgexp-view" id="orgexp-view">
+        <canvas class="orgexp-canvas" id="orgexp-canvas" width="920" height="560"></canvas>
+        <button class="orgexp-open" id="orgexp-open" type="button" aria-label="展开导航">☰ 组织层级</button>
+      </div>
+    </div>
+
+    <div class="orgexp-hint">💡 星球缓慢自动公转 · <b>在轨道上左右滑动</b>可快速旋转 · <b>点击部门星球</b>查看它的一句话职责 · <b>点击主星</b>查看集团详情</div>
+  </div>
+</div>
+
+<div id="orgexp-panel" role="dialog" aria-label="部门详情"></div>
+
+<script>
+/* 星球视图「搬家」工具：节点常驻 #orgexpHolder，按需搬入目标容器。
+   —— 新版：renderSec() 搬进 #orgexpSlot；旧版(?old=1)：gotoView(33) 搬回 #orgexpLegacySlot。
+   只搬节点、不重建，故 canvas 位图、事件绑定、rAF 循环全部保留；
+   宿主是 display:none，节点不在场时会自动暂停渲染与图片加载。 */
+(function () {
+  function byId(id) { return document.getElementById(id); }
+  window.__nwOrgexpHome = function () {
+    /* 旧版平台（?old=1）下不要抢节点：那时它归 #orgexpLegacySlot 管 */
+    if (document.documentElement.getAttribute('data-nw') === 'off') return;
+    var o = byId('orgexp'), h = byId('orgexpHolder');
+    if (o && h && o.parentNode !== h) h.appendChild(o);
+  };
+  window.__nwOrgexpTo = function (target) {
+    var o = byId('orgexp');
+    if (o && target && o.parentNode !== target) target.appendChild(o);
+  };
+})();
+</script>
+
 <!-- 发票放大预览灯箱 -->
 <div class="lightbox" id="lightbox" data-component="lightbox" role="dialog" aria-modal="true" aria-label="发票放大预览">
   <button class="lightbox-close" type="button" aria-label="关闭预览">
@@ -9957,9 +10045,9 @@ if (/(\?|&)old=1/.test(location.search)) {
     document.body.classList.toggle('module-comm', isComm);
     document.body.classList.toggle('module-culture', isCulture);
     document.body.classList.toggle('module-ethics', isEthics);
-    // 组织架构（view 33）进入时初始化星际图（懒初始化 + 防止重复）
-    if (isCulture && String(n) === '33' && typeof window.initGalaxyOrgChart === 'function') {
-      try { window.initGalaxyOrgChart(); } catch (e) {}
+    // 组织架构（view 33，旧版 ?old=1 路径）：把常驻的星球视图节点搬回旧版挂载点
+    if (String(n) === '33' && typeof window.__nwOrgexpTo === 'function') {
+      try { window.__nwOrgexpTo(document.getElementById('orgexpLegacySlot')); } catch (e) {}
     }
     // 预热挑战未完成时：处于预热页则游戏全屏（隐藏侧栏），完成或离开后恢复
     var warmFullscreen = (String(n) === '19') && !window.commUnlocked;
@@ -11450,7 +11538,7 @@ init();
 })();
 </script>
 
-<script src="assets/org-explorer.js"></script>
+<script src="assets/org-explorer.js?v=2026-09-15-zz-galaxy-tex"></script>
 
 <script src="assets/config.js"></script>
 <script src="assets/dataCollector.js"></script>
@@ -12294,11 +12382,13 @@ init();
     }
     var when = opts.when ? '<div class="zz-dep-when"><b>什么时候找他们：</b>' + opts.when + '</div>' : '';
     var note = opts.note ? '<div class="zz-dep-note">' + opts.note + '</div>' : '';
+    /* 卡片末尾可挂一张图（如部门组织架构图），点击放大 */
+    var fig = opts.fig ? '<div class="zz-dep-fig">' + opts.fig + '</div>' : '';
     return '<div class="zz-dept">' +
       '<div class="zz-dep-top"><span class="zz-dep-tag">' + tag + '</span><span class="zz-dep-name">' + name + '</span></div>' +
       '<div class="zz-dep-pos">' + pos + '</div>' +
       '<div class="zz-subgroups">' + blocks + flow + '</div>' +
-      when + note +
+      when + note + fig +
       '</div>';
   }
   function zzCollab(title, first, co, flow) {
@@ -12313,100 +12403,104 @@ init();
   var ZZ = [
     { t: '整体概览', html:
       '<p class="nw-eyebrow">整体概览 / 01</p>' +
-      '<h1>整体概览：各个部门如何接力</h1>' +
-      '<p class="nw-lead">初来乍到，先建立一张业务全景图：四个部门如何接力，把一笔跨境订单从线索变成回款。再带着这张图，去认识每个部门的职责与接口人。</p>' +
-      '<p class="nw-sec-sub">从一条线索到一笔回款，四步一环，缺一不可。</p>' +
-      '<div class="nw-callout"><span class="t">一句话</span><p>市场找机会，商务谈成并服务客户，技术撑住系统，财务管好钱——四部门接力，把跨境订单从线索跑成回款。</p></div>' +
+      '<h1>整体概览：公司怎么运转</h1>' +
+      '<p class="nw-lead">先建立一张组织全景图：集团总裁之下，六大部门如何分工与协作。再带着这张图，去认识每个部门的职责与接口人。</p>' +
+      '<p class="nw-sec-sub">集团总裁统管全局；总裁办是中枢枢纽，业务发展部、产品及运营部、财务部、技术部各司其职、相互接力。</p>' +
+      '<div class="nw-callout"><span class="t">一句话</span><p>市场找机会、产品管业务线、商务谈成并服务客户、技术撑住系统、财务管好钱、总裁办抓好中枢——六部门接力，把跨境订单从线索跑成回款。</p></div>' +
+      '<div class="zz-org"><ul><li>' +
+        '<div class="oc-node oc-root">集团总裁</div>' +
+        '<ul>' +
+          '<li><div class="oc-node oc-func">总裁办</div></li>' +
+          '<li><div class="oc-node oc-biz">业务发展部</div></li>' +
+          '<li><div class="oc-node oc-biz2">产品及运营部</div></li>' +
+          '<li><div class="oc-node oc-func">财务部</div></li>' +
+          '<li><div class="oc-node oc-tech">技术部</div></li>' +
+        '</ul>' +
+      '</li></ul></div>' +
+      '<p class="nw-sec-sub" style="margin-top:22px">业务主链条：从一条线索到一笔回款，四步一环，缺一不可。</p>' +
       '<div class="zz-flow">' +
-        zzFlowStep('1', '市场获客', '阶段 · 市场获客', '市场营销部通过海外 BD、广告、展会等获取线索，并输送给业务部门。') +
-        zzFlowStep('2', '商务转化与客户服务', '阶段 · 商务转化与服务', '业务发展部销售谈报价、签约，客服做认证、下单、异常处理与对账。') +
+        zzFlowStep('1', '市场获客', '阶段 · 市场获客', '市场营销部通过海外 BD、国内获客等获取线索，并输送给业务部门。') +
+        zzFlowStep('2', '商务转化与客户服务', '阶段 · 商务转化与服务', '业务发展部销售谈报价、签约，客服做认证、下单、异常处理与对账；产品及运营部提供产品与渠道支撑。') +
         zzFlowStep('3', '技术系统支撑', '阶段 · 技术系统支撑', '技术部规划研发 OMS / WMS / TMS / CRM / BI 等系统，保障下单到结算稳定运行。') +
         zzFlowStep('4', '财务结算与管控', '阶段 · 财务结算与管控', '财务部做报价审核、账期、充值、发票、回款与成本结算。') +
-      '</div>'
+      '</div>' +
+      '<h2>组织星图：点进去，看清每个部门</h2>' +
+      '<p class="nw-sec-sub">把上面的层级图换一个玩法——这是一张可以「钻进去」的星图。中心主星是集团创始人，环绕公转的是各一级部门；点击部门星球，先看它的一句话职责概括，再点「进入下级团队」钻进它的下级，左侧层级树可随时跳转。</p>' +
+      '<div id="orgexpSlot"></div>' +
+      '<div class="ceo-section" data-component="ceo-profile">' +
+        '<h2>领航人</h2>' +
+        '<p class="nw-sec-sub">从跨境大卖到行业服务商，他用 20 年时间把「Better · Faster · Easier」做成了一家公司的名字。</p>' +
+        '<div class="ceo-card">' +
+          '<div class="ceo-photo-wrap">' +
+            '<img class="ceo-photo" src="assets/ceo-photo.png" alt="出口易创始人兼 CEO 肖友泉" decoding="async">' +
+            '<p class="ceo-photo-badge">Founder &amp; CEO</p>' +
+          '</div>' +
+          '<div class="ceo-body">' +
+            '<span class="ceo-eyebrow">创始人说</span>' +
+            '<h3 class="ceo-name">肖友泉</h3>' +
+            '<p class="ceo-title">Founder &amp; CEO · 贝法易集团（出口易）</p>' +
+            '<p class="ceo-tagline">跨境电商领域的先行者与企业家</p>' +
+            '<ul class="ceo-edu">' +
+              '<li><span class="ceo-ico" aria-hidden="true">🎓</span><span><span class="ceo-school">中山大学</span> · <span class="ceo-major">数学 / 金融学 双学士学位</span></span></li>' +
+              '<li><span class="ceo-ico" aria-hidden="true">🏅</span><span><span class="ceo-school">中欧国际工商学院</span> · <span class="ceo-major">高级管理人员工商管理硕士 EMBA</span></span></li>' +
+            '</ul>' +
+            '<div class="ceo-milestones">' +
+              '<div class="ceo-ms"><b>2003</b><span>以卖家身份入局跨境电商</span></div>' +
+              '<div class="ceo-ms"><b>2008</b><span>创立出口易，转型服务商</span></div>' +
+              '<div class="ceo-ms"><b>10 亿+</b><span>行业首个十亿级营收服务商</span></div>' +
+            '</div>' +
+          '</div>' +
+        '</div>' +
+        '<div class="nw-callout"><span class="t">怎么看</span><p>星球图展示的是「公司今天怎么运转」，创始人的经历解释的是「公司为什么长成这样」。从卖家到服务商，出口易的每一次转身，都来自一线真实的痛点。</p></div>'
     },
-    { t: '各个部门', html:
-      '<p class="nw-eyebrow">各个部门 / 02</p>' +
-      '<h2>各个部门，职责一览</h2>' +
-      '<p class="nw-sec-sub">四个部门平行协作，各自有清晰的组别与接口。</p>' +
-      '<div class="zz-depts">' +
-        zzDept2('商务与服务', '业务发展部', '由销售团队与客服团队共同组成，围绕客户全生命周期开展商务拓展、客户服务和账务协同。', [
-          { name:'销售团队', lead:'主要承担商务开拓与商务谈判类工作：', items:[
-            '对接商务合作伙伴搭建业务合作关系，主导报价洽谈、报价申请及报价更新告知，向客户讲解公司产品线业务',
-            '开展客户拜访挖掘客户需求，输出定制化特殊揽收方案',
-            '推进公司与客户双方系统对接落地',
-            '处理账期特殊事项，负责物流款项的催收工作'
-          ] },
-          { name:'客服团队', lead:'聚焦客户签约落地、日常运营服务与账单售后处理：', items:[
-            '客户系统实名认证、标准合同签署指引',
-            '日常普通揽收沟通、系统下单操作指引，协助客户充值，办理对公开票业务',
-            '核对每日客户到仓数据，反馈差异件、问题件，上报各类业务异常',
-            '协助客户完成查件、索赔；出具客户账单，保障准确入账，配合款项催收'
-          ] }
-        ], { when:'报价、签约、日常下单、查件索赔、账单催收、对公开票等任何客户侧事宜；需要客户系统对接或特殊账期时。' }) +
-        zzDept2('资金与合规', '财务部', '负责集团下属所有公司的财务相关事务。', [
-          { name:'资金组', lead:'负责资金安全与日常流转：', items:[
-            '客户充值查账与确认、报销付款',
-            '日常资金管理、银行日常沟通及银行融资',
-            '充值确认问题可经「财务问题交流大群」沟通'
-          ] },
-          { name:'应收组', lead:'负责客户侧收入与账务：', items:[
-            '出口易系统客户报价设置、退费与补收操作',
-            '客户合同审阅、账期审核、实名认证、异常账单跟进',
-            '发票管理、欠费客户数据管理、大客户对账'
-          ] },
-          { name:'账务组', lead:'负责集团账务与报表：', items:[
-            '集团各公司账务处理、费用报销、总账管理',
-            '财务报表管理，跟进税务、统计及审计',
-            '为融资提供数据支持'
-          ] },
-          { name:'应付结算组', lead:'负责供应商与成本结算：', items:[
-            '集团所有供应商对账',
-            '出具 BU 等管理报表',
-            '其他供应商及成本相关事宜'
-          ] },
-          { name:'财务 BP', lead:'为业务提供财务支持：', items:[
-            '设 1 名专职主管',
-            '其余人员由财务部其他组别同事兼任'
-          ] }
+    { t: '部门职责', html:
+      '<p class="nw-eyebrow">部门职责 / 02</p>' +
+      '<h2>六大部门，职责一览</h2>' +
+      '<p class="nw-sec-sub">按职能域分组，便于你快速判断「这事该找谁」。</p>' +
+      '<div class="zz-dom"><div class="zz-dom-h">集团中枢与职能支撑</div><div class="zz-depts">' +
+        zzDept2('中枢', '总裁办', '集团战略落地的「中枢枢纽」，直接对集团总裁负责，统筹行政统筹、政企关系与项目申报、法务与合规支持、人力资源管理四大职能。', [
+          { name:'行政统筹与综合行政', desc:'印章保管与用印管理；证照年检、年报办理；合同存档与文书档案管理；办公资产与后勤保障；重要接待与差旅保障；跨部门协调与督办；制度流程建设与宣贯。' },
+          { name:'政企关系与项目申报', desc:'知识产权（商标、专利、著作权）维护；对接政府、行业协会；政策研判与资质 / 荣誉 / 资金类项目申报；政企活动与关系维护（实际执行由公关部承担，隶属总裁办职能线）。' },
+          { name:'法务与合规支持', desc:'合同审核流程管理；法务对接与外部律师协调；诉讼案件跟进。' },
+          { name:'人力资源管理', desc:'统筹全集团人力资源工作，制定 HR 战略、政策与工具（薪酬方案、绩效制度设计）；招聘与配置、薪酬福利、员工关系（入离职 / 合同 / 劳动合规）、培训发展等。' }
+        ], { when:'用印 / 证照 / 合同存档、政企关系与项目申报、合同合规与诉讼、招聘 / 薪酬 / 培训 / 员工关系等集团职能事宜。' }) +
+        zzDept2('职能', '财务部', '负责集团下属所有公司的财务相关事务。', [
+          { name:'资金组', lead:'负责资金安全与日常流转：', items:['客户充值查账与确认、报销付款','日常资金管理、银行日常沟通及银行融资','充值确认问题可经「财务问题交流大群」沟通'] },
+          { name:'应收组', lead:'负责客户侧收入与账务：', items:['出口易系统客户报价设置、退费与补收操作','客户合同审阅、账期审核、实名认证、异常账单跟进','发票管理、欠费客户数据管理、大客户对账'] },
+          { name:'账务组', lead:'负责集团账务与报表：', items:['集团各公司账务处理、费用报销、总账管理','财务报表管理，跟进税务、统计及审计','为融资提供数据支持'] },
+          { name:'应付结算组', lead:'负责供应商与成本结算：', items:['集团所有供应商对账','出具 BU 等管理报表','其他供应商及成本相关事宜'] },
+          { name:'财务 BP', lead:'为业务提供财务支持：', items:['设 1 名专职主管','其余人员由财务部其他组别同事兼任'] }
         ], { when:'充值查账、发票、账单、退费补收、账期与回款、供应商对账与成本结算、财务合同审核等问题。', note:'财务部设 2 名财务经理，分别分管相关组别工作，并承担集团内所有财务相关合同审核及内部财务咨询工作。' }) +
-        zzDept2('增长引擎', '市场营销部', '以扩大收入规模、拓展新业务增长点和利润点为核心目标，分为海外 BD 与国内获客两个组别。', [
-          { name:'市场营销负责人', lead:'统筹部门整体策略与资源：', items:[
-            '部门整体策略、目标管理和资源协调',
-            '80% 精力聚焦海外市场策略、重点客户及签约结果',
-            '20% 精力统筹国内获客成果'
-          ] },
-          { name:'海外 BD 组', lead:'负责海外获客与商机推进：', items:[
-            '海外平台、大客户、第三方服务商及海外社交媒体获客',
-            '推进商机至签约，并协助完成客户交接',
-            '后续根据海外业务和商机规模增加人员'
-          ] },
-          { name:'国内获客组', lead:'负责国内线上与线下获客：', items:[
-            '国内线上获客专员：线上内容及投放获客',
-            '国内线下获客专员：行业活动、展会和平台合作获客'
-          ] }
+      '</div></div>' +
+      '<div class="zz-dom"><div class="zz-dom-h">业务与增长</div><div class="zz-depts">' +
+        zzDept2('业务', '业务发展部', '由销售团队与客服团队共同组成，围绕客户全生命周期开展商务拓展、业务对接、客户服务与账务协同工作。', [
+          { name:'销售团队', lead:'主要承担商务开拓与商务谈判类工作：', items:['对接商务合作伙伴搭建业务合作关系，主导报价洽谈、报价申请及报价更新告知，向客户讲解公司产品线业务','开展客户拜访挖掘客户需求，输出定制化特殊揽收方案','推进公司与客户双方系统对接落地','处理账期特殊事项，负责物流款项的催收工作'] },
+          { name:'客服团队', lead:'聚焦客户签约落地、日常运营服务与账单售后处理：', items:['客户系统实名认证、标准合同签署指引','日常普通揽收沟通、系统下单操作指引，协助客户充值，办理对公开票业务','核对每日客户到仓数据，反馈差异件、问题件，上报各类业务异常','协助客户完成查件、索赔；出具客户账单，保障准确入账，配合款项催收'] }
+        ], { when:'报价、签约、日常下单、查件索赔、账单催收、对公开票等任何客户侧事宜；需要客户系统对接或特殊账期时。' }) +
+        zzDept2('增长', '市场营销部', '隶属于业务发展部门，以扩大收入规模、拓展新业务增长点和利润点为核心目标，分为海外 BD 与国内获客两个组别。', [
+          { name:'市场营销负责人', lead:'统筹部门整体策略与资源：', items:['部门整体策略、目标管理和资源协调','80% 精力聚焦海外市场策略、重点客户及签约结果','20% 精力统筹国内获客成果'] },
+          { name:'海外 BD 组', lead:'负责海外获客与商机推进：', items:['海外平台、大客户、第三方服务商及海外社交媒体获客','推进商机至签约，并协助完成客户交接','后续根据海外业务和商机规模增加人员'] },
+          { name:'国内获客组', lead:'负责国内线上与线下获客：', items:['国内线上获客专员：线上内容及投放获客','国内线下获客专员：行业活动、展会和平台合作获客'] }
         ], { when:'想开拓新市场、需要海外平台或大客户资源、获取有效线索或推进商机至签约时。' }) +
-        zzDept2('系统与技术', '技术部', '负责公司业务系统的规划、研发、测试、上线与稳定运行，以数字化能力支撑跨境物流业务。', [
-          { name:'技术负责人', lead:'统筹部门规划与重点交付：', items:[
-            '部门整体规划、团队管理、重点项目推进',
-            '核心技术方案评审、系统稳定性建设',
-            '跨部门重大事项协调'
-          ] },
-          { name:'产品 / 需求', lead:'对接业务、落地需求：', items:[
-            '收集分析业务需求，梳理流程与规则，形成需求方案和产品设计',
-            '协调研发、测试及业务推动需求从提出到上线',
-            '持续跟进上线后的使用效果'
-          ] },
-          { name:'研发', lead:'负责系统设计与开发维护：', items:[
-            '各业务系统及接口的设计、开发和维护',
-            '第三方物流供应商及电商平台接口对接、性能优化、数据处理、自动化及 AI 场景开发',
-            '所辖系统线上问题排查及日常维护'
-          ] },
-          { name:'测试', lead:'负责质量把控：', items:[
-            '测试方案及用例设计、功能和业务流程验证',
-            '缺陷跟踪、上线前质量把控及上线后验证'
-          ] }
-        ], { when:'系统故障、新功能需求、平台对接、数据报表与自动化、以及清关/合同审核/业务查询等 AI 应用场景。', flow:['业务需求提出','需求分析与评估','产品/技术方案设计','研发开发','测试验证','上线发布','业务验证','持续监控与优化'], flowName:'主要工作协作流程' }) +
-      '</div>'
+        zzDept2('产品', '产品及运营部', '按产品线 / 区域拆分业务单元（BU），覆盖产品设计、渠道拓展、商务落地与履约运营全链路。', [
+          { name:'中国直发', desc:'中国始发直邮跨境物流产品线，负责产品设计、迭代、渠道拓展、商务落地全链路。' },
+          { name:'南美区', desc:'南美区域属地化业务单元，按国家 / 区域拆分 BU，中台统一支撑，覆盖商务销售 + 本地清关、尾程、仓库履约。' },
+          { name:'北美海外仓', desc:'北美海外仓业务线，围绕海外仓产品、渠道、履约、技术支撑一体化运营。' },
+          { name:'欧澳海外仓', desc:'欧洲 + 澳洲海外仓业务线，仓配一体化运营。' }
+        ], { when:'产品咨询、渠道拓展、海外仓 / 直发业务合作，以及本地清关、尾程、仓库履约等运营事宜。',
+          fig:'<figure class="zz-shot" role="button" tabindex="0" data-full="assets/zz/product-ops-org.png" data-cap="产品及运营部 · 组织架构与业务单元">' +
+              '<img src="assets/zz/product-ops-org.png" alt="产品及运营部组织架构图：中国直发设产品运营/产品优化/渠道开发/项目商务；南美区设秘鲁BU、阿根廷BU、中美洲BU与中台运营支持；北美海外仓设产品组、渠道运营组、渠道开发组、运营统筹组、履约运营组、技术BP、海外仓；欧澳海外仓设产品组、仓库运营组、技术BP、渠道开发组、设备规划组、海外仓" loading="lazy" decoding="async">' +
+              '<span class="zc">点击放大</span></figure>' +
+              '<p class="zz-shot-cap">产品及运营部 · 组织架构与业务单元（四条业务线及其下级团队）</p>' }) +
+      '</div></div>' +
+      '<div class="zz-dom"><div class="zz-dom-h">技术支撑</div><div class="zz-depts">' +
+        zzDept2('技术', '技术部', '负责公司业务系统的规划、研发、测试、上线与稳定运行，以数字化能力支撑跨境物流业务。', [
+          { name:'技术负责人', lead:'统筹部门规划与重点交付：', items:['部门整体规划、团队管理、重点项目推进','核心技术方案评审、系统稳定性建设','跨部门重大事项协调'] },
+          { name:'产品 / 需求', lead:'对接业务、落地需求：', items:['收集分析业务需求，梳理流程与规则，形成需求方案和产品设计','协调研发、测试及业务推动需求从提出到上线','持续跟进上线后的使用效果'] },
+          { name:'研发', lead:'负责系统设计与开发维护：', items:['各业务系统及接口的设计、开发和维护','第三方物流供应商及电商平台接口对接、性能优化、数据处理、自动化及 AI 场景开发','所辖系统线上问题排查及日常维护'] },
+          { name:'测试', lead:'负责质量把控：', items:['测试方案及用例设计、功能和业务流程验证','缺陷跟踪、上线前质量把控及上线后验证'] }
+        ], { when:'系统故障、新功能需求、平台对接、数据报表与自动化、以及清关 / 合同审核 / 业务查询等 AI 应用场景。', flow:['业务需求提出','需求分析与评估','产品/技术方案设计','研发开发','测试验证','上线发布','业务验证','持续监控与优化'], flowName:'主要工作协作流程' }) +
+      '</div></div>'
     },
     { t: '协作场景', html:
       '<p class="nw-eyebrow">协作场景 / 03</p>' +
@@ -12420,6 +12514,11 @@ init();
         zzCollab('系统故障或需要新功能', '技术部（产品 / 研发）', '业务发展部（提需求）', '业务提需求 → 产品分析 → 研发测试 → 上线验证。') +
         zzCollab('物流差异件、问题件或索赔', '业务发展部（客服）', '技术部（系统数据）、财务部（账单）', '客服登记差异 / 问题件 → 技术查轨迹 → 财务调账单或理赔。') +
         zzCollab('充值、发票、账单或回款问题', '财务部（应收 / 资金组）', '业务发展部（客服协助）', '客户或客服提诉求 → 财务查账、开票、催收 → 回款入账。') +
+        zzCollab('产品咨询、渠道合作或海外仓业务', '产品及运营部（对应业务线）', '业务发展部（销售承接与对接）', '产品及运营部提供产品 / 渠道方案 → 销售对接客户 → 客服协助落地。') +
+        zzCollab('需要加盖公章或办理证照 / 年报', '总裁办（行政统筹）', '相关业务部门', '提交用印 / 证照申请 → 总裁办审核用印、办理证照年检与年报。') +
+        zzCollab('合同合规、诉讼或法务对接', '总裁办（法务与合规）', '财务部 / 业务发展部（业务合同）', '业务发起合同 → 总裁办管审核流程、对接外部律师、跟进诉讼。') +
+        zzCollab('招聘、薪酬、培训或员工关系', '总裁办（人力资源）', '用人部门', '提需求 → 总裁办做招聘配置、薪酬福利与员工关系处理。') +
+        zzCollab('政企关系、资质或资金类项目申报', '总裁办（政企关系与项目申报，公关部执行）', '业务部门（提供材料）', '总裁办研判政策、对接政府与协会、组织申报材料并跟进。') +
       '</div>' +
       '<div class="zz-col-tip"><b>跨部门沟通提示：</b>说明问题时，请尽量提供「客户是谁、问题是什么、影响范围多大、期望何时解决」四要素，方便对方快速判断与接力。</div>'
     },
@@ -12429,9 +12528,15 @@ init();
       '<p class="nw-sec-sub">面向零行业基础的你，每个词只用大白话解释。</p>' +
       '<dl class="zz-terms">' +
         zzTerm('BD', '业务拓展（Business Development），负责找客户、谈合作、拓市场。') +
-        zzTerm('BU', '业务单元（Business Unit），公司内相对独立的一条业务线或部门。') +
+        zzTerm('BU', '业务单元（Business Unit），公司内相对独立的一条业务线或部门；这里也指按产品线 / 区域划分的经营单元（如中国直发、南美区、北美海外仓、欧澳海外仓）。') +
         zzTerm('财务 BP', '嵌入业务的财务伙伴，为业务提供报价、账期、成本等财务支持。') +
         zzTerm('账期', '给客户的赊销期限，到期前可先发货后付款（如 30 天账期）。') +
+        zzTerm('直发', '从中国直接发货给海外买家（中国直发业务线），泛指跨境直邮模式。') +
+        zzTerm('海外仓', '提前把货备到目标国仓库，订单产生后本地发货，时效更快、体验更好。') +
+        zzTerm('用印', '加盖公司印章（合同章 / 公章），重要文件生效前必经流程，由总裁办管理。') +
+        zzTerm('合规', '业务与合同符合法律法规及公司制度的要求；由总裁办法务与合规支持。') +
+        zzTerm('HR', '人力资源（Human Resources），负责招聘、薪酬、培训、员工关系，由总裁办统筹。') +
+        zzTerm('公关部', '实际承担政企关系与项目申报的部门，隶属总裁办职能线。') +
         zzTerm('OMS', '订单管理系统，处理客户下单、订单流转与履约。') +
         zzTerm('WMS', '仓储管理系统，管理入库、库存与上架。') +
         zzTerm('TMS', '运输管理系统，管理干线运输与配送轨迹。') +
@@ -12444,6 +12549,7 @@ init();
     }
   ];
   SECS.zz = ZZ;
+
 
   /* 十二条令：12 条指令，按「指令 / 行动 / 沟通 / 汇报」四类重做（白卡呈现，非搬运旧游戏代码） */
   var TWELVE = [
@@ -14888,6 +14994,17 @@ init();
     aiLbEl.classList.add('open');
   }
 
+  /* 可放大的图片（.zz-shot 等）支持键盘打开：Enter / 空格 */
+  document.addEventListener('keydown', function (e) {
+    if (e.key !== 'Enter' && e.key !== ' ' && e.keyCode !== 13 && e.keyCode !== 32) return;
+    var t = e.target;
+    var zs = t && t.closest && t.closest('.zz-shot');
+    if (!zs) return;
+    e.preventDefault();
+    var kimg = zs.querySelector('img');
+    aiLightbox(zs.getAttribute('data-full') || (kimg ? kimg.src : ''), zs.getAttribute('data-cap') || '');
+  });
+
   /* 职场沟通：动态内容的图片灯箱 + 复制提示词（事件委托） */
   var zcLb = document.getElementById('lightbox');
   document.addEventListener('click', function (e) {
@@ -14999,6 +15116,14 @@ init();
       return;
     }
 
+    /* 组织架构：部门卡末尾的组织图，点击放大预览 */
+    var zshot = e.target.closest && e.target.closest('.zz-shot');
+    if (zshot) {
+      var zi = zshot.querySelector('img');
+      aiLightbox(zshot.getAttribute('data-full') || (zi ? zi.src : ''), zshot.getAttribute('data-cap') || '');
+      return;
+    }
+
     /* AI易 截图画廊：点击缩略图放大预览 */
     var shot = e.target.closest && e.target.closest('.ai-shot');
     if (shot) {
@@ -15055,7 +15180,33 @@ init();
     try { var raw = localStorage.getItem(progKey()); if (!raw) return {}; var o = JSON.parse(raw); return (o && typeof o === 'object') ? o : {}; }
     catch (e) { return {}; }
   }
+  function reloadProgress(){ progress = loadProgress(); }   /* 切换登录用户后必须按新用户名重读内存副本，否则首页进度条会残留上一用户的值 */
   function saveProgress(){ try { localStorage.setItem(progKey(), JSON.stringify(progress)); } catch (e) {} }
+  /* 游客（未登录）进度隔离：游客数据存于无后缀的 guest key，关闭页面即清、退出登录即清、登录时并入账号取最大 */
+  var GUEST_KEYS = ['nw_progress_v1', 'nw_quiz_score_v1', 'nw_quiz_pass_v1', 'ethics-training-state'];
+  function isGuest(){ return !nwUserName(); }
+  function loadGuestProgress(){
+    try { var raw = localStorage.getItem('nw_progress_v1'); if (!raw) return {}; var o = JSON.parse(raw); return (o && typeof o === 'object') ? o : {}; }
+    catch (e) { return {}; }
+  }
+  function clearGuestData(){
+    if (!isGuest()) return;   /* 仅游客态才清，避免误删已登录用户数据 */
+    GUEST_KEYS.forEach(function (k) { try { localStorage.removeItem(k); } catch (e) {} });
+  }
+  function guestSectionDoneHint(){
+    try {
+      if (sessionStorage.getItem('nw_guest_nomore') === '1') return;   /* 本会话已选"不再提示"则跳过 */
+      var m = document.getElementById('nwGuestMask'); if (m) m.hidden = false;
+    } catch (e) {}
+  }
+  /* 暴露给登录 IIFE（独立 <script> 作用域）跨域调用 */
+  window.__nwGuest = { isGuest: isGuest, clearGuestData: clearGuestData, loadGuestProgress: loadGuestProgress };
+  /* 登录 IIFE 的 render()/退出/登录回填会调用这些主 IIFE 内函数；挂到 window 使其成为全局可见，避免 ReferenceError（曾导致入口弹窗与登录拉取整体失效） */
+  window.reloadProgress = reloadProgress;
+  window.refreshHomeProgress = refreshHomeProgress;
+  window.applyPullThenReload = applyPullThenReload;
+  window.clearGuestData = clearGuestData;   /* 退出登录处理里会直接调用，需对登录 IIFE 可见 */
+  window.isGuest = isGuest;
   function isCompleted(mod, sec){ return !!(progress[mod] && progress[mod].indexOf(sec) !== -1); }
 
   function refreshSnavPct(){
@@ -15128,6 +15279,7 @@ init();
     if (mod === curMod) refreshSnavPct();
     refreshHomeProgress();
     markSnavDone(mod, sec);
+    if (isGuest()) guestSectionDoneHint();   /* 游客每学完一个子页面提示：未登录不记录 */
     showToast('已学完该页面');
     var list = SECS[mod];
     if (list) {
@@ -17311,7 +17463,12 @@ init();
     });
   }
   function applyPullThenReload(name){
-    fetchPull(name).then(function () { location.reload(); }).catch(function () { location.reload(); });
+    /* 登录即丢弃游客临时进度（不并入账号，避免数据管理混乱），仅展示服务器拉取的最高进度。
+       注意：此时已写入 nw_user_name，isGuest() 为 false，clearGuestData 的 isGuest 守卫会提前返回，
+       故这里直接无条件清除游客 key（只删无后缀的游客 key，绝不碰 nw_progress_v1_<用户>）。 */
+    function discardGuest(){ GUEST_KEYS.forEach(function (k) { try { localStorage.removeItem(k); } catch (e) {} }); }
+    fetchPull(name).then(function () { discardGuest(); location.reload(); })
+      .catch(function () { discardGuest(); location.reload(); });
   }
 
   /* 仅供自动化验证：?sheettest=1 时把内部上报函数挂到 window，便于无头脚本断言（正常功能零影响） */
@@ -17330,7 +17487,10 @@ init();
       getRid: function (name) { return localStorage.getItem('nw_sheet_rid_' + (name || '用户')); },
       pullValues: function (name) { return fetchPull(name); },   /* 仅拉取并写回本地(不刷新)，供测试 */
       restore: function (values) { restoreFromSheet(values); },  /* 直接合并给定 values，供测试 */
-      applyPull: function (name) { return applyPullThenReload(name); }
+      applyPull: function (name) { return applyPullThenReload(name); },
+      dbg: function () { return { total: totalLearnPct(), hyLen: (progress.hy || []).length, name: nwUserName(), raw: JSON.stringify(progress) }; },
+      refresh: function () { refreshHomeProgress(); return (document.getElementById('nwPc') || {}).textContent; },
+      guestHint: function () { guestSectionDoneHint(); }   /* 模拟"学完一个子页面"触发游客提示，供测试 */
     };
   }
 
@@ -17372,6 +17532,8 @@ init();
   }
 
   function renderSec(i) {
+    /* 星球视图是常驻节点，必须先搬回宿主，否则会被下面的 innerHTML 重建连带销毁 */
+    if (typeof window.__nwOrgexpHome === 'function') window.__nwOrgexpHome();
     var list = SECS[curMod];
     if (!list) {                       /* 其他模块：占位 */
       content.innerHTML = '<p class="nw-eyebrow">内容迁移中</p><h1>' + MODS.filter(function(x){return x.key===curMod;})[0].name +
@@ -17421,6 +17583,11 @@ init();
       _ey.className = 'nw-eyebrow';
       _ey.textContent = _gn + ' / ' + (_od < 10 ? '0' + _od : '' + _od);
       _secEl.insertBefore(_ey, _secEl.firstChild);
+    }
+    /* 星球视图挂载点：仅「zz / 整体概览」页带 #orgexpSlot，把常驻节点搬进来 */
+    if (_secEl) {
+      var _oslot = _secEl.querySelector('#orgexpSlot');
+      if (_oslot && typeof window.__nwOrgexpTo === 'function') window.__nwOrgexpTo(_oslot);
     }
     var prev = document.getElementById('nwPrev');
     var next = document.getElementById('nwNext');
@@ -17494,7 +17661,7 @@ init();
     }
     /* AI易页：保留原右侧小节导航；其左侧新增细线段步骤目录（本页 8 步） */
     var railHost = document.getElementById('nwRailHost');
-    var railOn = (curMod === 'xt' && s && s.t === 'AI易') || (curMod === 'zz' && s && s.t === '各个部门');
+    var railOn = (curMod === 'xt' && s && s.t === 'AI易') || (curMod === 'zz' && s && s.t === '部门职责');
     railHost.classList.toggle('on', railOn);
     content.classList.toggle('noscroll', railOn);   /* AI易页隐藏内容区原生滚动条 */
     railHost.innerHTML = '';
@@ -17687,6 +17854,19 @@ init();
     <div class="nw-login-tip" id="nwLoginTip">请用企业微信 App 扫描上方二维码完成登录</div>
   </div>
 </div>
+
+<!-- 游客未登录提示弹窗：进入页面/每学完一个子页面提示；可关闭，关闭后仍可学习 -->
+<div class="nw-guest-mask" id="nwGuestMask" hidden>
+  <div class="nw-guest-pop" role="dialog" aria-modal="true" aria-label="未登录提示">
+    <h3 class="nw-guest-t">您还未登录</h3>
+    <p class="nw-guest-p">当前学习进度仅临时保存在本浏览器，<b>不会记录到企业微信表格</b>。关闭页面后进度将清空，再次进入将从零开始。</p>
+    <label class="nw-guest-chk"><input type="checkbox" id="nwGuestNoMore"> 本会话内不再提示</label>
+    <div class="nw-guest-btns">
+      <button class="nw-guest-go" id="nwGuestGo" type="button">去登录</button>
+      <button class="nw-guest-cancel" id="nwGuestCancel" type="button">稍后再学</button>
+    </div>
+  </div>
+</div>
 <style id="nwLoginStyle">
 .nw-login-mask{position:fixed;inset:0;background:rgba(20,28,40,.42);display:flex;align-items:center;justify-content:center;z-index:9999}
 .nw-login-pop{width:340px;max-width:92vw;background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 18px 50px rgba(20,28,40,.28)}
@@ -17700,7 +17880,17 @@ init();
 .nw-login-btn:active{transform:translateY(1px)}
 .nw-logout{border:0;background:transparent;margin-left:auto;font-size:12px;color:var(--muted);cursor:pointer}
 /* 登录后全屏淡水印：固定视口、不随滚动、不挡点击；层级 800 在内容(≤220)之上、弹窗(9999)之下 */
-#nwWatermark{position:fixed;inset:0;z-index:800;pointer-events:none;display:none;background-repeat:repeat;background-position:0 0}
+  #nwWatermark{position:fixed;inset:0;z-index:800;pointer-events:none;display:none;background-repeat:repeat;background-position:0 0}
+  /* 游客未登录提示弹窗（与登录弹窗同级，但不强制） */
+  .nw-guest-mask{position:fixed;inset:0;background:rgba(20,28,40,.42);display:flex;align-items:center;justify-content:center;z-index:9998}
+  .nw-guest-pop{width:340px;max-width:92vw;background:#fff;border-radius:16px;padding:22px 22px 18px;box-shadow:0 18px 50px rgba(20,28,40,.28);text-align:center}
+  .nw-guest-t{font-size:17px;font-weight:800;margin:4px 0 8px}
+  .nw-guest-p{font-size:13.5px;line-height:1.6;color:#5a6473;margin:0 0 12px}
+  .nw-guest-p b{color:#c0392b}
+  .nw-guest-chk{display:flex;align-items:center;justify-content:center;gap:6px;font-size:12.5px;color:#7a8595;margin-bottom:14px;cursor:pointer}
+  .nw-guest-btns{display:flex;gap:10px}
+  .nw-guest-go{flex:1;border:0;background:var(--brand,#3E7BFA);color:#fff;font-weight:700;font-size:14px;padding:10px 0;border-radius:10px;cursor:pointer}
+  .nw-guest-cancel{flex:1;border:1px solid var(--line,#e3e8ef);background:#fff;color:#5a6473;font-size:14px;padding:10px 0;border-radius:10px;cursor:pointer}
 </style>
 <script>
 (function(){
@@ -17762,6 +17952,8 @@ init();
       if(hi) hi.textContent = '新同学';
     }
     applyWatermark(n);
+    reloadProgress();          /* 登录态变了：按当前用户名重读进度内存副本（不再残留上一用户） */
+    refreshHomeProgress();     /* 并立即重算首页进度条，不依赖整页 reload（解决切用户需手动刷新的问题） */
   }
   function openLogin(){
     frame.style.height = ''; /* 复位为默认高度，等 mock 页上报真实高度后自适应 */
@@ -17790,11 +17982,23 @@ init();
   });
   if(btn) btn.addEventListener('click', openLogin);
   if(foot) foot.addEventListener('click', function(ev){ if(ev.target !== out && !localStorage.getItem(KEY_NAME)) openLogin(); });
-  if(out) out.addEventListener('click', function(ev){ ev.stopPropagation(); localStorage.removeItem(KEY_NAME); localStorage.removeItem(KEY_ID); location.reload(); });   /* 退出整页刷新，清除上一用户残留 */
+  if(out) out.addEventListener('click', function(ev){ ev.stopPropagation(); localStorage.removeItem(KEY_NAME); localStorage.removeItem(KEY_ID); clearGuestData(); render(); location.reload(); });   /* 退出即清空游客临时进度→0；render 立即重算进度条，reload 兜底 */
   var closeX = document.getElementById('nwLoginClose');
   if(closeX) closeX.addEventListener('click', closeLogin);
   if(mask) mask.addEventListener('click', function(ev){ if(ev.target === mask) closeLogin(); });
   document.addEventListener('keydown', function(ev){ if(ev.key === 'Escape' && mask && !mask.hidden) closeLogin(); });
+  /* 游客未登录提示弹窗 */
+  var gmask = document.getElementById('nwGuestMask');
+  var ggo = document.getElementById('nwGuestGo');
+  var gcancel = document.getElementById('nwGuestCancel');
+  var gnomore = document.getElementById('nwGuestNoMore');
+  function closeGuest(){ if (gmask) gmask.hidden = true; }
+  if (gmask) gmask.addEventListener('click', function (ev) { if (ev.target === gmask) closeGuest(); });
+  if (ggo) ggo.addEventListener('click', function () { closeGuest(); openLogin(); });
+  if (gcancel) gcancel.addEventListener('click', function () {
+    if (gnomore && gnomore.checked) { try { sessionStorage.setItem('nw_guest_nomore', '1'); } catch (e) {} }
+    closeGuest();
+  });
 
   /* GitHub Pages 等跨域部署：REAL 扫码经 worker 302 回跳本页 ?nw_login=1&name=...&userid=...；
      在此自检参数写登录态（不依赖跨域 postMessage），并清理 URL 防刷新循环。 */
@@ -17826,6 +18030,8 @@ init();
   })();
 
   render();
+  if (window.__nwGuest && window.__nwGuest.isGuest()) { var _gm = document.getElementById('nwGuestMask'); if (_gm) _gm.hidden = false; }   /* 游客进入页面即提示登录（可关闭，关闭后仍可学习；不受"不再提示"影响） */
+  window.addEventListener('pagehide', function () { if (window.__nwGuest && window.__nwGuest.isGuest()) window.__nwGuest.clearGuestData(); });   /* 关闭/刷新页面：游客进度清空，下次进入为 0 */
   if(_paramLogin){ applyPullThenReload(localStorage.getItem(KEY_NAME)); }   /* REAL 回调落页：写登录态后立即从 D1 拉取该用户最大进度 */
 })();
 </script>

@@ -34,9 +34,9 @@
   var NEW_DIR = 'assets/galaxy/new/';    // 大星球图片（按部门名命名）
 
   var SAT_POOL = [
-    '人事行政部.png', '仓储运营优化.png', '国际运输FBA.png', '客户发展部.png', '总裁办.png',
-    '技术部.png', '海外仓产品运营.png', '物流业务部门.png', '直发产品运营.png', '财务部-邓文静.png',
-    '财务部.png', '运力中心.png', '集团支持部门.png'
+    'hr-admin.png', 'warehouse-ops.png', 'intl-fba.png', 'customer-dev.png', 'direct-ship-prod.png',
+    'finance-deng-wenjing.png', 'group-support.png', 'logistics-biz.png', 'overseas-wh-prod.png',
+    'capacity-center.png', 'tech.png'
   ];
 
   var CEO = {
@@ -48,36 +48,35 @@
   };
 
   var DEPARTMENTS = [
-    { name: '战略委员办', children: [] },
-    { name: '总裁办', children: [
+    { name: '总裁办', slug: 'ceo-office', desc: '集团战略落地的「中枢枢纽」，统筹行政、政企关系、法务合规与人力资源等集团职能。', children: [
       { name: 'HR' }, { name: '行政' }, { name: 'PR' }, { name: '法务' }, { name: '投资孵化' }
     ]},
-    { name: '财务部', children: [
+    { name: '财务部', slug: 'finance', desc: '负责集团所有公司的财务事务，覆盖资金、账务、应收、应付结算与财务 BP。', children: [
       { name: '资金' }, { name: '账务' }, { name: '应付结算' }, { name: 'BU' }, { name: '财务BP' }
     ]},
-    { name: '技术部', children: [
+    { name: '技术部', slug: 'tech', desc: '负责业务系统的规划、研发、测试、上线与稳定运行，以数字化能力支撑跨境物流。', children: [
       { name: '产品与BP' }, { name: '框架平台' }, { name: 'AI创新' }, { name: '业务交付' },
       { name: '运维保障' }, { name: '特别项目组' }
     ]},
-    { name: '业务发展部', children: [
+    { name: '业务发展部', slug: 'biz-dev', desc: '由销售与客服组成，围绕客户全生命周期做商务拓展、对接与服务协同。', children: [
       { name: '支持管理' }, { name: '市场营销' }, { name: 'KA组' }, { name: 'CBD小组' },
       { name: '客户成功' }, { name: 'CS' }
     ]},
-    { name: '产品及运营', children: [
-      { name: '客户成功' }, { name: '设备及优化' }, { name: '中国直发' }, { name: '欧澳区' },
-      { name: '北美区' }, { name: '南美区' }, { name: '其他地区' }, { name: '国际运输部' },
-      { name: '运力追溯性' }, { name: '仓储操作中心' }
-    ]},
-    { name: '其他', children: [] }
+    { name: '产品及运营', slug: 'product-ops', desc: '按产品线 / 区域拆分业务单元，覆盖产品设计、渠道拓展、商务落地与履约运营全链路。', children: [
+      { name: '中国直发', desc: '中国始发直邮跨境物流产品线，负责产品设计、迭代、渠道拓展与商务落地全链路。' },
+      { name: '南美区', desc: '南美区域属地化业务单元，按国家 / 区域拆分 BU，中台统一支撑清关、尾程与仓配履约。' },
+      { name: '北美海外仓', desc: '北美海外仓业务线，围绕海外仓产品、渠道、履约与技术支撑一体化运营。' },
+      { name: '欧澳海外仓', desc: '欧洲与澳洲海外仓业务线，仓配一体化运营。' }
+    ]}
   ];
 
   var PALETTE = ['#3b82f6', '#f97316', '#22c55e', '#a855f7', '#06b6d4', '#ef4444', '#eab308'];
-  CEO.img = NEW_DIR + 'CEO-肖友泉.png';
+  CEO.img = NEW_DIR + 'ceo-xiao-youquan.png';
   var satIdx = 0;
   function nextSat() { var f = SAT_POOL[satIdx % SAT_POOL.length]; satIdx++; return f; }
   DEPARTMENTS.forEach(function (d, i) {
     d.color = PALETTE[i % PALETTE.length];
-    d.img = NEW_DIR + d.name + '.png';
+    d.img = NEW_DIR + d.slug + '.png';
     d.children.forEach(function (c) { c.color = d.color; c.img = ASSET_DIR + nextSat(); });
   });
 
@@ -140,6 +139,13 @@
    * ========================================================================= */
   var IMG = {};
   var imagesLoaded = false;
+  window.__nwOrgexpDraw = { img: 0, proc: 0 };
+  window.__nwOrgexpImgStat = function () {
+    var ks = Object.keys(IMG);
+    return { n: ks.length, loaded: ks.filter(function (k) { return !!IMG[k]; }).length,
+      keys: ks, boxes: ks.map(function (k) { return IMG[k]._box ? 1 : 0; }),
+      imagesLoadedFlag: imagesLoaded };
+  };
 
   function computeBox(img) {
     try {
@@ -214,6 +220,22 @@
    * ========================================================================= */
   var hits = [];
 
+  // 只读调试钩子：按部门名返回该星球在屏幕上的中心坐标，便于无头验证脚本精准点击卫星
+  window.__nwOrgexpHitScreen = function (name) {
+    var c = document.getElementById('orgexp-canvas'); if (!c) return null;
+    var rect = c.getBoundingClientRect();
+    for (var i = 0; i < hits.length; i++) {
+      var h = hits[i];
+      if (h.node && h.node.name === name) {
+        return {
+          x: Math.round(rect.left + h.x / LOGICAL_W * rect.width),
+          y: Math.round(rect.top + h.y / LOGICAL_H * rect.height)
+        };
+      }
+    }
+    return null;
+  };
+
   var starSeed = (function (seed) {
     var a = seed >>> 0;
     return function () {
@@ -276,6 +298,7 @@
     ctx.save();
     ctx.globalAlpha = alpha;
     var img = IMG[node.img];
+    if (window.__nwOrgexpDraw) { if (img) window.__nwOrgexpDraw.img++; else window.__nwOrgexpDraw.proc++; }
     if (img) {
       var box = img._box;
       if (box) {
@@ -558,7 +581,7 @@
     var h = hitTest(x, y);
     if (!h) { closePanel(); return; }
     if (h.kind === 'body') openBodyPanel(h.node);
-    else if (view.type === 'ceo') select({ type: 'dept', dept: h.node }, null);
+    else if (view.type === 'ceo') openBodyPanel(h.node);
     else openSatPanel(h.node, h.x, h.y);
   }
 
@@ -584,6 +607,7 @@
     var chips = kids.length
       ? kids.map(function (k) { return '<span class="orgexp-chip">' + esc(k.name) + '</span>'; }).join('')
       : '<span class="orgexp-chip orgexp-chip-empty">暂无下级</span>';
+    var canEnter = !isC && kids.length && !(view.type === 'dept' && view.dept === node);
     var html =
       '<button class="orgexp-close" id="orgexp-panel-close" aria-label="关闭">×</button>' +
       '<div class="orgexp-phead">' +
@@ -591,10 +615,19 @@
       (isC ? esc(CEO.emoji) : '🪐') + '</span>' +
       '<div><div class="orgexp-pt">' + esc(node.name) + '</div>' +
       '<div class="orgexp-pst">' + (isC ? esc(CEO.title) : '一级部门') + '</div></div></div>' +
-      (isC && CEO.desc ? '<p class="orgexp-pdesc">' + esc(CEO.desc) + '</p>' : '') +
+      (node.desc ? '<p class="orgexp-pdesc">' + esc(node.desc) + '</p>' : '') +
       '<div class="orgexp-pkids">' + (isC ? '一级部门（' : '直属下级（') + kids.length + '）</div>' +
-      '<div class="orgexp-chips">' + chips + '</div>';
+      '<div class="orgexp-chips">' + chips + '</div>' +
+      (canEnter ? '<button class="orgexp-enter" id="orgexp-enter" type="button">进入下级团队 →</button>' : '');
     show(html, CX + bodyR(), CY);
+    if (canEnter) {
+      var eb = panel.querySelector('#orgexp-enter');
+      if (eb) eb.addEventListener('click', function (e) {
+        e.stopPropagation();
+        select({ type: 'dept', dept: node }, null);
+        closePanel();
+      });
+    }
   }
 
   function openSatPanel(node, sx, sy) {
@@ -603,7 +636,8 @@
       '<div class="orgexp-phead">' +
       '<span class="orgexp-pdot" style="background:' + esc(node.color) + ';color:' + esc(node.color) + '">🛰️</span>' +
       '<div><div class="orgexp-pt">' + esc(node.name) + '</div>' +
-      '<div class="orgexp-pst">' + esc(view.dept.name) + ' · 下级部门</div></div></div>';
+      '<div class="orgexp-pst">' + esc(view.dept.name) + ' · 下级团队</div></div></div>' +
+      (node.desc ? '<p class="orgexp-pdesc">' + esc(node.desc) + '</p>' : '');
     show(html, sx, sy);
   }
 
