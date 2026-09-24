@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="canvas:width" content="1440">
 <meta name="canvas:height" content="900">
-<meta name="nw-build" content="2026-09-15-zz-galaxy-tex">
+<meta name="nw-build" content="2026-09-24-done-popup-redo">
 <title>出口易新人培训平台 · 财务报销与合同审批 · 基础知识</title>
 <style>
   :root{
@@ -3304,8 +3304,10 @@
   .ceo-section{margin-top:calc(var(--space)*4);}
   .ceo-card{
     position:relative;
+    /* 2026-09-24：副标题与卡片贴死 → 补 18px；照片列 300→240px，人物照不再把卡片撑高 */
+    margin-top:18px;
     display:grid;
-    grid-template-columns:300px minmax(0,1fr);
+    grid-template-columns:240px minmax(0,1fr);
     gap:calc(var(--space)*2.5);
     align-items:stretch;
     padding:calc(var(--space)*2.25);
@@ -3326,7 +3328,10 @@
     overflow:hidden;
     background:var(--panel);
     border:1px solid var(--border);
-    min-height:340px;
+    /* 原 min-height:340px 会被 grid stretch 拉到与正文同高，把「学历 → 里程碑」撑出 129px 空档；
+       改为按 4:5 定比例 + 顶部对齐，卡片高度交给正文决定 */
+    aspect-ratio:4/5;
+    align-self:start;
   }
   .ceo-photo{
     display:block;width:100%;height:100%;object-fit:cover;object-position:center top;
@@ -4735,7 +4740,8 @@ body.nw{background:#EDF3FB}
 body.nw{overflow:hidden}
 .nw-side{width:212px;flex:0 0 212px;padding:24px 16px;display:flex;flex-direction:column;gap:6px;overflow-y:auto}
 .nw-brand{display:flex;align-items:center;gap:9px;padding:4px 10px 20px}
-.nw-brand-dot{width:26px;height:26px;border-radius:9px;background:var(--brand);display:grid;place-items:center;color:#fff;font-size:13px;font-weight:800}
+.nw-brand-dot{width:28px;height:28px;flex:0 0 28px;border-radius:0;background:transparent;display:grid;place-items:center}
+.nw-brand-dot img{width:100%;height:100%;object-fit:contain;display:block}
 .nw-brand-t{font-size:14.5px;font-weight:800;letter-spacing:.3px}
 .nw-nav{display:flex;align-items:center;gap:10px;padding:11px 14px;border-radius:12px;font-size:14.5px;color:var(--ink-2);cursor:pointer;font-weight:600;transition:background .18s,color .18s}
 .nw-nav:hover{background:#E7EEF8}
@@ -5038,11 +5044,11 @@ a.nw-card{text-decoration:none;color:inherit;cursor:pointer}
 .xt-split .xt-shot{flex:0 0 190px;margin-top:2px}
 .xt-shot.mini{max-width:190px;margin-left:auto;margin-right:auto}
 .xt-shot.mini img{border-radius:18px;box-shadow:0 6px 20px rgba(16,24,40,.14)}
-/* 企业微信「怎么加入」：截图换行放到文字下方（不再右侧并排） */
-.xt-scope .xt-split{display:block;margin-top:20px}
-.xt-scope .xt-split-main{flex:initial;min-width:0}
-.xt-scope .xt-split .xt-shot{margin-top:18px;max-width:420px}
-.xt-scope .xt-shot.mini{margin:18px 0 0;max-width:420px}
+/* 企业微信「怎么加入」：步骤在左、手机截图缩小后靠右并排（2026-09-24 缩图靠右，原 420px 过大） */
+.xt-scope .xt-split{display:flex;gap:26px;align-items:flex-start;margin-top:20px}
+.xt-scope .xt-split-main{flex:1 1 320px;min-width:220px}
+.xt-scope .xt-split .xt-shot{flex:0 0 140px;margin:2px 0 0 auto;max-width:140px}
+.xt-scope .xt-shot.mini{max-width:140px;margin-left:auto;margin-right:0}
 /* ===== 系统与工具指南（xt）配色：粉底保留，内容元素转中性/企业蓝 ===== */
 .xt-scope{
   --mc:#2F6FD0;                 /* 内容主色：企业蓝（页面底仍走 --pmbg 粉） */
@@ -5107,6 +5113,8 @@ a.nw-card{text-decoration:none;color:inherit;cursor:pointer}
   .zz-flow{grid-template-columns:repeat(2,1fr)}
   .zz-step:not(:last-child)::after{display:none}
 }
+/* 流程卡与下方「组织星图」标题拉开距离（原 h2 margin-top:0 导致贴太近） */
+.zz-flow + h2{margin-top:44px}
 /* 四个部门卡片 */
 .zz-depts{display:flex;flex-direction:column;gap:16px;margin-top:20px}
 .zz-dept{background:#fff;border:1px solid var(--line);border-radius:18px;padding:18px 20px;display:flex;flex-direction:column;gap:11px}
@@ -5183,7 +5191,9 @@ a.nw-card{text-decoration:none;color:inherit;cursor:pointer}
 .zz-shot:hover .zc{opacity:1}
 .zz-shot-cap{margin:9px 0 0;font-size:12.5px;line-height:1.6;color:var(--ink-2);text-align:center}
 /* 整体概览末尾：组织星图 */
-#orgexpSlot{margin-top:24px}
+#orgexpSlot{margin-top:0}
+/* 星图卡片自带 margin-top:30px，与挂载点叠加会变成 54px（副标题离星图太远）→ 收进 26px */
+#orgexpSlot>.orgexp{margin-top:26px}
 /* 组织星图（星球视图）迁入新版内容区：补齐旧版遗留 token —— 新版作用域内未定义它们，
    不补的话工具栏的底/边/文字色会取不到值（变透明、无边）。 */
 .orgexp{
@@ -6147,7 +6157,7 @@ if (/(\?|&)old=1/.test(location.search)) {
 
   <aside class="nw-side">
     <div class="nw-brand">
-      <div class="nw-brand-dot">易</div>
+      <div class="nw-brand-dot"><img src="assets/chukouyi-logo3.png" alt="出口易"></div>
       <div class="nw-brand-t">出口易·入职培训</div>
     </div>
     <div class="nw-nav on" data-view="home" title="首页"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 10.5L12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/></svg>首页</div>
@@ -9850,11 +9860,6 @@ if (/(\?|&)old=1/.test(location.search)) {
           </div>
         </div>
       </div>
-
-      <div class="callout" data-component="callout">
-        <span class="callout-tag">怎么看</span>
-        <p>星球图展示的是「公司今天怎么运转」，创始人的经历解释的是「公司为什么长成这样」。从卖家到服务商，出口易的每一次转身，都来自一线真实的痛点。</p>
-      </div>
     </div>
 
     <div class="page-actions" data-component="page-nav">
@@ -12450,8 +12455,7 @@ init();
               '<div class="ceo-ms"><b>10 亿+</b><span>行业首个十亿级营收服务商</span></div>' +
             '</div>' +
           '</div>' +
-        '</div>' +
-        '<div class="nw-callout"><span class="t">怎么看</span><p>星球图展示的是「公司今天怎么运转」，创始人的经历解释的是「公司为什么长成这样」。从卖家到服务商，出口易的每一次转身，都来自一线真实的痛点。</p></div>'
+        '</div>'
     },
     { t: '部门职责', html:
       '<p class="nw-eyebrow">部门职责 / 02</p>' +
@@ -15558,27 +15562,38 @@ init();
   function showModuleDone(mod){
     if (!modalEl) {
       modalEl = document.createElement('div'); modalEl.className = 'nw-modaldone-mask';
-      modalEl.innerHTML = '<div class="nw-modaldone"><h3></h3><p></p><button type="button" class="md-close">去学习下一个模块 →</button></div>';
+      modalEl.innerHTML = '<div class="nw-modaldone"><h3></h3><p></p><button type="button" class="md-close"></button></div>';
       document.body.appendChild(modalEl);
       modalEl.querySelector('.md-close').addEventListener('click', function () {
         modalEl.classList.remove('show');
-        if (modalEl._next) { selectMod(modalEl._next); setView('learn'); }   /* 还有下一个未学完模块 → 去学习 */
-        else { setView('home'); }                                            /* 全部学完 → 回首页 */
+        if (modalEl._quizMod) { selectQuizMod(modalEl._quizMod); setView('quiz'); } /* 学完非 xt 模块 → 去测验对应模块 */
+        else if (modalEl._next) { selectMod(modalEl._next); setView('learn'); }      /* 学完 xt → 去学习下一个模块 */
+        else { setView('home'); }                                                     /* 全部学完 → 回首页 */
       });
       modalEl.addEventListener('click', function (e) { if (e.target === modalEl) modalEl.classList.remove('show'); });
     }
     var name = (MODS.filter(function (x) { return x.key === mod; })[0] || {}).name || '';
-    var nx = nextLearnMod(mod);
     modalEl._mod = mod;
-    modalEl._next = nx;
-    modalEl.querySelector('h3').textContent = '恭喜你完成该模块的学习🎉';
+    modalEl._next = null;
+    modalEl._quizMod = null;
     var btn = modalEl.querySelector('.md-close');
-    if (nx) {
-      modalEl.querySelector('p').textContent = '「' + name + '」全部小节已学完，继续学习下一个模块吧！';
-      btn.textContent = '去学习下一个模块 →';
+    modalEl.querySelector('h3').textContent = '恭喜你完成该模块的学习🎉';
+    if (mod === 'xt') {
+      /* 只有学完「系统与工具指南」才提示去学下一个模块 */
+      var nx = nextLearnMod(mod);
+      modalEl._next = nx;
+      if (nx) {
+        modalEl.querySelector('p').textContent = '「' + name + '」全部小节已学完，继续学习下一个模块吧！';
+        btn.textContent = '去学习下一个模块 →';
+      } else {
+        modalEl.querySelector('p').textContent = '「' + name + '」已完成，且所有模块均已学完，太棒了！返回首页查看总进度。';
+        btn.textContent = '返回首页 →';
+      }
     } else {
-      modalEl.querySelector('p').textContent = '「' + name + '」已完成，且所有模块均已学完，太棒了！返回首页查看总进度。';
-      btn.textContent = '返回首页 →';
+      /* 其它模块学完 → 提示去测验对应模块 */
+      modalEl._quizMod = mod;
+      modalEl.querySelector('p').textContent = '「' + name + '」全部小节已学完，去测验一下掌握程度吧！';
+      btn.textContent = '去测验 →';
     }
     modalEl.classList.add('show');
     burstConfetti(modalEl);
@@ -16901,6 +16916,452 @@ init();
 ];
   /* ===== HY_BANK_END ===== */
 
+    /* ===== ZZ_BANK_START ===== */
+  var ZZ_BANK = [
+  {
+    "qid": "Q01",
+    "cat": "组织架构",
+    "sub": "业务主链条",
+    "kind": "单项选择",
+    "q": "公司业务主链条“从一条线索到一笔回款”的正确顺序是？",
+    "opts": [
+      "商务转化 → 市场获客 → 财务结算 → 技术支撑",
+      "市场获客 → 商务转化与服务 → 技术系统支撑 → 财务结算与管控",
+      "财务结算 → 技术支撑 → 市场获客 → 商务转化",
+      "市场获客 → 财务结算 → 技术支撑 → 商务转化"
+    ],
+    "optScores": [
+      0,
+      10,
+      0,
+      0
+    ],
+    "best": 1,
+    "a": 1,
+    "ana": "业务链条四步为：市场获客→商务转化与服务→技术系统支撑→财务结算与管控，缺一不可。"
+  },
+  {
+    "qid": "Q02",
+    "cat": "组织架构",
+    "sub": "部门分工定位",
+    "kind": "单项选择",
+    "q": "公司常说“市场找机会、产品管业务线、商务谈成并服务客户、技术撑住系统、财务管好钱、总裁办抓好中枢”。负责“管好钱”的是哪个部门？",
+    "opts": [
+      "技术部",
+      "业务发展部",
+      "财务部",
+      "总裁办"
+    ],
+    "optScores": [
+      0,
+      0,
+      10,
+      0
+    ],
+    "best": 2,
+    "a": 2,
+    "ana": "财务部负责报价审核、账期、充值、发票、回款与成本结算，即“管好钱”。"
+  },
+  {
+    "qid": "Q03",
+    "cat": "组织架构",
+    "sub": "线索流转",
+    "kind": "单项选择",
+    "q": "市场营销部通过海外 BD、国内获客获取的销售线索，主要输送给哪个部门？",
+    "opts": [
+      "业务发展部",
+      "财务部",
+      "技术部",
+      "总裁办"
+    ],
+    "optScores": [
+      10,
+      0,
+      0,
+      0
+    ],
+    "best": 0,
+    "a": 0,
+    "ana": "市场获客后将线索输送给业务发展部，由销售团队承接签约。"
+  },
+  {
+    "qid": "Q04",
+    "cat": "组织架构",
+    "sub": "技术系统支撑",
+    "kind": "单项选择",
+    "q": "技术部规划研发 OMS、WMS、TMS 等系统，主要是为了保障什么？",
+    "opts": [
+      "客户合同盖章",
+      "审批客户报价",
+      "催收客户回款",
+      "客户从下单到结算稳定运行"
+    ],
+    "optScores": [
+      0,
+      0,
+      0,
+      10
+    ],
+    "best": 3,
+    "a": 3,
+    "ana": "技术部通过系统建设，保障客户从下单到结算全流程稳定运行。"
+  },
+  {
+    "qid": "Q05",
+    "cat": "组织架构",
+    "sub": "部门职责",
+    "kind": "单项选择",
+    "q": "作为集团“中枢枢纽”，统筹行政、政企关系、法务合规、人力资源四大职能的是哪个部门？",
+    "opts": [
+      "财务部",
+      "总裁办",
+      "技术部",
+      "产品及运营部"
+    ],
+    "optScores": [
+      0,
+      10,
+      0,
+      0
+    ],
+    "best": 1,
+    "a": 1,
+    "ana": "总裁办直接对集团总裁负责，统筹行政、政企、法务、人力四大职能。"
+  },
+  {
+    "qid": "Q06",
+    "cat": "组织架构",
+    "sub": "部门职责",
+    "kind": "单项选择",
+    "q": "负责客户报价审核、账期、充值、发票、回款与成本结算的是哪个部门？",
+    "opts": [
+      "业务发展部",
+      "市场营销部",
+      "财务部",
+      "技术部"
+    ],
+    "optScores": [
+      0,
+      0,
+      10,
+      0
+    ],
+    "best": 2,
+    "a": 2,
+    "ana": "财务部负责集团财务事务，涵盖报价审核、账期、充值、发票、回款与成本结算。"
+  },
+  {
+    "qid": "Q07",
+    "cat": "组织架构",
+    "sub": "部门职责",
+    "kind": "单项选择",
+    "q": "由销售团队和客服团队组成，负责报价洽谈、签约、日常下单、查件索赔、账单等客户全生命周期服务的是哪个部门？",
+    "opts": [
+      "业务发展部",
+      "市场营销部",
+      "产品及运营部",
+      "总裁办"
+    ],
+    "optScores": [
+      10,
+      0,
+      0,
+      0
+    ],
+    "best": 0,
+    "a": 0,
+    "ana": "业务发展部由销售、客服团队组成，围绕客户全生命周期开展商务拓展与客户服务。"
+  },
+  {
+    "qid": "Q08",
+    "cat": "组织架构",
+    "sub": "部门职责",
+    "kind": "单项选择",
+    "q": "隶属于业务发展部门，以获取销售线索、拓展新客户为核心目标的是哪个部门？",
+    "opts": [
+      "财务部",
+      "技术部",
+      "总裁办",
+      "市场营销部"
+    ],
+    "optScores": [
+      0,
+      0,
+      0,
+      10
+    ],
+    "best": 3,
+    "a": 3,
+    "ana": "市场营销部隶属于业务发展部门，分海外 BD 与国内获客两组，负责获客。"
+  },
+  {
+    "qid": "Q09",
+    "cat": "组织架构",
+    "sub": "部门职责",
+    "kind": "单项选择",
+    "q": "按产品线/区域拆分业务单元，负责产品设计、渠道拓展、海外仓与直发业务运营的是哪个部门？",
+    "opts": [
+      "技术部",
+      "产品及运营部",
+      "业务发展部",
+      "市场营销部"
+    ],
+    "optScores": [
+      0,
+      10,
+      0,
+      0
+    ],
+    "best": 1,
+    "a": 1,
+    "ana": "产品及运营部按产品线/区域拆分业务单元，覆盖产品设计、渠道拓展与履约运营全链路。"
+  },
+  {
+    "qid": "Q10",
+    "cat": "组织架构",
+    "sub": "部门职责",
+    "kind": "单项选择",
+    "q": "负责公司业务系统的规划、研发、测试、上线与稳定运行的是哪个部门？",
+    "opts": [
+      "财务部",
+      "总裁办",
+      "技术部",
+      "产品及运营部"
+    ],
+    "optScores": [
+      0,
+      0,
+      10,
+      0
+    ],
+    "best": 2,
+    "a": 2,
+    "ana": "技术部负责业务系统规划、研发、测试、上线与稳定运行，支撑数字化业务。"
+  },
+  {
+    "qid": "Q11",
+    "cat": "组织架构",
+    "sub": "常见问题找谁",
+    "kind": "单项选择",
+    "q": "你在行业活动中认识一位有物流需求的海外卖家，想帮他对接公司业务，应该先找哪个部门？",
+    "opts": [
+      "市场营销部",
+      "财务部",
+      "技术部",
+      "总裁办"
+    ],
+    "optScores": [
+      10,
+      0,
+      0,
+      0
+    ],
+    "best": 0,
+    "a": 0,
+    "ana": "发现新客户或新商机，先找市场营销部（海外 BD/国内获客）跟进获客。"
+  },
+  {
+    "qid": "Q12",
+    "cat": "组织架构",
+    "sub": "常见问题找谁",
+    "kind": "单项选择",
+    "q": "老客户提出希望调整报价，应该由哪个部门发起？",
+    "opts": [
+      "财务部",
+      "技术部",
+      "市场营销部",
+      "业务发展部（销售团队）"
+    ],
+    "optScores": [
+      0,
+      0,
+      0,
+      10
+    ],
+    "best": 3,
+    "a": 3,
+    "ana": "调价由业务发展部销售发起报价申请，财务部设价并审核账期。"
+  },
+  {
+    "qid": "Q13",
+    "cat": "组织架构",
+    "sub": "常见问题找谁",
+    "kind": "单项选择",
+    "q": "新客户准备签约，需要进行实名认证和合同签署指引，由哪个部门负责？",
+    "opts": [
+      "总裁办",
+      "业务发展部（客服团队）",
+      "技术部",
+      "市场营销部"
+    ],
+    "optScores": [
+      0,
+      10,
+      0,
+      0
+    ],
+    "best": 1,
+    "a": 1,
+    "ana": "客户实名认证、标准合同签署指引由业务发展部客服团队负责。"
+  },
+  {
+    "qid": "Q14",
+    "cat": "组织架构",
+    "sub": "常见问题找谁",
+    "kind": "单项选择",
+    "q": "客户下单时系统突然无法使用，应该找哪个部门处理？",
+    "opts": [
+      "财务部",
+      "市场营销部",
+      "技术部",
+      "总裁办"
+    ],
+    "optScores": [
+      0,
+      0,
+      10,
+      0
+    ],
+    "best": 2,
+    "a": 2,
+    "ana": "系统故障由技术部排查处理，反馈时说明客户、问题、影响范围与期望解决时间。"
+  },
+  {
+    "qid": "Q15",
+    "cat": "组织架构",
+    "sub": "常见问题找谁",
+    "kind": "单项选择",
+    "q": "客户反馈货物有差异（如到仓数据不符）或需要索赔，应该找哪个部门？",
+    "opts": [
+      "业务发展部（客服团队）",
+      "技术部",
+      "财务部",
+      "市场营销部"
+    ],
+    "optScores": [
+      10,
+      0,
+      0,
+      0
+    ],
+    "best": 0,
+    "a": 0,
+    "ana": "差异件、问题件、索赔由业务发展部客服团队登记处理。"
+  },
+  {
+    "qid": "Q16",
+    "cat": "组织架构",
+    "sub": "常见问题找谁",
+    "kind": "单项选择",
+    "q": "客户咨询充值到账、开具发票或账单核对的问题，应该找哪个部门？",
+    "opts": [
+      "业务发展部",
+      "技术部",
+      "总裁办",
+      "财务部"
+    ],
+    "optScores": [
+      0,
+      0,
+      0,
+      10
+    ],
+    "best": 3,
+    "a": 3,
+    "ana": "充值、发票、账单、回款问题由财务部处理。"
+  },
+  {
+    "qid": "Q17",
+    "cat": "组织架构",
+    "sub": "常见问题找谁",
+    "kind": "单项选择",
+    "q": "客户想了解海外仓产品并探讨渠道合作，应该找哪个部门？",
+    "opts": [
+      "技术部",
+      "产品及运营部",
+      "财务部",
+      "总裁办"
+    ],
+    "optScores": [
+      0,
+      10,
+      0,
+      0
+    ],
+    "best": 1,
+    "a": 1,
+    "ana": "产品咨询、渠道合作、海外仓业务由产品及运营部对应业务线承接。"
+  },
+  {
+    "qid": "Q18",
+    "cat": "组织架构",
+    "sub": "常见问题找谁",
+    "kind": "单项选择",
+    "q": "合同需要加盖公司公章或办理证照年检，应该找哪个部门？",
+    "opts": [
+      "业务发展部",
+      "财务部",
+      "总裁办",
+      "技术部"
+    ],
+    "optScores": [
+      0,
+      0,
+      10,
+      0
+    ],
+    "best": 2,
+    "a": 2,
+    "ana": "用印、证照年检与年报由总裁办行政统筹负责。"
+  },
+  {
+    "qid": "Q19",
+    "cat": "组织架构",
+    "sub": "常见问题找谁",
+    "kind": "单项选择",
+    "q": "公司收到需要法务对接的合同或法律文件，应该找哪个部门？",
+    "opts": [
+      "总裁办",
+      "技术部",
+      "市场营销部",
+      "财务部"
+    ],
+    "optScores": [
+      10,
+      0,
+      0,
+      0
+    ],
+    "best": 0,
+    "a": 0,
+    "ana": "合同合规、诉讼与法务对接由总裁办法务与合规支持负责。"
+  },
+  {
+    "qid": "Q20",
+    "cat": "组织架构",
+    "sub": "常见问题找谁",
+    "kind": "单项选择",
+    "q": "你想了解员工培训安排或薪酬福利，应该找哪个部门？",
+    "opts": [
+      "财务部",
+      "市场营销部",
+      "技术部",
+      "总裁办"
+    ],
+    "optScores": [
+      0,
+      0,
+      0,
+      10
+    ],
+    "best": 3,
+    "a": 3,
+    "ana": "招聘、薪酬、培训与员工关系由总裁办人力资源统筹。"
+  }
+];
+  /* ===== ZZ_BANK_END ===== */
+
+
   /* ================= 测验页子系统（4 大模块 · 学完解锁 · 右侧计时器 + 答题卡；系统与工具指南 xt 无测验，已隐藏其 tab） =================
      题库：当前为占位数据（QUIZ_BANK），结构 { sub, kind, q, opts[4], a }；
      真实题库接入时只需替换 buildQuizBank() 的返回值，其余版式/交互无需改动。 */
@@ -16973,6 +17434,16 @@ init();
     QUIZ_BANK['hy'] = hyDraw;
     return hyDraw;
   }
+  /* ---- 组织架构：从 ZZ_BANK（20 题）随机抽取 10 题；每次新作答重新抽取 ---- */
+  var zzDraw = null;
+  function drawZzSet(force) {
+    if (!force && zzDraw) return zzDraw;
+    var pool = (ZZ_BANK || []).slice();
+    for (var i = pool.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)); var t = pool[i]; pool[i] = pool[j]; pool[j] = t; }
+    zzDraw = pool.slice(0, 10).map(function (q) { return JSON.parse(JSON.stringify(q)); });
+    QUIZ_BANK['zz'] = zzDraw;
+    return zzDraw;
+  }
   var curQMod = 'hy', curQQ = 0;
   var qzState = {};                      /* { mod: { answers:{i:选中的选项下标}, marks:{i:true} } } */
   var qzResult = {};                     /* { mod: { score, raw, full, timeMs, detail:[{pick,score}], at } } 交卷后的成绩（仅内存） */
@@ -17004,7 +17475,7 @@ init();
     };
     var out = {};
     MODS.forEach(function (m) {
-      if (m.key === 'st' || m.key === 'zc' || m.key === 'hy') { out[m.key] = []; return; }   /* 十二条令 / 职场沟通与职业道德 / 行业及公司介绍：真实题运行时随机抽取，见 drawStSet()/drawZcSet()/drawHySet() */
+      if (m.key === 'st' || m.key === 'zc' || m.key === 'hy' || m.key === 'zz') { out[m.key] = []; return; }   /* 十二条令 / 职场沟通与职业道德 / 行业及公司介绍 / 组织架构：真实题运行时随机抽取，见 drawStSet()/drawZcSet()/drawHySet()/drawZzSet() */
       var cfg = meta[m.key] || { sub: m.name, kind: '综合' };
       out[m.key] = [];
       for (var i = 1; i <= QUIZ_QN; i++) {
@@ -17028,7 +17499,7 @@ init();
   }
   function qIndexOf(key) { var i = 0; MODS.forEach(function (m, k) { if (m.key === key) i = k; }); return i; }
   function qModOf(key) { return MODS.filter(function (x) { return x.key === key; })[0] || MODS[0]; }
-  function qQuestions() { if (curQMod === 'st') drawStSet(false); else if (curQMod === 'zc') drawZcSet(false); else if (curQMod === 'hy') drawHySet(false); return QUIZ_BANK[curQMod] || []; }
+  function qQuestions() { if (curQMod === 'st') drawStSet(false); else if (curQMod === 'zc') drawZcSet(false); else if (curQMod === 'hy') drawHySet(false); else if (curQMod === 'zz') drawZzSet(false); return QUIZ_BANK[curQMod] || []; }
   function qzOf(mod) { if (!qzState[mod]) qzState[mod] = { answers: {}, marks: {} }; return qzState[mod]; }
   /* ?qres=1 预览只放行「当时预览的那个模块」，其余模块的锁照常生效，不泄漏 */
   function qzPreviewBypass() { return qzPreviewOpen && qzPreviewMod === curQMod; }
@@ -17057,7 +17528,7 @@ init();
       });
       return raw >= 80 && okEth;
     }
-    if (mod === 'hy') return raw >= 80;   /* 行业及公司介绍：20 题抽 10，每题 10 分，≥80 合格（答对≥8 题） */
+    if (mod === 'hy' || mod === 'zz') return raw >= 80;   /* 行业及公司介绍 / 组织架构：20 题抽 10，每题 10 分，≥80 合格（答对≥8 题） */
     return raw >= 72;
   }
   function qzBuildResult(mod) {
@@ -17085,6 +17556,7 @@ init();
     if (mod === 'st') drawStSet(true);
     else if (mod === 'zc') drawZcSet(true);
     else if (mod === 'hy') drawHySet(true);
+    else if (mod === 'zz') drawZzSet(true);
     var qs = QUIZ_BANK[mod] || [], s = qzOf(mod);
     var plan = { 2: 0, 6: 3, 10: 1 };   /* 第 3 题得 0 分、第 7 题得 -10 分、第 11 题得 -5 分，其余答对 */
     qzTimerReset();
@@ -17095,6 +17567,26 @@ init();
     qzPreviewMod = mod;
     qzBuildResult(mod);
   }
+  /* 调试钩子（无头回归用）：直接抽题 / 全对判分 / 读成绩。与星图 __nwOrgexp* 同款。 */
+  window.__nwQuiz = {
+    bank: function (mod) { return (mod ? QUIZ_BANK[mod] : ZZ_BANK) || []; },
+    draw: function (mod, force) { if (mod === 'zz') return drawZzSet(force); if (mod === 'hy') return drawHySet(force); return []; },
+    forcePerfect: function (mod) {
+      var qs = QUIZ_BANK[mod] || []; qzOf(mod).answers = {};
+      qs.forEach(function (q, k) { var right = (q.a != null) ? q.a : (q.best != null ? q.best : 0); qzOf(mod).answers[k] = right; });
+      return qzBuildResult(mod);
+    },
+    forceRight: function (mod, nRight) {
+      var qs = QUIZ_BANK[mod] || []; qzOf(mod).answers = {};
+      qs.forEach(function (q, k) {
+        var right = (q.a != null) ? q.a : (q.best != null ? q.best : 0);
+        var wrong = (right + 1) % (q.opts ? q.opts.length : 4);
+        qzOf(mod).answers[k] = (k < nRight) ? right : wrong;
+      });
+      return qzBuildResult(mod);
+    },
+    result: function (mod) { return qzResult[mod]; }
+  };
 
   /* 测验 tab（与学习页同款，可复用 MODS 配色） */
   MODS.forEach(function (m, i) {
@@ -17200,7 +17692,7 @@ init();
       '<div class="nw-qhead">' +
         '<div class="nw-qhead-l"><h1>' + m.name + ' · 测验</h1>' +
           '<p>本模块共 ' + res.qn + ' 题 · 答对 ' + res.right + ' 题 · ' +
-            (m.key === 'zc' || m.key === 'hy'
+            (m.key === 'zc' || m.key === 'hy' || m.key === 'zz'
               ? '每题满分 ' + QZ_FULL + ' 分，按所选选项实际分值累加（满分 ' + res.full + ' 分）'
               : '每题满分 ' + QZ_FULL + ' 分，答错按严重程度得 0 / -5 / -10 分') + '</p></div>' +
         '<div class="nw-qhead-r">' +
@@ -17328,29 +17820,27 @@ init();
     if (curQMod === 'st') drawStSet(true);   /* 重新随机抽取 */
     else if (curQMod === 'zc') drawZcSet(true);   /* 重新随机抽取 */
     else if (curQMod === 'hy') drawHySet(true);   /* 重新随机抽取 */
+    else if (curQMod === 'zz') drawZzSet(true);   /* 重新随机抽取 */
     qzTimerReset();
     renderQuiz();
   }
   function redoQuiz() {
-    if (curQMod === 'st' || curQMod === 'zc') {
-      var m = qModOf(curQMod);
-      var mk = document.createElement('div');
-      mk.className = 'nw-modaldone-mask show';
-      mk.innerHTML = '<div class="nw-modaldone nw-qredo"><h3>重新作答</h3>' +
-        '<p>每次题目随机抽取，是否确认重新作答？</p>' +
-        '<div class="md-row"><button type="button" class="md-btn ghost" data-act="cancel">再想想</button>' +
-        '<button type="button" class="md-btn" data-act="ok" style="background:' + m.mtx + '">确认重新作答</button></div></div>';
-      document.body.appendChild(mk);
-      mk.addEventListener('click', function (e) {
-        var a = e.target.getAttribute && e.target.getAttribute('data-act');
-        if (a === 'ok' || a === 'cancel' || e.target === mk) {
-          if (mk.parentNode) mk.parentNode.removeChild(mk);
-          if (a === 'ok') doRedo();
-        }
-      });
-      return;
-    }
-    doRedo();
+    /* 所有模块点击「重新作答」都先弹确认框，避免误触重抽题目 */
+    var m = qModOf(curQMod);
+    var mk = document.createElement('div');
+    mk.className = 'nw-modaldone-mask show';
+    mk.innerHTML = '<div class="nw-modaldone nw-qredo"><h3>重新作答</h3>' +
+      '<p>每次题目随机抽取，是否确认重新作答？</p>' +
+      '<div class="md-row"><button type="button" class="md-btn ghost" data-act="cancel">再想想</button>' +
+      '<button type="button" class="md-btn" data-act="ok" style="background:' + m.mtx + '">确认重新作答</button></div></div>';
+    document.body.appendChild(mk);
+    mk.addEventListener('click', function (e) {
+      var a = e.target.getAttribute && e.target.getAttribute('data-act');
+      if (a === 'ok' || a === 'cancel' || e.target === mk) {
+        if (mk.parentNode) mk.parentNode.removeChild(mk);
+        if (a === 'ok') doRedo();
+      }
+    });
   }
 
   function renderQuizSideDoing() {
@@ -17516,7 +18006,7 @@ init();
         ? '<p class="md-note">合格标准：总分≥100 分，且不得出现 -10 分选项、-5 分选项最多 1 次。</p>'
         : curQMod === 'zc'
           ? '<p class="md-note">合格标准：完成全部 10 题、总分≥80 分，且职业道德题未选择负分选项。</p>'
-          : curQMod === 'hy'
+          : (curQMod === 'hy' || curQMod === 'zz')
             ? '<p class="md-note">合格标准：从 20 题中随机抽取 10 题，每题 10 分，总分≥80 分（答对至少 8 题）为合格。</p>'
             : '') +
       '<div class="md-row"><button type="button" class="md-btn" data-act="res" style="background:' + m.mtx + '">查看题目解析</button></div></div>';
